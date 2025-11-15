@@ -10,6 +10,7 @@ using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Explorer.Stakeholders.Core.UseCases.Authoring;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -27,6 +28,7 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
+        services.AddScoped<IAccountService, AccountService>(); // DODATO anja
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

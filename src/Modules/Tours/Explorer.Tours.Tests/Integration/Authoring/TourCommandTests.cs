@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-//Cela klasa napravljena uz pomoc AI
-
 namespace Explorer.Tours.Tests.Integration.Authoring;
 
 [Collection("Sequential")]
@@ -31,18 +29,26 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = service.Create(tourDto, -1);
+        try
+        {
+            var result = service.Create(tourDto, -11);
 
-        // Assert
-        result.ShouldNotBeNull();
-        result.Id.ShouldNotBe(0);
-        result.Name.ShouldBe(tourDto.Name);
-        result.Description.ShouldBe(tourDto.Description);
-        result.Difficulty.ShouldBe(tourDto.Difficulty);
-        result.Status.ShouldBe(0); // Draft
-        result.Price.ShouldBe(0);
-        result.AuthorId.ShouldBe(-1);
-        result.Tags.Count.ShouldBe(2);
+            // Assert
+            result.ShouldNotBeNull();
+            result.Id.ShouldNotBe(0);
+            result.Name.ShouldBe(tourDto.Name);
+            result.Description.ShouldBe(tourDto.Description);
+            result.Difficulty.ShouldBe(tourDto.Difficulty);
+            result.Status.ShouldBe(0); // Draft
+            result.Price.ShouldBe(0);
+            result.AuthorId.ShouldBe(-11);
+            result.Tags.Count.ShouldBe(2);
+        }
+        catch (Exception ex)
+        {
+            // Dodaj breakpoint ovde i vidi exception!
+            throw;
+        }
     }
 
     [Fact]
@@ -54,7 +60,7 @@ public class TourCommandTests : BaseToursIntegrationTest
 
         var updateDto = new TourUpdateDto
         {
-            Id = -1,
+            Id = -3,
             Name = "Updated Tour Name",
             Description = "Updated description",
             Difficulty = 2,
@@ -63,7 +69,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = service.Update(updateDto, -1);
+        var result = service.Update(updateDto, -11); 
 
         // Assert
         result.ShouldNotBeNull();
@@ -81,8 +87,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
 
-        // Act & Assert - Should not throw exception for Draft tour
-        service.Delete(-1, -1);
+        service.Delete(-1, -11); 
 
         // Verify by trying to get deleted tour
         Should.Throw<Exception>(() => service.GetById(-1));
@@ -97,7 +102,7 @@ public class TourCommandTests : BaseToursIntegrationTest
 
         // Act & Assert
         Should.Throw<InvalidOperationException>(() =>
-            service.Delete(-2, -1)
+            service.Delete(-2, -11) 
         ).Message.ShouldContain("Draft");
     }
 
@@ -109,7 +114,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
 
         // Act
-        var result = service.Publish(-3, -1);
+        var result = service.Publish(-3, -11);
 
         // Assert
         result.ShouldNotBeNull();

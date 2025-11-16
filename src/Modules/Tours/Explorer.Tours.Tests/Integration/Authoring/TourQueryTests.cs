@@ -12,7 +12,6 @@ public class TourQueryTests : BaseToursIntegrationTest
 {
     public TourQueryTests(ToursTestFactory factory) : base(factory) { }
 
-
     [Fact]
     public void Gets_tour_by_id()
     {
@@ -27,7 +26,7 @@ public class TourQueryTests : BaseToursIntegrationTest
         result.ShouldNotBeNull();
         result.Id.ShouldBe(-1);
         result.Name.ShouldBe("Test Tour Draft");
-        result.AuthorId.ShouldBe(-1);
+        result.AuthorId.ShouldBe(-11); 
     }
 
     [Fact]
@@ -38,12 +37,12 @@ public class TourQueryTests : BaseToursIntegrationTest
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
 
         // Act
-        var result = service.GetByAuthorId(-1);
+        var result = service.GetByAuthorId(-11);
 
         // Assert
         result.ShouldNotBeNull();
         result.Count.ShouldBe(3); // 3 test tours
-        result.All(t => t.AuthorId == -1).ShouldBeTrue();
+        result.All(t => t.AuthorId == -11).ShouldBeTrue();
     }
 
     [Fact]

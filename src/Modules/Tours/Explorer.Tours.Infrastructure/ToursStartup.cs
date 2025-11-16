@@ -28,12 +28,14 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>(); // DODATO
+        services.AddScoped<IMonumentService, MonumentService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
+        services.AddScoped<IMonumentRepository, MonumentDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

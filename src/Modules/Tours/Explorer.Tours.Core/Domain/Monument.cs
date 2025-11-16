@@ -42,9 +42,4 @@ namespace Explorer.Tours.Core.Domain
             Longitude = longitude;
         }
     }
-    public enum MonumentStatus
-    {
-        Active,
-        Inactive
-    }
 }

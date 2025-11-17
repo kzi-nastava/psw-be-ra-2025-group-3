@@ -32,6 +32,7 @@ public static class ToursStartup
         services.AddScoped<ITourService, TourService>(); // DODATO
 
         services.AddScoped<ITourProblemService, TourProblemService>();
+        services.AddScoped<IPreferenceService, PreferenceService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -40,6 +41,7 @@ public static class ToursStartup
         services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
 
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
+        services.AddScoped<IPreferenceRepository, PreferenceDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

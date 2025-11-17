@@ -12,5 +12,14 @@ public class ToursProfile : Profile
         CreateMap<TourDto, Tour>().ReverseMap();
         CreateMap<TourCreateDto, Tour>();
         CreateMap<TourUpdateDto, Tour>();
+
+
+
+
+
+
+        CreateMap<PreferenceDto, Preference>().ReverseMap();
+        CreateMap<PreferenceCreateDto, Preference>();
+        CreateMap<PreferenceUpdateDto, Preference>();
     }
 }

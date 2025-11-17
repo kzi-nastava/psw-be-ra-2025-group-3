@@ -14,7 +14,9 @@ public class ToursContext : DbContext
     
     public DbSet<TourProblem> TourProblems { get; set; }
 
-    public DbSet<Preference> Preferences { get; set; } 
+    public DbSet<Preference> Preferences { get; set; }
+
+    public DbSet<TouristEquipment> TouristEquipment { get; set; }
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -49,5 +51,18 @@ public class ToursContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             ));
+
+        // Konfiguracija za TouristEquipment odnosno many-to-many veza
+        modelBuilder.Entity<TouristEquipment>(entity =>
+        {
+            // Kompozitni primarni ključ (TouristId + EquipmentId)
+            entity.HasKey(te => new { te.TouristId, te.EquipmentId });
+
+            // Relacija sa Equipment tabelom
+            entity.HasOne(te => te.Equipment)
+                .WithMany()
+                .HasForeignKey(te => te.EquipmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }

@@ -30,8 +30,6 @@ public class Tour : Entity
             throw new ArgumentException("Tour name cannot be empty.", nameof(name));
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException("Tour description cannot be empty.", nameof(description));
-        if (authorId <= 0)
-            throw new ArgumentException("Author ID must be valid.", nameof(authorId));
 
         Name = name;
         Description = description;

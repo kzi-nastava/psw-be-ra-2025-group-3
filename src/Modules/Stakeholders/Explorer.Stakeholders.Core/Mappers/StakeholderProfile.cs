@@ -10,9 +10,13 @@ public class StakeholderProfile : Profile
     {
         CreateMap<AccountDto, Account>().ReverseMap(); //anja dodala
         CreateMap<AccountCreateDto, Account>(); //anja dodala
+
                                                 // Mapiranje entitet -> DTO sa enum -> string
         CreateMap<Account, AccountDto>()
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+        CreateMap<Person, PersonDto>().ReverseMap();
+
     }
 }

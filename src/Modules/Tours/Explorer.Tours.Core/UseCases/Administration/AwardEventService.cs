@@ -25,7 +25,8 @@ namespace Explorer.Tours.Core.UseCases.Administration
         public PagedResult<AwardEventDto> GetPaged(int page, int pageSize)
         {
             var pagedEvents = _awardEventRepository.GetPaged(page, pageSize);
-            return _mapper.Map<PagedResult<AwardEventDto>>(pagedEvents);
+            var itemDtos = _mapper.Map<List<AwardEventDto>>(pagedEvents.Results);
+            return new PagedResult<AwardEventDto>(itemDtos, pagedEvents.TotalCount);
         }
 
         public AwardEventDto Get(long id)
@@ -33,7 +34,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
             var awardEvent = _awardEventRepository.Get(id);
             if (awardEvent == null)
             {
-                // Baci grešku koju će kontroler uhvatiti kao 404 Not Found
+                // Baci gresku koju ce kontroler uhvatiti kao 404 Not Found
                 throw new KeyNotFoundException("Award Event not found: " + id);
             }
             return _mapper.Map<AwardEventDto>(awardEvent);
@@ -46,7 +47,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
                 throw new ArgumentException("Voting start date must be before end date.");
 
             if (_awardEventRepository.ExistsForYear(awardEventDto.Year))
-                // Baci grešku koju će kontroler uhvatiti kao 409 Conflict
+                // Baci gresku koju ce kontroler uhvatiti kao 409 Conflict
                 throw new InvalidOperationException($"An award event for the year {awardEventDto.Year} already exists.");
 
             try

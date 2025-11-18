@@ -15,7 +15,7 @@ namespace Explorer.Tours.API.Dtos
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
-        [Range(2020, 2100)]
+        [Range(2000, 2100)]
         public int Year { get; set; }
         [Required]
         public DateTime VotingStartDate { get; set; }

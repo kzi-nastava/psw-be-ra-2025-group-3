@@ -10,7 +10,6 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
     public interface IAwardEventRepository
     {
         PagedResult<AwardEvent> GetPaged(int page, int pageSize);
-
         AwardEvent Get(long id);
         AwardEvent Create(AwardEvent awardEvent);
         AwardEvent Update(AwardEvent awardEvent);

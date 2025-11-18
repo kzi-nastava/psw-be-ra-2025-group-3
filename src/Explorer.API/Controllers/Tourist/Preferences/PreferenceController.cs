@@ -24,6 +24,8 @@ public class PreferenceController : ControllerBase
     {
         var touristId = User.PersonId();
         var result = _preferenceService.GetByTouristId(touristId);
+        if (result == null)
+            return NotFound(); // 404 umesto exception
         return Ok(result);
     }
 

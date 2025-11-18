@@ -86,7 +86,7 @@ public class PreferenceService : IPreferenceService
     {
         var preference = _preferenceRepository.GetByTouristId(touristId);
         if (preference == null)
-            throw new NotFoundException($"Preferences for tourist {touristId} not found.");
+            return null;  //  null umesto exception
 
         return _mapper.Map<PreferenceDto>(preference);
     }

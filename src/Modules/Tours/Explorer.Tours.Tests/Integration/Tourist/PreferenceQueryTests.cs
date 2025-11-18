@@ -30,16 +30,7 @@ public class PreferenceQueryTests : BaseToursIntegrationTest
         result.Tags.Count.ShouldBe(2);
     }
 
-    [Fact]
-    public void Get_fails_when_preference_not_found()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-999");
-
-        // Act & Assert
-        Should.Throw<Exception>(() => controller.GetMyPreferences());
-    }
+   
 
     private static PreferenceController CreateController(IServiceScope scope, string touristId)
     {

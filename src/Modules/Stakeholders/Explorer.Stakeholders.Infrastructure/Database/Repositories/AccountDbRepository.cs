@@ -25,7 +25,7 @@ public class AccountDbRepository : IAccountRepository
         return account;
     }
 
-    public Account? Get(int id)
+    public Account? Get(long id)
     {
         return _context.Accounts.Find(id);
     }

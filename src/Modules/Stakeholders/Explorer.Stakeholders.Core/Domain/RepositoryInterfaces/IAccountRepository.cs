@@ -12,7 +12,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
     {
         bool Exists(string username);
         Account Create(Account account);
-        Account? Get(int id);
+        Account? Get(long id);
         Account? GetByUsername(string username);
         List<Account> GetAll();
         void Update(Account account);

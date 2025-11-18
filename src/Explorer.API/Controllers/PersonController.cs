@@ -71,14 +71,24 @@ public class PersonController : ControllerBase
 
     private long GetPersonIdFromToken()
     {
+        
         var personIdClaim = HttpContext.User.Claims
             .FirstOrDefault(claim => claim.Type == "personId");
 
-        if (personIdClaim == null || !long.TryParse(personIdClaim.Value, out var personId))
+        if (personIdClaim != null && long.TryParse(personIdClaim.Value, out var personId))
         {
-            throw new UnauthorizedAccessException("Person ID not found in token.");
+            return personId;
         }
 
-        return personId;
+        //testovi
+        var userIdClaim = HttpContext.User.Claims
+            .FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null && long.TryParse(userIdClaim.Value, out var userId))
+        {
+            return userId; 
+        }
+
+        throw new UnauthorizedAccessException("Person ID or User ID not found in token.");
     }
 }

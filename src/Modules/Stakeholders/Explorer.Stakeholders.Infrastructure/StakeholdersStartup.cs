@@ -29,6 +29,7 @@ public static class StakeholdersStartup
         services.AddScoped<ITokenGenerator, JwtGenerator>();
         services.AddScoped<IAccountService, AccountService>(); // DODATO anja
         services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IAppRatingService, AppRatingService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -36,6 +37,7 @@ public static class StakeholdersStartup
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IAccountRepository, AccountDbRepository>(); // DODATO
+        services.AddScoped<IAppRatingRepository, AppRatingDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

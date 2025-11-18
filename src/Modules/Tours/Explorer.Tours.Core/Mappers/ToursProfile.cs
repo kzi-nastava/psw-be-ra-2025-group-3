@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
+using Explorer.BuildingBlocks.Core.UseCases;
 
 namespace Explorer.Tours.Core.Mappers;
 
@@ -13,16 +14,17 @@ public class ToursProfile : Profile
         CreateMap<TourCreateDto, Tour>();
         CreateMap<TourUpdateDto, Tour>();
 
-
-
-
-
-
         CreateMap<PreferenceDto, Preference>().ReverseMap();
         CreateMap<PreferenceCreateDto, Preference>();
         CreateMap<PreferenceUpdateDto, Preference>();
 
         CreateMap<TouristEquipmentCreateDto, TouristEquipment>();
         CreateMap<EquipmentWithOwnershipDto, Equipment>().ReverseMap();
+
+        CreateMap<AwardEvent, AwardEventDto>().ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<AwardEventCreateDto, AwardEvent>();
+        CreateMap<AwardEventUpdateDto, AwardEvent>();
+        CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
+        CreateMap<PagedResult<AwardEvent>, PagedResult<AwardEventDto>>();
     }
 }

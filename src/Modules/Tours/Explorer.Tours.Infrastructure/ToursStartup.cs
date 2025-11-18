@@ -9,6 +9,7 @@ using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
+using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -30,6 +31,7 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>(); // DODATO
+        services.AddScoped<IAwardEventService, AwardEventService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<IPreferenceService, PreferenceService>();
@@ -40,6 +42,7 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
+        services.AddScoped<IAwardEventRepository, AwardEventRepository>();
 
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
         services.AddScoped<IPreferenceRepository, PreferenceDbRepository>();

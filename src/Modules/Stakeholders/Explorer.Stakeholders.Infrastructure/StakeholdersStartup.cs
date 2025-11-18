@@ -3,6 +3,7 @@ using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
 using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Stakeholders.Core.UseCases.Authoring;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
@@ -21,22 +22,25 @@ public static class StakeholdersStartup
         SetupInfrastructure(services);
         return services;
     }
-    
+
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
+        services.AddScoped<IAccountService, AccountService>(); // DODATO anja
+        services.AddScoped<IPersonService, PersonService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
+        services.AddScoped<IAccountRepository, AccountDbRepository>(); // DODATO
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();
-        
+
         services.AddDbContext<StakeholdersContext>(opt =>
             opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "stakeholders")));

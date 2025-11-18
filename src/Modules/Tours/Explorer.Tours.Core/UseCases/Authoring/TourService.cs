@@ -25,7 +25,10 @@ public class TourService : ITourService
 
     public TourDto Create(TourCreateDto tourDto, long authorId)
     {
-        // Kreiranje Tour entiteta sa validacijama
+        // Basic validation - full Stakeholders integration can be added later !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (authorId == 0)
+            throw new ArgumentException("Author ID must be valid.", nameof(authorId));
+
         var tour = new Tour(
             tourDto.Name,
             tourDto.Description,

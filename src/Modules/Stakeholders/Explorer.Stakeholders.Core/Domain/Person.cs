@@ -9,9 +9,9 @@ public class Person : Entity
     public string Name { get; private set; }
     public string Surname { get; private set; }
     public string Email { get; private set; }
-    public string? ProfilePictureUrl { get; private set; }
-    public string? Biography { get; private set; }
-    public string? Quote { get; private set; }
+    public string? ProfilePictureUrl { get; private set; } //luka
+    public string? Biography { get; private set; } //luka
+    public string? Quote { get; private set; } //luka
 
     public Person(long userId, string name, string surname, string email,
                   string? profilePictureUrl = null, string? biography = null, string? quote = null)

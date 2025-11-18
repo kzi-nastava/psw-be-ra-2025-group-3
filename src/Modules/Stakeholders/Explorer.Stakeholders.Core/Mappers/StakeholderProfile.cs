@@ -10,8 +10,10 @@ public class StakeholderProfile : Profile
     {
         CreateMap<AccountDto, Account>().ReverseMap(); //anja dodala
         CreateMap<AccountCreateDto, Account>(); //anja dodala
+        CreateMap<AppRatingRequestDto, AppRating>().ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+        CreateMap<AppRating, AppRatingResponseDto>().ForMember(dest => dest.Username, opt => opt.Ignore());
 
-                                                
+
         CreateMap<Account, AccountDto>()
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));

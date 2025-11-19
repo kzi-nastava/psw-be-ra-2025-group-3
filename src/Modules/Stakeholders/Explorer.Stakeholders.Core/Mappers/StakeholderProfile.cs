@@ -20,5 +20,12 @@ public class StakeholderProfile : Profile
 
         CreateMap<Person, PersonDto>().ReverseMap();
 
+        // --- Dodao petar s. 
+        CreateMap<Club, ClubDto>()
+            .ForMember(dest => dest.FeaturedImage, opt => opt.MapFrom(src => src.FeaturedImage))
+            .ForMember(dest => dest.GalleryImages, opt => opt.MapFrom(src => src.Images.Where(img => img.Id != src.FeaturedImageId).ToList()));
+
+        CreateMap<ClubImage, ClubImageDto>();
+        // ----
     }
 }

@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Author\" />
+  </ItemGroup>
+
 </Project>

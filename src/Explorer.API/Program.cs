@@ -1,9 +1,12 @@
-using Explorer.API.Middleware;
+﻿using Explorer.API.Middleware;
 using Explorer.API.Startup;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+
+var cs = builder.Configuration.GetConnectionString("Explorer");
+
 
 builder.Services.AddControllers();
 builder.Services.ConfigureSwagger(builder.Configuration);

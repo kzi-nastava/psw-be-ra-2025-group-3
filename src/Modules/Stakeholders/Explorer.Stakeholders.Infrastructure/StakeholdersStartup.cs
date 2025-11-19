@@ -29,6 +29,7 @@ public static class StakeholdersStartup
         services.AddScoped<ITokenGenerator, JwtGenerator>();
         services.AddScoped<IAccountService, AccountService>(); // DODATO anja
         services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IAppRatingService, AppRatingService>();
 
         services.AddScoped<IClubService, ClubService>(); // dodato petar s.
     }
@@ -38,6 +39,7 @@ public static class StakeholdersStartup
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IAccountRepository, AccountDbRepository>(); // DODATO
+        services.AddScoped<IAppRatingRepository, AppRatingDbRepository>();
 
         services.AddScoped<IClubRepository, ClubRepository>(); // dodato petar s.
 

@@ -91,6 +91,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (clubDto.PromoteGalleryImageId.HasValue)
             {
                 club.PromoteGalleryImageToFeatured(clubDto.PromoteGalleryImageId.Value);
+                club = _repository.Update(club);
             }
 
             if (!string.IsNullOrWhiteSpace(clubDto.NewFeaturedImageUrl))

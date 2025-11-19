@@ -73,8 +73,7 @@ namespace Explorer.Stakeholders.Core.Domain
             var image = Images.FirstOrDefault(i => i.Id == imageId);
             if (image == null)
                 throw new ArgumentException("Image not found in gallery.");
-
-            Images.Remove(image);
+            
             FeaturedImageId = image.Id;
         }
 

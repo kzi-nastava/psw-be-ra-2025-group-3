@@ -61,12 +61,18 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
 
         public void Delete(long id)
         {
-            var club = Get(id);
-            if (club != null)
-            {
-                _dbContext.Clubs.Remove(club);
-                _dbContext.SaveChanges();
-            }
+            var club = _dbContext.Clubs
+        .Include(c => c.Images)
+        .Include(c => c.FeaturedImage)
+        .FirstOrDefault(c => c.Id == id);
+
+            if (club == null)
+                throw new KeyNotFoundException("Club not found.");
+
+            club.SetFeaturedImage(null);
+            _dbContext.SaveChanges();
+            _dbContext.Clubs.Remove(club);
+            _dbContext.SaveChanges();
         }
 
         public PagedResult<Club> GetByOwnerId(long ownerId, int page, int pageSize)

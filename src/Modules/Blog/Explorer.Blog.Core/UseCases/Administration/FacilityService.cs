@@ -40,16 +40,23 @@ public class FacilityService : IFacilityService
     public FacilityDto Update(long id, FacilityUpdateDto dto)
     {
         var facility = _facilityRepository.Get(id);
-        if (facility == null) throw new KeyNotFoundException("Facility not found.");
 
-        _mapper.Map(dto, facility);   // ovde će se pozvati Update() kroz AfterMap u profilu
+        if (facility == null)
+            throw new KeyNotFoundException("Facility not found.");
+
+        _mapper.Map(dto, facility);
         _facilityRepository.Update(facility);
 
         return _mapper.Map<FacilityDto>(facility);
     }
 
+
     public void Delete(long id)
     {
+        var facility = _facilityRepository.Get(id);
+        if (facility == null)
+            throw new KeyNotFoundException("Facility not found.");
+
         _facilityRepository.Delete(id);
     }
 }

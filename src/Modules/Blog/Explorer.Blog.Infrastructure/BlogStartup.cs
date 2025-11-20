@@ -15,7 +15,7 @@ public static class BlogStartup
 {
     public static IServiceCollection ConfigureBlogModule(this IServiceCollection services)
     {
-        // Registers all profiles since it works on the assembly
+       
         services.AddAutoMapper(typeof(BlogProfile).Assembly);
         SetupCore(services);
         SetupInfrastructure(services);

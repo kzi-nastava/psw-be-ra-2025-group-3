@@ -33,9 +33,20 @@ public class FacilityDbRepository : IFacilityRepository
 
     public Facility Get(long id)
     {
-        // može i FirstOrDefault + bacanje izuzetka, ali ovo je dovoljno za sad
-        return _dbContext.Facilities.Find(id)!;
+        return _dbContext.Facilities.FirstOrDefault(f => f.Id == id);
     }
+
+    public void Delete(long id)
+    {
+        var entity = _dbContext.Facilities.FirstOrDefault(f => f.Id == id);
+
+        if (entity == null)
+            throw new KeyNotFoundException("Facility not found.");
+
+        _dbContext.Facilities.Remove(entity);
+        _dbContext.SaveChanges();
+    }
+
 
     public Facility Update(Facility facility)
     {
@@ -44,13 +55,5 @@ public class FacilityDbRepository : IFacilityRepository
         return facility;
     }
 
-    public void Delete(long id)
-    {
-        var entity = _dbContext.Facilities.Find(id);
-        if (entity != null)
-        {
-            _dbContext.Facilities.Remove(entity);
-            _dbContext.SaveChanges();
-        }
-    }
+    
 }

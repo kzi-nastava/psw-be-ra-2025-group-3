@@ -126,7 +126,12 @@ public class MonumentCommandTests : BaseToursIntegrationTest
         var updatedEntity = new MonumentDto
         {
             Id = -9999,
-            Name = "Test"
+            Name = "Test",
+            Description = "Description",
+            Year = 2000,
+            Status = "Active",
+            Latitude = 45.0,
+            Longitude = 19.0
         };
 
         // Act & Assert

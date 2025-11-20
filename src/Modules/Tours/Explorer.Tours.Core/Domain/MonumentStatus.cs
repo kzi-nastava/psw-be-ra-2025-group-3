@@ -8,6 +8,6 @@ namespace Explorer.Tours.Core.Domain;
 
 public enum MonumentStatus
 {
-    InActive = 0,
+    Inactive = 0,
     Active = 1
 }

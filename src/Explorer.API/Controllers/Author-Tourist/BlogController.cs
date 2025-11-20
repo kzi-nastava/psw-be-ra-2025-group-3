@@ -19,7 +19,6 @@ namespace Explorer.API.Controllers.Author_Tourist
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
-            blogDto.AuthorId = 2; // Hardkodirano za testiranje
             var result = _blogService.CreateBlog(blogDto);
             return Ok(result);
         }
@@ -33,9 +32,8 @@ namespace Explorer.API.Controllers.Author_Tourist
         }
 
         [HttpGet("my-blogs")]
-        public ActionResult<List<BlogDto>> GetUserBlogs()
+        public ActionResult<List<BlogDto>> GetUserBlogs([FromQuery] int userId)
         {
-            var userId = 2; // Hardkodirano za testiranje
             var result = _blogService.GetUserBlogs(userId);
             return Ok(result);
         }

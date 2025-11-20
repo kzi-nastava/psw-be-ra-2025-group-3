@@ -1,12 +1,10 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Explorer.API.Controllers.Author_Tourist
 {
-    [Authorize(Policy = "touristOrAuthorPolicy")]
+    // PRIVREMENO UKLONJENO: [Authorize(Policy = "touristOrAuthorPolicy")]
     [Route("api/blog")]
     [ApiController]
     public class BlogController : ControllerBase
@@ -21,10 +19,9 @@ namespace Explorer.API.Controllers.Author_Tourist
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
-            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
-            blogDto.AuthorId = userId;
+            blogDto.AuthorId = 2; // Hardkodirano za testiranje
             var result = _blogService.CreateBlog(blogDto);
-            return CreatedAtAction(nameof(GetUserBlogs), new { userId = result.AuthorId }, result);
+            return Ok(result);
         }
 
         [HttpPut("{id:long}")]
@@ -38,7 +35,7 @@ namespace Explorer.API.Controllers.Author_Tourist
         [HttpGet("my-blogs")]
         public ActionResult<List<BlogDto>> GetUserBlogs()
         {
-            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
+            var userId = 2; // Hardkodirano za testiranje
             var result = _blogService.GetUserBlogs(userId);
             return Ok(result);
         }

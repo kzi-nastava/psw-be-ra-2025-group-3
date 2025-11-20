@@ -27,5 +27,10 @@ public class StakeholderProfile : Profile
 
         CreateMap<ClubImage, ClubImageDto>();
         // ----
+
+        // Meetup mapiranje - Dragana
+        CreateMap<MeetupDto, Meetup>().ReverseMap();
+        CreateMap<MeetupCreateDto, Meetup>();
+        CreateMap<MeetupUpdateDto, Meetup>();
     }
 }

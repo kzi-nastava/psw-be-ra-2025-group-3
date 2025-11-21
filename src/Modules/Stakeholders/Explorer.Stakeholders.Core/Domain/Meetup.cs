@@ -33,8 +33,8 @@ namespace Explorer.Stakeholders.Core.Domain
             if (longitude < -180 || longitude > 180)
                 throw new ArgumentException("Longitude must be between -180 and 180.", nameof(longitude));
             
-            if (creatorId <= 0)
-                throw new ArgumentException("CreatorId must be a valid positive number.", nameof(creatorId));
+            if (creatorId == 0)
+                throw new ArgumentException("CreatorId must be valid.", nameof(creatorId));
 
             Title = title;
             Description = description;

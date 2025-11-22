@@ -20,7 +20,7 @@ namespace Explorer.Stakeholders.Core.Domain
             UserId = userId;
             Rating = rating;
             Comment = comment;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTime.Now;
 
             Validate();
         }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -24,7 +25,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             _mapper = mapper;
         }
 
-        // Glavni flow: "Oceni aplikaciju" - automatski Create ili Update
         public AppRatingResponseDto CreateRating(long userId, AppRatingRequestDto entity)
         {
             var rating = _repository.GetByUserId(userId);
@@ -37,7 +37,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             }
             else
             {
-                // Ako već ima ocenu, automatski uradi UPDATE (korisnik ne zna da ima ocenu)
                 _mapper.Map(entity, rating);
                 rating.Validate();
                 rating.UpdatedAt = DateTime.Now;
@@ -47,7 +46,6 @@ namespace Explorer.Stakeholders.Core.UseCases
             return MapToDto(rating);
         }
 
-        // Explicit edit: "Izmeni ocenu" - korisnik SVESNO menja postojeću ocenu
         public AppRatingResponseDto UpdateRating(long userId, AppRatingRequestDto entity)
         {
             var rating = _repository.GetByUserId(userId);
@@ -81,10 +79,11 @@ namespace Explorer.Stakeholders.Core.UseCases
             return rating == null ? null : MapToDto(rating);
         }
 
-        public List<AppRatingResponseDto> GetAllRatings()
+        public PagedResult<AppRatingResponseDto> GetPaged(int page, int pageSize)
         {
-            var ratings = _repository.GetAll();
-            return ratings.Select(MapToDto).ToList();
+            var result = _repository.GetPaged(page, pageSize);
+            var items = result.Results.Select(MapToDto).ToList();
+            return new PagedResult<AppRatingResponseDto>(items, result.TotalCount);
         }
 
         private AppRatingResponseDto MapToDto(AppRating entity)

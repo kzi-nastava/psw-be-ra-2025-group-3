@@ -3,28 +3,46 @@ using System.Net.Mail;
 
 namespace Explorer.Stakeholders.Core.Domain;
 
+public enum PersonRole
+{
+    Administrator,
+    Author,
+    Tourist
+}
+
+
 public class Person : Entity
 {
+
     public long UserId { get; init; }
     public string Name { get; private set; }
     public string Surname { get; private set; }
     public string Email { get; private set; }
-    public string? ProfilePictureUrl { get; private set; } //luka
-    public string? Biography { get; private set; } //luka
-    public string? Quote { get; private set; } //luka
+    public string? ProfilePictureUrl { get; private set; }
+    public string? Biography { get; private set; }
+    public string? Quote { get; private set; }
 
-    public Person(long userId, string name, string surname, string email,
-                  string? profilePictureUrl = null, string? biography = null, string? quote = null)
+    public Person(
+    long userId,
+    string name,
+    string surname,
+    string email,
+    string? profilePictureUrl = null,
+    string? biography = null,
+    string? quote = null)
     {
         UserId = userId;
         Name = name;
         Surname = surname;
-        Email = email;
+        Email = email;     // Ako nije prosleđeno, prazno
         ProfilePictureUrl = profilePictureUrl;
         Biography = biography;
         Quote = quote;
+
         Validate();
     }
+
+
 
     public void Update(string name, string surname, string email,
                        string? profilePictureUrl, string? biography, string? quote)
@@ -37,6 +55,7 @@ public class Person : Entity
         Quote = quote;
         Validate();
     }
+
 
     private void Validate()
     {

@@ -103,6 +103,136 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
 
     // --- Helper Metodi ---
 
+    // ---------------------
+    // CREATE PERSON (ADMIN)
+    // ---------------------
+    [Fact]
+    public void Create_person_succeeds()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin"); // admin iz tvojih podataka
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var dto = new AccountRegistrationDto
+        {
+            Username = "noviuser",
+            Password = "Test123!",
+            Role = "Author",
+            Name = "Test",
+            Surname = "Person",
+            Email = "test.person@gmail.com"
+        };
+
+        var response = client.PostAsJsonAsync("api/stakeholders/person", dto).Result;
+
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Created);
+
+        var person = ExtractResult<PersonDto>(response);
+        person.ShouldNotBeNull();
+        person.Name.ShouldBe("Test");
+        person.Email.ShouldBe("test.person@gmail.com");
+    }
+
+    [Fact]
+    public void Create_person_fails_invalid_email()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var dto = new AccountRegistrationDto
+        {
+            Username = "losmail",
+            Password = "Test123!",
+            Role = "Author",
+            Name = "Bad",
+            Surname = "Email",
+            Email = "invalid-email" // nevalidan email
+        };
+
+        var response = client.PostAsJsonAsync("api/stakeholders/person", dto).Result;
+
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.UnprocessableEntity);
+    }
+
+    // ---------------------
+    // GET ALL PEOPLE
+    // ---------------------
+    [Fact]
+    public void Get_all_people_succeeds()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = client.GetAsync("api/stakeholders/person/all").Result;
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+
+        var people = ExtractResult<List<PersonDto>>(response);
+        people.ShouldNotBeNull();
+        people.Count.ShouldBeGreaterThan(0);
+        people.Any(p => p.UserId == -1).ShouldBeTrue(); // admin
+        people.Any(p => p.UserId == -21).ShouldBeTrue(); // Pera
+        people.Any(p => p.UserId == -22).ShouldBeTrue(); // Mika
+        people.Any(p => p.UserId == -23).ShouldBeTrue(); // Steva
+    }
+
+    // ---------------------
+    // GET PERSON BY ID
+    // ---------------------
+    [Fact]
+    public void Get_person_by_id_succeeds()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = client.GetAsync("api/stakeholders/person/-21").Result; // Pera
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+
+        var person = ExtractResult<PersonDto>(response);
+        person.ShouldNotBeNull();
+        person.UserId.ShouldBe(-21);
+        person.Name.ShouldBe("Pera");
+        person.Email.ShouldBe("turista1@gmail.com");
+    }
+
+    // ---------------------
+    // BLOCK PERSON
+    // ---------------------
+    [Fact]
+    public void Block_person_succeeds()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = client.PutAsync("api/stakeholders/person/-22/block", null).Result; // Mika
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.NoContent);
+
+        var getResponse = client.GetAsync("api/stakeholders/person/-22").Result;
+        var person = ExtractResult<PersonDto>(getResponse);
+        person.IsActive.ShouldBeFalse();
+    }
+
+    // ---------------------
+    // UNBLOCK PERSON
+    // ---------------------
+    [Fact]
+    public void Unblock_person_succeeds()
+    {
+        var client = Factory.CreateClient();
+        var token = GetJwtToken("admin@gmail.com", "admin");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = client.PutAsync("api/stakeholders/person/-22/unblock", null).Result; // Mika
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.NoContent);
+
+        var getResponse = client.GetAsync("api/stakeholders/person/-22").Result;
+        var person = ExtractResult<PersonDto>(getResponse);
+        person.IsActive.ShouldBeTrue();
+    }
+
     private static T ExtractResult<T>(HttpResponseMessage response)
     {
         var json = response.Content.ReadAsStringAsync().Result;

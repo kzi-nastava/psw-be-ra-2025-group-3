@@ -90,7 +90,7 @@ namespace Explorer.Stakeholders.Core.UseCases
         private AppRatingResponseDto MapToDto(AppRating entity)
         {
             var rating = _mapper.Map<AppRatingResponseDto>(entity);
-            var user = _userRepository.GetById(entity.UserId);
+            var user = _userRepository.Get(entity.UserId);
             rating.Username = user?.Username ?? string.Empty;
             return rating;
         }

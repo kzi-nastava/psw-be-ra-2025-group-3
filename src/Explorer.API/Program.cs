@@ -28,6 +28,9 @@ else
 }
 
 app.UseRouting();
+
+app.UseStaticFiles();
+
 app.UseCors(corsPolicy);
 app.UseHttpsRedirection();
 app.UseAuthentication();

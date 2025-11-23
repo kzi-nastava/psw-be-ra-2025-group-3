@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -25,11 +26,6 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             return entity;
         }
 
-        public List<AppRating> GetAll()
-        {
-            return _dbSet.AsNoTracking().ToList();
-        }
-
         public AppRating? GetByUserId(long userId)
         {
             return _dbSet.AsNoTracking().FirstOrDefault(r => r.UserId == userId);
@@ -53,6 +49,19 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
         {
             _dbSet.Remove(entity);
             DbContext.SaveChanges();
+        }
+
+        public PagedResult<AppRating> GetPaged(int page, int pageSize)
+        {
+            var query = _dbSet.AsNoTracking().OrderByDescending(r => r.CreatedAt);
+
+            var totalCount = query.Count();
+            var results = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<AppRating>(results, totalCount);
         }
     }
 }

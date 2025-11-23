@@ -71,7 +71,7 @@ public class PersonController : ControllerBase
 
     private long GetPersonIdFromToken()
     {
-        
+
         var personIdClaim = HttpContext.User.Claims
             .FirstOrDefault(claim => claim.Type == "personId");
 
@@ -86,9 +86,61 @@ public class PersonController : ControllerBase
 
         if (userIdClaim != null && long.TryParse(userIdClaim.Value, out var userId))
         {
-            return userId; 
+            return userId;
         }
 
         throw new UnauthorizedAccessException("Person ID or User ID not found in token.");
+    }
+
+    // POST: api/stakeholders/person
+    [Authorize(Policy = "administratorPolicy")]
+    [HttpPost]
+    public ActionResult<PersonDto> Create([FromBody] AccountRegistrationDto dto)
+    {
+        var result = _personService.Create(dto);
+        return CreatedAtAction(nameof(GetById), new { id = result.UserId }, result);
+    }
+
+    // GET: api/stakeholders/person/all
+    [Authorize(Policy = "administratorPolicy")]
+    [HttpGet("all")]
+    public ActionResult<List<PersonDto>> GetAll()
+    {
+        var result = _personService.GetAll();
+        return Ok(result);
+    }
+
+    // GET: api/stakeholders/person/{id}
+    [Authorize(Policy = "administratorPolicy")]
+    [HttpGet("{id:long}")]
+    public ActionResult<PersonDto> GetById(long id)
+    {
+        try
+        {
+            var result = _personService.Get(id);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    // PUT: api/stakeholders/person/{id}/block
+    [Authorize(Policy = "administratorPolicy")]
+    [HttpPut("{id:long}/block")]
+    public ActionResult Block(long id)
+    {
+        _personService.Block(id);
+        return NoContent();
+    }
+
+    // PUT: api/stakeholders/person/{id}/unblock
+    [Authorize(Policy = "administratorPolicy")]
+    [HttpPut("{id:long}/unblock")]
+    public ActionResult Unblock(long id)
+    {
+        _personService.Unblock(id);
+        return NoContent();
     }
 }

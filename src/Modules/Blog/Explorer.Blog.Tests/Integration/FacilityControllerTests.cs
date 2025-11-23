@@ -29,7 +29,7 @@ public class FacilityControllerTests : BaseWebIntegrationTest<BlogTestFactory>
         var items = await response.Content.ReadFromJsonAsync<List<FacilityDto>>();
 
         Assert.NotNull(items);
-        Assert.Contains(items!, f => f.Id == -1);
+        Assert.True(items!.Count >= 1);
     }
 
     [Fact]

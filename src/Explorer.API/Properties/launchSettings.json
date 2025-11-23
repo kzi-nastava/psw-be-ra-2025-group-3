@@ -5,7 +5,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_SCHEMA": "explorer"
+        "DATABASE_SCHEMA": "explorer-v1"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:5001;http://localhost:5000"

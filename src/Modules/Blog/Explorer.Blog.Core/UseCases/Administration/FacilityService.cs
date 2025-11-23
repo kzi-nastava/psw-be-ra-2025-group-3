@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
 using Explorer.Blog.Core.Domain;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;   // ⬅⬅⬅ OVO DODAJ
 
 namespace Explorer.Blog.Core.UseCases.Administration;
-
 
 public class FacilityService : IFacilityService
 {
@@ -42,7 +36,7 @@ public class FacilityService : IFacilityService
         var facility = _facilityRepository.Get(id);
 
         if (facility == null)
-            throw new KeyNotFoundException("Facility not found.");
+            throw new NotFoundException("Facility not found.");   // ⬅⬅ OVO
 
         _mapper.Map(dto, facility);
         _facilityRepository.Update(facility);
@@ -50,12 +44,12 @@ public class FacilityService : IFacilityService
         return _mapper.Map<FacilityDto>(facility);
     }
 
-
     public void Delete(long id)
     {
         var facility = _facilityRepository.Get(id);
+
         if (facility == null)
-            throw new KeyNotFoundException("Facility not found.");
+            throw new NotFoundException("Facility not found.");   // ⬅⬅ I OVO
 
         _facilityRepository.Delete(id);
     }

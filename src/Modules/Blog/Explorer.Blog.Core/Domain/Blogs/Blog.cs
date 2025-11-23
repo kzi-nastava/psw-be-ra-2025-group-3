@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Blog.Core.Domain.Blogs
 {
@@ -32,13 +30,23 @@ namespace Explorer.Blog.Core.Domain.Blogs
             Images = images ?? new List<BlogImage>();
         }
 
-        public void Update(string title, string description)
+        /// <summary>
+        /// ✅ ISPRAVLJENA METODA - Sada prima i slike!
+        /// </summary>
+        public void Update(string title, string description, List<BlogImage> newImages = null)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title cannot be empty");
 
             Title = title;
             Description = description;
+
+            // ✅ Ako su prosleđene nove slike, zameni stare
+            if (newImages != null)
+            {
+                Images.Clear();
+                Images.AddRange(newImages);
+            }
         }
 
         public void AddImage(BlogImage image)

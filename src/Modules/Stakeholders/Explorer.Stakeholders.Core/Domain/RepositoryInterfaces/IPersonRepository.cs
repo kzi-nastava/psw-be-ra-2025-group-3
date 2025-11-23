@@ -6,5 +6,9 @@ public interface IPersonRepository
 {
     Person Create(Person person);
     Person? Get(long id);
+
+    List<Person> GetAll();
     Person Update(Person person);
+
+    bool EmailExists(string email);
 }

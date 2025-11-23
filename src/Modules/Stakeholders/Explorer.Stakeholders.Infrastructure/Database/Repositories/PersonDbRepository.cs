@@ -35,4 +35,18 @@ public class PersonDbRepository : IPersonRepository
         DbContext.SaveChanges();
         return person;
     }
+
+    public bool EmailExists(string email)
+    {
+        var normalized = email.Trim().ToLower();
+        return _dbSet.Any(p => p.Email.ToLower() == normalized);
+    }
+
+
+
+
+    public List<Person> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }

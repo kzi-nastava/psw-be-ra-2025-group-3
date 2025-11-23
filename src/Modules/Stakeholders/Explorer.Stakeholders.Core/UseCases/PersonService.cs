@@ -105,9 +105,37 @@ public class PersonService : IPersonService
 
     public List<PersonDto> GetAll()
     {
-        var people = _personRepository.GetAll();
-        return people.Select(_mapper.Map<PersonDto>).ToList();
+        var people = _personRepository.GetAll(); // svi personi
+        var dtos = new List<PersonDto>();
+
+        foreach (var person in people)
+        {
+            // dohvat User-a po UserId iz Person
+            var user = _userRepository.Get(person.UserId);
+
+            // mapiraj person na PersonDto
+            var dto = _mapper.Map<PersonDto>(person);
+
+            // dodaj User podatke
+            if (user != null)
+            {
+                dto.Username = user.Username;
+                dto.Role = user.Role.ToString();
+                dto.IsActive = user.IsActive;
+            }
+            else
+            {
+                dto.Username = "Unknown";
+                dto.Role = "Unknown";
+                dto.IsActive = false;
+            }
+
+            dtos.Add(dto);
+        }
+
+        return dtos;
     }
+
 
     public void Block(long id)
     {

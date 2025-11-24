@@ -10,13 +10,13 @@ namespace Explorer.Blog.Core.Mappers
         public BlogProfile()
         {
             CreateMap<BlogDto, BlogEntity>()
-                .ForMember(dest => dest.Id, opt => opt.Condition(src => src.Id > 0))
-                .ForMember(dest => dest.CreationDate, opt => opt.Ignore()); 
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // ✅ Uvek mapiraj Id
+                .ForMember(dest => dest.CreationDate, opt => opt.Ignore());
 
             CreateMap<BlogEntity, BlogDto>();
 
             CreateMap<BlogImageDto, BlogImageEntity>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.Ignore());  // Id se generiše u bazi
 
             CreateMap<BlogImageEntity, BlogImageDto>();
         }

@@ -47,7 +47,9 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             // 4. Dodaj nove slike
             if (blog.Images != null && blog.Images.Any())
             {
-                foreach (var image in blog.Images)
+                var imagesToAdd = blog.Images.ToList();
+
+                foreach (var image in imagesToAdd)
                 {
                     _context.Set<BlogImageEntity>().Add(new BlogImageEntity(image.ImageUrl, blog.Id));
                 }

@@ -89,7 +89,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var actionResult = controller.Update(updatedEntity).Result as ObjectResult;
+        var actionResult = controller.Update(updatedEntity.Id, updatedEntity).Result as ObjectResult;
         actionResult.ShouldNotBeNull();
         actionResult.StatusCode.ShouldBe(200);
 
@@ -135,7 +135,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
         };
 
         // Act & Assert
-        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity));
+        Should.Throw<NotFoundException>(() => controller.Update(updatedEntity.Id, updatedEntity));
     }
 
     [Fact]

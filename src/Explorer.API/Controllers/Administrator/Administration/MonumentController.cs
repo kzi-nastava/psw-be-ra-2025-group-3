@@ -31,8 +31,11 @@ public class MonumentController : ControllerBase
     }
 
     [HttpPut("{id:long}")]
-    public ActionResult<MonumentDto> Update([FromBody] MonumentDto monument)
+    public ActionResult<MonumentDto> Update(long id, [FromBody] MonumentDto monument)
     {
+        if (id != monument.Id)
+            return BadRequest("Route id and body id do not match.");
+
         return Ok(_monumentService.Update(monument));
     }
 

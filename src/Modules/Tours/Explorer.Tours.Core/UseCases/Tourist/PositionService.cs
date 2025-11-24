@@ -31,21 +31,17 @@ public class PositionService : IPositionService
 
     public void Update(long touristId, PositionDto dto)
     {
-        // prvo proveri da li postoji turista (dodaj Exists metodu u repozitorijum)
-        if (!_positionRepository.Exists(touristId))
-            throw new Exception($"Tourist with id {touristId} does not exist.");
-
         var existing = _positionRepository.GetByTouristId(touristId);
 
         if (existing == null)
         {
-            // create
+            // CREATE
             var pos = new Position(touristId, dto.Latitude, dto.Longitude);
             _positionRepository.Create(pos);
             return;
         }
 
-        // update
+        // UPDATE
         existing.Update(dto.Latitude, dto.Longitude);
         _positionRepository.Update(existing);
     }

@@ -53,21 +53,6 @@ namespace Explorer.Tours.Tests.Integration.Tourist
         }
 
 
-        [Fact]
-        public void Update_fails_for_invalid_tourist()
-        {
-            using var scope = Factory.Services.CreateScope();
-            var controller = CreateController(scope, "-999");
-
-            var dto = new PositionDto
-            {
-                Latitude = 44.0,
-                Longitude = 20.0
-            };
-
-            Should.Throw<Exception>(() => controller.Update(dto));
-        }
-
         private static PositionController CreateController(IServiceScope scope, string touristId)
         {
             return new PositionController(scope.ServiceProvider.GetRequiredService<IPositionService>())

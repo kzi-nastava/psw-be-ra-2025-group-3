@@ -12,7 +12,7 @@ namespace Explorer.Tours.API.Dtos
         public string Name { get; set; }
         public string Description { get; set; }
         public int Year { get; set; }
-        public string Status { get; set; }        
+        public int Status { get; set; }  // active = 1, inactive = 0       
         public double Latitude { get; set; }
         public double Longitude { get; set; }
 

@@ -27,7 +27,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
             Name = "Test Spomenik",
             Description = "Opis test spomenika.",
             Year = 2000,
-            Status = "Active",   
+            Status = 1,   
             Latitude = 45.251,
             Longitude = 19.836
         };
@@ -83,7 +83,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
             Name = "Izmenjeni Spomenik",
             Description = "Izmenjeni opis.",
             Year = 1900,
-            Status = "Inactive",
+            Status = 0,
             Latitude = 45.200,
             Longitude = 19.800
         };
@@ -111,7 +111,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
         storedEntity.Name.ShouldBe(updatedEntity.Name);
         storedEntity.Description.ShouldBe(updatedEntity.Description);
         storedEntity.Year.ShouldBe(updatedEntity.Year);
-        storedEntity.Status.ToString().ShouldBe(updatedEntity.Status);
+        ((int)storedEntity.Status).ShouldBe(updatedEntity.Status);
         storedEntity.Latitude.ShouldBe(updatedEntity.Latitude);
         storedEntity.Longitude.ShouldBe(updatedEntity.Longitude);
     }
@@ -129,7 +129,7 @@ public class MonumentCommandTests : BaseToursIntegrationTest
             Name = "Test",
             Description = "Description",
             Year = 2000,
-            Status = "Active",
+            Status = 1,
             Latitude = 45.0,
             Longitude = 19.0
         };

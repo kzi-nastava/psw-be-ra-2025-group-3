@@ -1,4 +1,5 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+﻿using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.API.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Explorer.Stakeholders.API.Public
         AppRatingResponseDto UpdateRating(long userId, AppRatingRequestDto rating);
         void DeleteRating(long userId);
         AppRatingResponseDto? GetMyRating(long userId);
-        List<AppRatingResponseDto> GetAllRatings();
+        PagedResult<AppRatingResponseDto> GetPaged(int page, int pageSize);
     }
 }
 

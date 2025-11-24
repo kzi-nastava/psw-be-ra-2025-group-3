@@ -9,8 +9,16 @@ namespace Explorer.Blog.Core.Mappers
     {
         public BlogProfile()
         {
-            CreateMap<BlogDto, BlogEntity>().ReverseMap();
-            CreateMap<BlogImageDto, BlogImageEntity>().ReverseMap();
+            CreateMap<BlogDto, BlogEntity>()
+                .ForMember(dest => dest.Id, opt => opt.Condition(src => src.Id > 0))
+                .ForMember(dest => dest.CreationDate, opt => opt.Ignore()); 
+
+            CreateMap<BlogEntity, BlogDto>();
+
+            CreateMap<BlogImageDto, BlogImageEntity>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<BlogImageEntity, BlogImageDto>();
         }
     }
 }

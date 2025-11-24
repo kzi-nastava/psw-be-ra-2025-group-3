@@ -7,6 +7,7 @@ using Explorer.Stakeholders.Core.UseCases.Authoring;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
+using Explorer.Stakeholders.Infrastructure.FileStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -43,6 +44,7 @@ public static class StakeholdersStartup
         services.AddScoped<IAppRatingRepository, AppRatingDbRepository>();
 
         services.AddScoped<IClubRepository, ClubRepository>(); // dodato petar s.
+        services.AddScoped<IImageStorageService, FileSystemImageStorageService>();
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));

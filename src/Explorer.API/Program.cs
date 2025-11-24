@@ -1,18 +1,20 @@
 ﻿using Explorer.API.Middleware;
 using Explorer.API.Startup;
+using Explorer.Blog.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-var cs = builder.Configuration.GetConnectionString("Explorer");
-
-
 builder.Services.AddControllers();
 builder.Services.ConfigureSwagger(builder.Configuration);
+
 const string corsPolicy = "_corsPolicy";
 builder.Services.ConfigureCors(corsPolicy);
 builder.Services.ConfigureAuth();
+
+builder.Services.ConfigureBlogModule(); // <-- OVO JE JEDINO ŠTO SME DA REGISTRUJE BlogContext
 
 builder.Services.RegisterModules();
 
@@ -40,7 +42,6 @@ app.MapControllers();
 
 app.Run();
 
-// Required for automated tests
 namespace Explorer.API
 {
     public partial class Program { }

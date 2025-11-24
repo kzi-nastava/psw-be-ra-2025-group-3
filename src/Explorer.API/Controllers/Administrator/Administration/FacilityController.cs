@@ -25,12 +25,13 @@ public class FacilityController : ControllerBase
     }
 
     // GET ALL
-    [HttpGet]
+   [HttpGet]
     public ActionResult<List<FacilityDto>> GetAll()
     {
         var result = _facilityService.GetAll();
         return Ok(result);
     }
+   
 
     // UPDATE
     [HttpPut("{id:long}")]

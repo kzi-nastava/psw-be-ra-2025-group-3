@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Explorer.Blog.Core.Domain;
+using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Explorer.Blog.Core.Domain;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Blog.Infrastructure.Database.Repositories;
 
@@ -28,12 +28,16 @@ public class FacilityDbRepository : IFacilityRepository
 
     public List<Facility> GetAll()
     {
-        return _dbContext.Facilities.ToList();
+        return _dbContext.Facilities
+            .AsNoTracking()          
+            .ToList();
     }
 
     public Facility Get(long id)
     {
-        return _dbContext.Facilities.FirstOrDefault(f => f.Id == id);
+        return _dbContext.Facilities
+            .AsNoTracking()         
+            .FirstOrDefault(f => f.Id == id);
     }
 
     public void Delete(long id)
@@ -47,13 +51,10 @@ public class FacilityDbRepository : IFacilityRepository
         _dbContext.SaveChanges();
     }
 
-
     public Facility Update(Facility facility)
     {
         _dbContext.Facilities.Update(facility);
         _dbContext.SaveChanges();
         return facility;
     }
-
-    
 }

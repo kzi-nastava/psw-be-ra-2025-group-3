@@ -10,10 +10,10 @@ namespace Explorer.Blog.Core.Domain;
 
 public class Facility : Entity
 {
-    public string Name { get; private set; }
-    public double Latitude { get; private set; }
-    public double Longitude { get; private set; }
-    public FacilityCategory Category { get; private set; }
+    public string Name { get; protected set; }
+    public double Latitude { get; protected set; }
+    public double Longitude { get; protected set; }
+    public FacilityCategory Category { get; protected set; }
 
     public Facility() { }
 
@@ -27,6 +27,7 @@ public class Facility : Entity
         Longitude = longitude;
         Category = category;
     }
+
 
     public void Update(string name, double latitude, double longitude, FacilityCategory category)
     {

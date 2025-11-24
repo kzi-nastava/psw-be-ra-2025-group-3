@@ -13,17 +13,22 @@ namespace Explorer.Tours.Core.UseCases.Tourist;
 public class TourProblemService : ITourProblemService
 {
     private readonly ITourProblemRepository _tourProblemRepository;
+    private readonly ITourRepository _tourRepository;
     private readonly IMapper _mapper;
 
-    public TourProblemService(ITourProblemRepository repository, IMapper mapper)
+    public TourProblemService(ITourProblemRepository repository, ITourRepository tourRepository, IMapper mapper)
     {
         _tourProblemRepository = repository;
+        _tourRepository = tourRepository;
         _mapper = mapper;
     }
 
     public TourProblemDto Create(TourProblemCreateDto problemDto, long touristId)
     {
         // Kreiranje TourProblem entiteta sa validacijama
+        var tour = _tourRepository.GetById(problemDto.TourId);
+        if (tour == null)
+            throw new NotFoundException($"Tour with ID {problemDto.TourId} does not exist.");
         var problem = new TourProblem(
             problemDto.TourId,
             touristId,

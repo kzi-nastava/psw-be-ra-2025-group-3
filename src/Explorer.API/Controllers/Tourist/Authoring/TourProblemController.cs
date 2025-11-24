@@ -1,5 +1,6 @@
 ﻿using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,10 +12,13 @@ namespace Explorer.API.Controllers.Tourist.Authoring;
 public class TourProblemController : ControllerBase
 {
     private readonly ITourProblemService _tourProblemService;
+    private readonly ITourRepository _tourRepository; // DODAJ OVO
 
-    public TourProblemController(ITourProblemService tourProblemService)
+    // IZMENI KONSTRUKTOR
+    public TourProblemController(ITourProblemService tourProblemService, ITourRepository tourRepository)
     {
         _tourProblemService = tourProblemService;
+        _tourRepository = tourRepository; // DODAJ OVO
     }
 
     [HttpPost]
@@ -56,6 +60,21 @@ public class TourProblemController : ControllerBase
         var touristId = GetTouristId();
         _tourProblemService.Delete(id, touristId);
         return NoContent();
+    }
+
+  
+    [HttpGet("validate-tour/{tourId}")]
+    public IActionResult ValidateTour(long tourId)
+    {
+        try
+        {
+            var tour = _tourRepository.GetById(tourId);
+            return Ok(new { exists = tour != null });
+        }
+        catch
+        {
+            return Ok(new { exists = false });
+        }
     }
 
     // Helper metoda za ekstrakciju Tourist ID iz JWT tokena

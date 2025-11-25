@@ -32,7 +32,11 @@ public static class ToursStartup
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>(); // DODATO
 
+        services.AddScoped<IPositionService,PositionService>();
+
+
         services.AddScoped<IMonumentService, MonumentService>();
+
         services.AddScoped<IAwardEventService, AwardEventService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
@@ -44,7 +48,11 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
+
+        services.AddScoped<IPositionRepository, PositionDbRepository>();
+
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
+
         services.AddScoped<IAwardEventRepository, AwardEventRepository>();
 
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();

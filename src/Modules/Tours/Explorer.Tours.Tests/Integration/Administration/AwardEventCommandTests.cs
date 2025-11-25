@@ -59,12 +59,7 @@ namespace Explorer.Tours.Tests.Integration.Administration
                 VotingEndDate = DateTime.UtcNow.AddDays(5)
             };
 
-            // Act
-            var result = controller.Create(invalidEntity).Result as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.StatusCode.ShouldBe(409);
+            var exception = Should.Throw<InvalidOperationException>(() => controller.Create(invalidEntity));
         }
 
         [Fact]

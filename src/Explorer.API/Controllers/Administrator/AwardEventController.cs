@@ -3,8 +3,6 @@ using Explorer.Tours.Core.UseCases.Administration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Explorer.BuildingBlocks.Core.UseCases;
-using System;
-using System.Collections.Generic;
 
 namespace Explorer.API.Controllers.Administrator
 {
@@ -29,33 +27,15 @@ namespace Explorer.API.Controllers.Administrator
         [HttpGet("{id:long}")]
         public ActionResult<AwardEventDto> Get(long id)
         {
-            try
-            {
-                var result = _awardEventService.Get(id);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
+            var result = _awardEventService.Get(id);
+            return Ok(result);
         }
 
         [HttpPost]
         public ActionResult<AwardEventDto> Create([FromBody] AwardEventCreateDto createDto)
         {
-            try
-            {
-                var result = _awardEventService.Create(createDto);
-                return Ok(result);
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
-            }
-            catch (InvalidOperationException e)
-            {
-                return Conflict(e.Message);
-            }
+            var result = _awardEventService.Create(createDto);
+            return Ok(result);
         }
 
         [HttpPut("{id:long}")]
@@ -64,37 +44,15 @@ namespace Explorer.API.Controllers.Administrator
             if (id != updateDto.Id)
                 return BadRequest("ID in URL and body do not match.");
 
-            try
-            {
-                var result = _awardEventService.Update(updateDto);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
-            }
-            catch (InvalidOperationException e)
-            {
-                return Conflict(e.Message);
-            }
+            var result = _awardEventService.Update(updateDto);
+            return Ok(result);
         }
 
         [HttpDelete("{id:long}")]
         public ActionResult Delete(long id)
         {
-            try
-            {
-                _awardEventService.Delete(id);
-                return Ok();
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
+            _awardEventService.Delete(id);
+            return Ok();
         }
     }
 }

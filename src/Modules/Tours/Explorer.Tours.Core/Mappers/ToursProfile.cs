@@ -14,9 +14,14 @@ public class ToursProfile : Profile
         CreateMap<TourCreateDto, Tour>();
         CreateMap<TourUpdateDto, Tour>();
 
+        CreateMap<MonumentDto, Monument>().ReverseMap();
+
+
         CreateMap<PreferenceDto, Preference>().ReverseMap();
         CreateMap<PreferenceCreateDto, Preference>();
         CreateMap<PreferenceUpdateDto, Preference>();
+
+        CreateMap<PositionDto, Position>().ReverseMap();
 
         CreateMap<TouristEquipmentCreateDto, TouristEquipment>();
         CreateMap<EquipmentWithOwnershipDto, Equipment>().ReverseMap();
@@ -26,5 +31,6 @@ public class ToursProfile : Profile
         CreateMap<AwardEventUpdateDto, AwardEvent>();
         CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
         CreateMap<PagedResult<AwardEvent>, PagedResult<AwardEventDto>>();
+
     }
 }

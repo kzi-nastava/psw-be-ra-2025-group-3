@@ -1,5 +1,8 @@
-﻿using Explorer.Blog.Core.Domain;
+using Explorer.Blog.Core.Domain;
 using Microsoft.EntityFrameworkCore;
+
+using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
+using BlogImageEntity = Explorer.Blog.Core.Domain.Blogs.BlogImage;
 
 namespace Explorer.Blog.Infrastructure.Database
 {
@@ -7,14 +10,19 @@ namespace Explorer.Blog.Infrastructure.Database
     {
         public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
 
+        // ENTITETI
         public DbSet<Facility> Facilities { get; set; }
+        public DbSet<BlogEntity> Blogs { get; set; }
+        public DbSet<BlogImageEntity> BlogImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Šema
             modelBuilder.HasDefaultSchema("blog");
 
-            // EKSPlicitno mapiranje Facility entiteta
+            // --------------------------
+            // FACILITY MAPIRANJE
+            // --------------------------
             modelBuilder.Entity<Facility>(entity =>
             {
                 entity.ToTable("Facilities");
@@ -33,11 +41,19 @@ namespace Explorer.Blog.Infrastructure.Database
                 entity.Property(f => f.Longitude)
                     .IsRequired();
 
-                // enum <-> int
                 entity.Property(f => f.Category)
-                    .HasConversion<int>()   // EF zna da je u bazi int
+                    .HasConversion<int>()
                     .IsRequired();
             });
+
+            // --------------------------
+            // BLOG + IMAGES MAPIRANJE
+            // --------------------------
+            modelBuilder.Entity<BlogEntity>()
+                .HasMany(b => b.Images)
+                .WithOne()
+                .HasForeignKey(img => img.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

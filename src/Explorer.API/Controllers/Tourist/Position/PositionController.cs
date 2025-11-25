@@ -26,6 +26,14 @@ namespace Explorer.API.Controllers.Tourist.Position
             return Ok(position); // null će se serializovati
         }
 
+        // GET api/tourist/position/{touristId}
+        [HttpGet("{touristId:long}")]
+        public ActionResult<PositionDto?> GetByTouristId(long touristId)
+        {
+            var position = _positionService.GetForTourist(touristId);
+            return Ok(position);
+        }
+
         // PUT api/tourist/position
         [HttpPut]
         public IActionResult Update([FromBody] PositionDto dto)

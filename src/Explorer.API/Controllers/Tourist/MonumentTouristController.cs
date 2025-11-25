@@ -29,4 +29,3 @@ namespace Explorer.API.Controllers.Tourist
         }
     }
 }
-//https://localhost:44333/api/tourist/monuments?page=1&pageSize=100

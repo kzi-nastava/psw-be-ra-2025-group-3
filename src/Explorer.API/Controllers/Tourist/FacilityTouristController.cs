@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using Explorer.Blog.API.Dtos;
+﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -21,10 +22,10 @@ namespace Explorer.API.Controllers.Tourist
         // Turista dobija sve objekte (restoran, WC, itd.) za prikaz na mapi
         [HttpGet]
         [Authorize(Policy = "touristPolicy")]
-        public ActionResult<List<FacilityDto>> GetAll()
+        public ActionResult<PagedResult<FacilityDto>> GetAll()
         {
-            var facilities = _facilityService.GetAll();
-            return Ok(facilities);
+            var result = _facilityService.GetAll();
+            return Ok(result);
         }
     }
 }

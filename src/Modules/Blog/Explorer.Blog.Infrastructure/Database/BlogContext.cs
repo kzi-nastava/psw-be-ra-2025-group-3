@@ -1,13 +1,59 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Explorer.Blog.Core.Domain;
+using Microsoft.EntityFrameworkCore;
 
-namespace Explorer.Blog.Infrastructure.Database;
+using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
+using BlogImageEntity = Explorer.Blog.Core.Domain.Blogs.BlogImage;
 
-public class BlogContext : DbContext
+namespace Explorer.Blog.Infrastructure.Database
 {
-    public BlogContext(DbContextOptions<BlogContext> options) : base(options) {}
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class BlogContext : DbContext
     {
-        modelBuilder.HasDefaultSchema("blog");
+        public BlogContext(DbContextOptions<BlogContext> options) : base(options) { }
+
+        // ENTITETI
+        public DbSet<Facility> Facilities { get; set; }
+        public DbSet<BlogEntity> Blogs { get; set; }
+        public DbSet<BlogImageEntity> BlogImages { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Šema
+            modelBuilder.HasDefaultSchema("blog");
+
+            // --------------------------
+            // FACILITY MAPIRANJE
+            // --------------------------
+            modelBuilder.Entity<Facility>(entity =>
+            {
+                entity.ToTable("Facilities");
+
+                entity.HasKey(f => f.Id);
+
+                entity.Property(f => f.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(f => f.Name)
+                    .IsRequired();
+
+                entity.Property(f => f.Latitude)
+                    .IsRequired();
+
+                entity.Property(f => f.Longitude)
+                    .IsRequired();
+
+                entity.Property(f => f.Category)
+                    .HasConversion<int>()
+                    .IsRequired();
+            });
+
+            // --------------------------
+            // BLOG + IMAGES MAPIRANJE
+            // --------------------------
+            modelBuilder.Entity<BlogEntity>()
+                .HasMany(b => b.Images)
+                .WithOne()
+                .HasForeignKey(img => img.BlogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,11 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explorer.Blog.API\Explorer.Blog.API.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Domain\RepositoryInterfaces\" />
-    <Folder Include="UseCases\" />
   </ItemGroup>
 
 </Project>

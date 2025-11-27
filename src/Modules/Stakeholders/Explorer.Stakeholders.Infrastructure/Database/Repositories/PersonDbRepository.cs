@@ -21,4 +21,32 @@ public class PersonDbRepository : IPersonRepository
         DbContext.SaveChanges();
         return entity;
     }
+
+    public Person? Get(long id)
+    {
+        var person = _dbSet.Find(id);
+        if (person == null) throw new KeyNotFoundException("Not found: " + id);
+        return person;
+    }
+
+    public Person Update(Person person)
+    {
+        DbContext.Update(person);
+        DbContext.SaveChanges();
+        return person;
+    }
+
+    public bool EmailExists(string email)
+    {
+        var normalized = email.Trim().ToLower();
+        return _dbSet.Any(p => p.Email.ToLower() == normalized);
+    }
+
+
+
+
+    public List<Person> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }

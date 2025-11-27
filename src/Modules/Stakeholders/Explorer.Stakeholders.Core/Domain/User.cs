@@ -23,7 +23,15 @@ public class User : Entity
         if (string.IsNullOrWhiteSpace(Username)) throw new ArgumentException("Invalid Name");
         if (string.IsNullOrWhiteSpace(Password)) throw new ArgumentException("Invalid Surname");
     }
+    public void Block()
+    {
+        IsActive = false;
+    }
 
+    public void Unblock()
+    {
+        IsActive = true;
+    }
     public string GetPrimaryRoleName()
     {
         return Role.ToString().ToLower();

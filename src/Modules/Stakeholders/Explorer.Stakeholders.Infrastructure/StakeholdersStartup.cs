@@ -3,9 +3,11 @@ using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
 using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Stakeholders.Core.UseCases.Authoring;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database.Repositories;
+using Explorer.Stakeholders.Infrastructure.FileStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -21,22 +23,34 @@ public static class StakeholdersStartup
         SetupInfrastructure(services);
         return services;
     }
-    
+
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
+        services.AddScoped<IAccountService, AccountService>(); // DODATO anja
+        services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<IAppRatingService, AppRatingService>();
+
+        services.AddScoped<IClubService, ClubService>(); // dodato petar s.
+        services.AddScoped<IMeetupService, MeetupService>(); 
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IPersonRepository, PersonDbRepository>();
         services.AddScoped<IUserRepository, UserDbRepository>();
+        services.AddScoped<IAccountRepository, AccountDbRepository>(); // DODATO
+        services.AddScoped<IAppRatingRepository, AppRatingDbRepository>();
+
+        services.AddScoped<IClubRepository, ClubRepository>(); // dodato petar s.
+        services.AddScoped<IImageStorageService, FileSystemImageStorageService>();
+        services.AddScoped<IMeetupRepository, MeetupDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();
-        
+
         services.AddDbContext<StakeholdersContext>(opt =>
             opt.UseNpgsql(dataSource,
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", "stakeholders")));

@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace Explorer.Tours.Infrastructure.Database.Repositories;
+
+public class TourDbRepository : ITourRepository
+{
+    private readonly ToursContext _context;
+
+    public TourDbRepository(ToursContext context)
+    {
+        _context = context;
+    }
+
+    public Tour Create(Tour tour)
+    {
+        _context.Tours.Add(tour);
+        _context.SaveChanges();
+        return tour;
+    }
+
+    public Tour Update(Tour tour)
+    {
+        _context.Tours.Update(tour);
+        _context.SaveChanges();
+        return tour;
+    }
+
+    public void Delete(long id)
+    {
+        var tour = _context.Tours.Find(id);
+        if (tour != null)
+        {
+            _context.Tours.Remove(tour);
+            _context.SaveChanges();
+        }
+    }
+
+    public Tour? GetById(long id)
+    {
+        return _context.Tours.Find(id);
+    }
+
+    public List<Tour> GetByAuthorId(long authorId)
+    {
+        return _context.Tours
+            .Where(t => t.AuthorId == authorId)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToList();
+    }
+}

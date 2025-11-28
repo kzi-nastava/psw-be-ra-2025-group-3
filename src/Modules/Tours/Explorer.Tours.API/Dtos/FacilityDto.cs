@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace Explorer.Blog.API.Dtos;
+namespace Explorer.Tours.API.Dtos;
 
 public class FacilityDto
 {
@@ -13,7 +13,7 @@ public class FacilityDto
     public string Name { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    public int Category { get; set; } 
+    public int Category { get; set; }
 }
 
 

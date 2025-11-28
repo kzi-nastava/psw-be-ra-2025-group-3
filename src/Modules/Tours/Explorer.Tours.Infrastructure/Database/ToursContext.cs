@@ -11,6 +11,7 @@ public class ToursContext : DbContext
     public DbSet<Tour> Tours { get; set; }
 
     public DbSet<Monument> Monuments { get; set; }
+    public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
 
     public DbSet<TourProblem> TourProblems { get; set; }
@@ -40,7 +41,29 @@ public class ToursContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             ));
+        //mapiranje za facilities
+        modelBuilder.Entity<Facility>(entity =>
+        {
+            entity.ToTable("Facilities");
 
+            entity.HasKey(f => f.Id);
+
+            entity.Property(f => f.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(f => f.Name)
+                .IsRequired();
+
+            entity.Property(f => f.Latitude)
+                .IsRequired();
+
+            entity.Property(f => f.Longitude)
+                .IsRequired();
+
+            entity.Property(f => f.Category)
+                .HasConversion<int>()
+                .IsRequired();
+        });
 
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Name).IsRequired();
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Description).IsRequired();

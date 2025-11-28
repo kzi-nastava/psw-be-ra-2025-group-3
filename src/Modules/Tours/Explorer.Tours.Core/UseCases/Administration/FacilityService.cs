@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using Explorer.Blog.API.Dtos;
-using Explorer.Blog.API.Public;
-using Explorer.Blog.Core.Domain;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
-using Explorer.BuildingBlocks.Core.Exceptions;   // ⬅⬅⬅ OVO DODAJ
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.BuildingBlocks.Core.Exceptions;   
 
-namespace Explorer.Blog.Core.UseCases.Administration;
+namespace Explorer.Tours.Core.UseCases.Administration;
 
 public class FacilityService : IFacilityService
 {
@@ -36,7 +36,7 @@ public class FacilityService : IFacilityService
         var facility = _facilityRepository.Get(id);
 
         if (facility == null)
-            throw new NotFoundException("Facility not found.");   // ⬅⬅ OVO
+            throw new NotFoundException("Facility not found.");   
 
         _mapper.Map(dto, facility);
         _facilityRepository.Update(facility);
@@ -49,7 +49,7 @@ public class FacilityService : IFacilityService
         var facility = _facilityRepository.Get(id);
 
         if (facility == null)
-            throw new NotFoundException("Facility not found.");   // ⬅⬅ I OVO
+            throw new NotFoundException("Facility not found.");  
 
         _facilityRepository.Delete(id);
     }

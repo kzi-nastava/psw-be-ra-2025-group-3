@@ -101,14 +101,15 @@ public class PersonController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.UserId }, result);
     }
 
-    // GET: api/stakeholders/person/all
     [Authorize(Policy = "administratorPolicy")]
     [HttpGet("all")]
     public ActionResult<List<PersonDto>> GetAll()
     {
-        var result = _personService.GetAll();
+        var currentPersonId = GetPersonIdFromToken();
+        var result = _personService.GetAll(currentPersonId);
         return Ok(result);
     }
+
 
     // GET: api/stakeholders/person/{id}
     [Authorize(Policy = "administratorPolicy")]

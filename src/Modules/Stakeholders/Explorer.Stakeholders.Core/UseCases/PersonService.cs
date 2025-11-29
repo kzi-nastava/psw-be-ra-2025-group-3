@@ -103,20 +103,19 @@ public class PersonService : IPersonService
     }
 
 
-    public List<PersonDto> GetAll()
+    public List<PersonDto> GetAll(long currentPersonId)
     {
         var people = _personRepository.GetAll(); // svi personi
+        var filtered = people.Where(p => p.UserId != currentPersonId); // SVI OSIM JA :)
+
         var dtos = new List<PersonDto>();
 
-        foreach (var person in people)
+        foreach (var person in filtered)
         {
-            // dohvat User-a po UserId iz Person
             var user = _userRepository.Get(person.UserId);
 
-            // mapiraj person na PersonDto
             var dto = _mapper.Map<PersonDto>(person);
 
-            // dodaj User podatke
             if (user != null)
             {
                 dto.Username = user.Username;
@@ -135,6 +134,7 @@ public class PersonService : IPersonService
 
         return dtos;
     }
+
 
 
     public void Block(long id)

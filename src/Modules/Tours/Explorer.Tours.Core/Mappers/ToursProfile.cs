@@ -11,6 +11,7 @@ public class ToursProfile : Profile
     {
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
         CreateMap<TourDto, Tour>().ReverseMap();
+
         CreateMap<TourCreateDto, Tour>();
         CreateMap<TourUpdateDto, Tour>();
 
@@ -31,6 +32,15 @@ public class ToursProfile : Profile
         CreateMap<AwardEventUpdateDto, AwardEvent>();
         CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
         CreateMap<PagedResult<AwardEvent>, PagedResult<AwardEventDto>>();
+
+        CreateMap<TourProblem, TourProblemDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status));
+
+        CreateMap<TourProblemDto, TourProblem>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (TourProblemStatus)src.Status));
+
+        CreateMap<TourProblemCreateDto, TourProblem>();
+        CreateMap<TourProblemUpdateDto, TourProblem>();
 
     }
 }

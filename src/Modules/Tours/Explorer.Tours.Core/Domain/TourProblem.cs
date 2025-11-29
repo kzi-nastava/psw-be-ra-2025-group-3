@@ -1,5 +1,8 @@
-﻿using System;
-using Explorer.BuildingBlocks.Core.Domain;
+﻿using Explorer.BuildingBlocks.Core.Domain;
+using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using System;
 
 namespace Explorer.Tours.Core.Domain;
 
@@ -21,7 +24,7 @@ public class TourProblem : AggregateRoot
     public bool IsHighlighted { get; private set; }
     public DateTime? AdminDeadline { get; private set; }
 
-    public TourProblem() 
+    public TourProblem()
     {
         Messages = new List<Message>();
     }
@@ -79,5 +82,50 @@ public class TourProblem : AggregateRoot
         Description = description;
         Time = utcTime;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    // Podtask 1
+    public void MarkAsResolved(string touristComment)
+    {
+        if (Status == TourProblemStatus.Resolved)
+            throw new InvalidOperationException("Problem is already marked as resolved.");
+
+        if (string.IsNullOrWhiteSpace(touristComment))
+            throw new ArgumentException("Tourist comment cannot be empty when marking as resolved.", nameof(touristComment));
+
+        Status = TourProblemStatus.Resolved;
+        ResolvedByTouristComment = touristComment.Trim();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void MarkAsUnresolved(string touristComment)
+    {
+        if (string.IsNullOrWhiteSpace(touristComment))
+            throw new ArgumentException("Tourist comment cannot be empty when marking as unresolved.", nameof(touristComment));
+
+        Status = TourProblemStatus.Unresolved;
+        ResolvedByTouristComment = touristComment.Trim();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddMessage(long authorId, string content, AuthorType authorType)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            throw new ArgumentException("Message content cannot be empty.", nameof(content));
+
+        if (content.Length > 1000)
+            throw new ArgumentException("Message content cannot exceed 1000 characters.", nameof(content));
+
+        // Validacija da samo relevantne osobe mogu slati poruke
+        if (authorType == AuthorType.Tourist && authorId != TouristId)
+            throw new InvalidOperationException("Only the tourist who reported the problem can send messages as Tourist.");
+
+        if (authorType == AuthorType.Author && authorId != AuthorId)
+            throw new InvalidOperationException("Only the tour author can send messages as Author.");
+
+        var message = new Message(authorId, content.Trim(), authorType);
+        Messages.Add(message);
+
+
     }
 }

@@ -9,4 +9,10 @@ public interface ITourProblemService
     void Delete(long id, long touristId);
     TourProblemDto GetById(long id, long touristId);
     List<TourProblemDto> GetByTouristId(long touristId);
+
+    //Podtask 1
+    TourProblemDto MarkAsResolved(long problemId, string touristComment, long touristId);
+    TourProblemDto MarkAsUnresolved(long problemId, string touristComment, long touristId);
+    List<TourProblemDto> GetByAuthorId(long authorId);
+    TourProblemDto AddMessage(long problemId, long authorId, string content, int authorType);
 }

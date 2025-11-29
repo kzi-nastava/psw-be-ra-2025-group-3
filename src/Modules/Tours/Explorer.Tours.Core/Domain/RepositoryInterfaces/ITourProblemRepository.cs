@@ -9,4 +9,7 @@ public interface ITourProblemRepository
     void Delete(long id);
     TourProblem GetById(long id);
     List<TourProblem> GetByTouristId(long touristId);
+
+    //Podtask 1
+    List<TourProblem> GetByAuthorId(long authorId);
 }

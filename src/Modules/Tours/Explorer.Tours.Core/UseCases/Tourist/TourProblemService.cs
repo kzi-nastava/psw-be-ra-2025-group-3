@@ -78,14 +78,15 @@ public class TourProblemService : ITourProblemService
         _tourProblemRepository.Delete(id);
     }
 
-    public TourProblemDto GetById(long id, long touristId)
+    public TourProblemDto GetById(long id, long userId)
     {
         var problem = _tourProblemRepository.GetById(id);
         if (problem == null)
             throw new NotFoundException($"Tour problem with id {id} not found.");
 
-        if (problem.TouristId != touristId)
-            throw new ForbiddenException("You can only view your own problems.");
+        // Korisnik moze videti problem ako je ili turista ili autor ture
+        if (problem.TouristId != userId && problem.AuthorId != userId)
+            throw new ForbiddenException("You can only view problems you reported or problems on your tours.");
 
         return _mapper.Map<TourProblemDto>(problem);
     }
@@ -94,5 +95,71 @@ public class TourProblemService : ITourProblemService
     {
         var problems = _tourProblemRepository.GetByTouristId(touristId);
         return problems.Select(_mapper.Map<TourProblemDto>).ToList();
+    }
+
+    //Podtask 1
+    public TourProblemDto MarkAsResolved(long problemId, string touristComment, long touristId)
+    {
+        //Ucitaj agregat
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException($"Tour problem with id {problemId} not found.");
+
+        // Validacija
+        if (problem.TouristId != touristId)
+            throw new ForbiddenException("Only the tourist who reported the problem can mark it as resolved.");
+
+        // Poziv metode
+        problem.MarkAsResolved(touristComment);
+
+        // Sacuvaj agregat
+        var result = _tourProblemRepository.Update(problem);
+
+        return _mapper.Map<TourProblemDto>(result);
+    }
+
+    public TourProblemDto MarkAsUnresolved(long problemId, string touristComment, long touristId)
+    {
+        // Ucitaj agregat
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException($"Tour problem with id {problemId} not found.");
+
+        // Validacija
+        if (problem.TouristId != touristId)
+            throw new ForbiddenException("Only the tourist who reported the problem can mark it as unresolved.");
+
+        // Poziv metode
+        problem.MarkAsUnresolved(touristComment);
+
+        // Sacuvaj agregat
+        var result = _tourProblemRepository.Update(problem);
+
+        return _mapper.Map<TourProblemDto>(result);
+    }
+
+    public List<TourProblemDto> GetByAuthorId(long authorId)
+    {
+        var problems = _tourProblemRepository.GetByAuthorId(authorId);
+        return problems.Select(_mapper.Map<TourProblemDto>).ToList();
+    }
+
+    public TourProblemDto AddMessage(long problemId, long authorId, string content, int authorType)
+    {
+        // 1. Ucitaj agregat
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException($"Tour problem with id {problemId} not found.");
+
+        // Validacija
+        var authorTypeEnum = (AuthorType)authorType;
+
+        // 2. Pozovi metodu 
+        problem.AddMessage(authorId, content, authorTypeEnum);
+
+        // 3. Sacuvaj agregat
+        var result = _tourProblemRepository.Update(problem);
+
+        return _mapper.Map<TourProblemDto>(result);
     }
 }

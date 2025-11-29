@@ -32,6 +32,7 @@ public class TourProblemService : ITourProblemService
         var problem = new TourProblem(
             problemDto.TourId,
             touristId,
+            tour.AuthorId,
             (ProblemCategory)problemDto.Category,
             (ProblemPriority)problemDto.Priority,
             problemDto.Description,

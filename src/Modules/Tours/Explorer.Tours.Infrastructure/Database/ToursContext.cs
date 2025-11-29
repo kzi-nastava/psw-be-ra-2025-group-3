@@ -17,7 +17,7 @@ public class ToursContext : DbContext
 
     public DbSet<Position> Positions { get; set; }
 
-    public DbSet<Preference> Preferences { get; set; }
+    
 
     public DbSet<TouristEquipment> TouristEquipment { get; set; }
 
@@ -53,19 +53,7 @@ public class ToursContext : DbContext
             .Property(ae => ae.Status)
             .HasConversion<string>();
 
-        modelBuilder.Entity<Preference>().HasIndex(p => p.TouristId);
-        modelBuilder.Entity<Preference>()
-            .Property(p => p.Tags)
-            .HasColumnType("jsonb")
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>()
-            )
-            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1.SequenceEqual(c2),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
+       
 
         // Konfiguracija za TouristEquipment odnosno many-to-many veza
         modelBuilder.Entity<TouristEquipment>(entity =>

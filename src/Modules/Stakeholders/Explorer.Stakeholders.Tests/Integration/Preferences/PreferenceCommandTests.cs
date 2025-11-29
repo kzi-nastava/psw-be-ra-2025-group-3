@@ -1,25 +1,25 @@
 ﻿using Explorer.API.Controllers.Tourist.Preferences;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Tourist;
-using Explorer.Tours.Infrastructure.Database;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Tours.Tests.Integration.Tourist;
+namespace Explorer.Stakeholders.Tests.Integration.Preferences;
 
 [Collection("Sequential")]
-public class PreferenceCommandTests : BaseToursIntegrationTest
+public class PreferenceCommandTests : BaseStakeholdersIntegrationTest
 {
-    public PreferenceCommandTests(ToursTestFactory factory) : base(factory) { }
+    public PreferenceCommandTests(StakeholdersTestFactory factory) : base(factory) { }
 
     [Fact]
     public void Creates()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-21"); // ← turista1
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var controller = CreateController(scope, "-21");
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
         var newEntity = new PreferenceCreateDto
         {
             Difficulty = 2,
@@ -55,7 +55,7 @@ public class PreferenceCommandTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-22"); // ← turista2
+        var controller = CreateController(scope, "-22");
         var invalidEntity = new PreferenceCreateDto
         {
             Difficulty = 1,
@@ -75,7 +75,7 @@ public class PreferenceCommandTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-23"); // ← turista3
+        var controller = CreateController(scope, "-23");
         var invalidEntity = new PreferenceCreateDto
         {
             Difficulty = 1,
@@ -83,7 +83,7 @@ public class PreferenceCommandTests : BaseToursIntegrationTest
             BicycleRating = 2,
             CarRating = 1,
             BoatRating = 0,
-            Tags = new List<string>() // Empty tags
+            Tags = new List<string>()
         };
 
         // Act & Assert
@@ -96,7 +96,7 @@ public class PreferenceCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-101");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
         var updatedEntity = new PreferenceUpdateDto
         {
             Id = -1,
@@ -144,7 +144,7 @@ public class PreferenceCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-103");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
         // Act
         var result = (OkResult)controller.Delete();

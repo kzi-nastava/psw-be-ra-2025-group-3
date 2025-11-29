@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
-namespace Explorer.Tours.Infrastructure.Database.Repositories;
+namespace Explorer.Stakeholders.Infrastructure.Database.Repositories;
 
 public class PreferenceDbRepository : IPreferenceRepository
 {
-    private readonly ToursContext _context;
+    private readonly StakeholdersContext _context;
 
-    public PreferenceDbRepository(ToursContext context)
+    public PreferenceDbRepository(StakeholdersContext context)
     {
         _context = context;
     }

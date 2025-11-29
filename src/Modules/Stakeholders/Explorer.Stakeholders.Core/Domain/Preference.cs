@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Explorer.BuildingBlocks.Core.Domain;
 
-namespace Explorer.Tours.Core.Domain;
+namespace Explorer.Stakeholders.Core.Domain;
 
 public class Preference : Entity
 {
@@ -34,7 +34,7 @@ public class Preference : Entity
         int boatRating,
         List<string>? tags = null)
     {
-        if (touristId == 0) // VALIDACIJA
+        if (touristId == 0)
             throw new ArgumentException("Tourist ID cannot be zero.", nameof(touristId));
 
         if (!IsValidRating(walkingRating))

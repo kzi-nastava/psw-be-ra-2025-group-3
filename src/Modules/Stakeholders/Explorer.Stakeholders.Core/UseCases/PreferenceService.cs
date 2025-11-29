@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Tourist;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using System;
 
-namespace Explorer.Tours.Core.UseCases.Tourist;
+namespace Explorer.Stakeholders.Core.UseCases;
 
 public class PreferenceService : IPreferenceService
 {
@@ -25,12 +21,10 @@ public class PreferenceService : IPreferenceService
 
     public PreferenceDto Create(PreferenceCreateDto preferenceDto, long touristId)
     {
-        // Provera da li preference vec postoje za ovog turista
         var existingPreference = _preferenceRepository.GetByTouristId(touristId);
         if (existingPreference != null)
             throw new InvalidOperationException($"Preferences for tourist {touristId} already exist. Use Update instead.");
 
-        // Kreiranje Preference entiteta sa validacijama
         var preference = new Preference(
             touristId,
             (TourDifficulty)preferenceDto.Difficulty,
@@ -47,16 +41,13 @@ public class PreferenceService : IPreferenceService
 
     public PreferenceDto Update(PreferenceUpdateDto preferenceDto, long touristId)
     {
-        // Provera da li preference postoje
         var preference = _preferenceRepository.GetByTouristId(touristId);
         if (preference == null)
             throw new NotFoundException($"Preferences for tourist {touristId} not found.");
 
-        // Provera da li turista pokusava da izmeni svoje preference
         if (preference.TouristId != touristId)
             throw new ForbiddenException("You can only update your own preferences.");
 
-        // Izmena preferenci kroz domensku metodu
         preference.Update(
             (TourDifficulty)preferenceDto.Difficulty,
             preferenceDto.WalkingRating,
@@ -82,11 +73,12 @@ public class PreferenceService : IPreferenceService
         _preferenceRepository.Delete(touristId);
     }
 
-    public PreferenceDto GetByTouristId(long touristId)
+    public PreferenceDto? GetByTouristId(long touristId)
     {
         var preference = _preferenceRepository.GetByTouristId(touristId);
+
         if (preference == null)
-            return null;  //  null umesto exception
+            return null; //  Umesto throw NotFoundException
 
         return _mapper.Map<PreferenceDto>(preference);
     }

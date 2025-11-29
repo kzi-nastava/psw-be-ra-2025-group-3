@@ -33,7 +33,8 @@ public static class StakeholdersStartup
         services.AddScoped<IAppRatingService, AppRatingService>();
 
         services.AddScoped<IClubService, ClubService>(); // dodato petar s.
-        services.AddScoped<IMeetupService, MeetupService>(); 
+        services.AddScoped<IMeetupService, MeetupService>();
+        services.AddScoped<IPreferenceService, PreferenceService>(); //preference
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -46,6 +47,7 @@ public static class StakeholdersStartup
         services.AddScoped<IClubRepository, ClubRepository>(); // dodato petar s.
         services.AddScoped<IImageStorageService, FileSystemImageStorageService>();
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
+        services.AddScoped<IPreferenceRepository, PreferenceDbRepository>(); //preference
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

@@ -40,7 +40,7 @@ public static class ToursStartup
         services.AddScoped<IAwardEventService, AwardEventService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
-        services.AddScoped<IPreferenceService, PreferenceService>();
+       
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
     }
 
@@ -56,7 +56,7 @@ public static class ToursStartup
         services.AddScoped<IAwardEventRepository, AwardEventRepository>();
 
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
-        services.AddScoped<IPreferenceRepository, PreferenceDbRepository>();
+    
         services.AddScoped<ITouristEquipmentRepository, TouristEquipmentDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

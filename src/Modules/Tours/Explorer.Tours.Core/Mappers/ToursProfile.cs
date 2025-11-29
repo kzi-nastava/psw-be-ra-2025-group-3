@@ -17,10 +17,7 @@ public class ToursProfile : Profile
         CreateMap<MonumentDto, Monument>().ReverseMap();
 
 
-        CreateMap<PreferenceDto, Preference>().ReverseMap();
-        CreateMap<PreferenceCreateDto, Preference>();
-        CreateMap<PreferenceUpdateDto, Preference>();
-
+       
         CreateMap<PositionDto, Position>().ReverseMap();
 
         CreateMap<TouristEquipmentCreateDto, TouristEquipment>();

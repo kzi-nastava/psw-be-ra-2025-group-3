@@ -27,6 +27,8 @@ namespace Explorer.Tours.Core.Domain
 
             if (year == 0)
                 throw new ArgumentException("Year 0 does not exist. Use negative numbers for BC dates.");
+            if(year > DateTime.Now.Year)
+                throw new ArgumentException($"Year must be less than or equal to {DateTime.Now.Year}.");
 
             if (latitude < -90 || latitude > 90)
                 throw new ArgumentException("Latitude must be between -90 and 90.");

@@ -1,9 +1,11 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
+using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases.Authoring;
 using Explorer.Tours.Core.UseCases.Tourist;
@@ -40,8 +42,8 @@ public static class ToursStartup
         services.AddScoped<IAwardEventService, AwardEventService>();
 
         services.AddScoped<ITourProblemService, TourProblemService>();
-       
-        services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();
+
+        services.AddScoped<IInternalEquipmentService, InternalEquipmentService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -57,7 +59,7 @@ public static class ToursStartup
 
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
     
-        services.AddScoped<ITouristEquipmentRepository, TouristEquipmentDbRepository>();
+       
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

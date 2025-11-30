@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Infrastructure\Explorer.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
     <ProjectReference Include="..\Explorer.Stakeholders.Core\Explorer.Stakeholders.Core.csproj" />
   </ItemGroup>
 

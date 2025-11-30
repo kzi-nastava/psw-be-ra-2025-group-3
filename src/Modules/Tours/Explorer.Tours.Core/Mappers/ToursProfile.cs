@@ -20,8 +20,6 @@ public class ToursProfile : Profile
        
         CreateMap<PositionDto, Position>().ReverseMap();
 
-        CreateMap<TouristEquipmentCreateDto, TouristEquipment>();
-        CreateMap<EquipmentWithOwnershipDto, Equipment>().ReverseMap();
 
         CreateMap<AwardEvent, AwardEventDto>().ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
         CreateMap<AwardEventCreateDto, AwardEvent>();

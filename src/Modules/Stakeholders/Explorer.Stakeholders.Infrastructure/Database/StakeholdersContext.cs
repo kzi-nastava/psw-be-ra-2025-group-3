@@ -22,6 +22,7 @@ public class StakeholdersContext : DbContext
 
     public DbSet<Preference> Preferences { get; set; }
 
+    public DbSet<Tourist> Tourists { get; set; }
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +60,42 @@ public class StakeholdersContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             ));
+
+
+        // Konfiguracija za Tourist - SAMOSTALNA tabela (NE TPH!)
+        modelBuilder.Entity<Tourist>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+
+            // Foreign key ka Person tabeli
+            entity.HasOne(t => t.Person)
+                .WithOne()
+                .HasForeignKey<Tourist>(t => t.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Konverzija liste EquipmentIds u string
+            entity.Property(t => t.EquipmentIds)
+                .HasConversion(
+                    ids => ids == null || ids.Count == 0 ? "" : string.Join(',', ids),
+                    ids => string.IsNullOrWhiteSpace(ids)
+                        ? new List<long>()
+                        : ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                             .Select(long.Parse)
+                             .ToList()
+                )
+                .HasColumnName("EquipmentIds")
+                .IsRequired(false);
+
+            // VALUE COMPARER
+            entity.Property(t => t.EquipmentIds)
+                .Metadata.SetValueComparer(
+                    new ValueComparer<List<long>>(
+                        (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                        c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c == null ? new List<long>() : c.ToList()
+                    )
+                );
+        });
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

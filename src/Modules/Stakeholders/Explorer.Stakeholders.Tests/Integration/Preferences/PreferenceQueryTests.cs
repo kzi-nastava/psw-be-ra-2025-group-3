@@ -1,16 +1,16 @@
 ﻿using Explorer.API.Controllers.Tourist.Preferences;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Tourist;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Tours.Tests.Integration.Tourist;
+namespace Explorer.Stakeholders.Tests.Integration.Preferences;
 
 [Collection("Sequential")]
-public class PreferenceQueryTests : BaseToursIntegrationTest
+public class PreferenceQueryTests : BaseStakeholdersIntegrationTest
 {
-    public PreferenceQueryTests(ToursTestFactory factory) : base(factory) { }
+    public PreferenceQueryTests(StakeholdersTestFactory factory) : base(factory) { }
 
     [Fact]
     public void Retrieves_preference_by_tourist_id()
@@ -29,8 +29,6 @@ public class PreferenceQueryTests : BaseToursIntegrationTest
         result.WalkingRating.ShouldBe(3);
         result.Tags.Count.ShouldBe(2);
     }
-
-   
 
     private static PreferenceController CreateController(IServiceScope scope, string touristId)
     {

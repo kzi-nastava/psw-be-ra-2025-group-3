@@ -32,5 +32,9 @@ public class StakeholderProfile : Profile
         CreateMap<MeetupDto, Meetup>().ReverseMap();
         CreateMap<MeetupCreateDto, Meetup>();
         CreateMap<MeetupUpdateDto, Meetup>();
+
+        CreateMap<PreferenceDto, Preference>().ReverseMap(); //preference
+        CreateMap<PreferenceCreateDto, Preference>();
+        CreateMap<PreferenceUpdateDto, Preference>();
     }
 }

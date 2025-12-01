@@ -9,6 +9,5 @@ public class AccountRegistrationDto
     public string Surname { get; set; }
     public string Role { get; set; }
 
-    public string Quote { get; set; }
-    public string Biography { get; set; }
+    
 }

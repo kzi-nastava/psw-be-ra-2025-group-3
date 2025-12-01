@@ -94,10 +94,8 @@ public class PersonService : IPersonService
             user.Id,
             dto.Name,
             dto.Surname,
-            dto.Email,
-            profilePictureUrl: null,
-            dto.Biography,
-            dto.Quote
+            dto.Email
+           
         );
 
         person = _personRepository.Create(person);

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Explorer.Tours.Core.Domain;
+using System.Collections.Generic;
 
-namespace Explorer.Blog.Core.Domain.RepositoryInterfaces;
+namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 public interface IFacilityRepository
 {

@@ -1,5 +1,5 @@
-﻿using Explorer.Blog.Core.Domain;
-using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Blog.Infrastructure.Database.Repositories;
+namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
 
 public class FacilityDbRepository : IFacilityRepository
 {
-    private readonly BlogContext _dbContext;
+    private readonly ToursContext _dbContext;
 
-    public FacilityDbRepository(BlogContext dbContext)
+    public FacilityDbRepository(ToursContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -29,14 +29,14 @@ public class FacilityDbRepository : IFacilityRepository
     public List<Facility> GetAll()
     {
         return _dbContext.Facilities
-            .AsNoTracking()          
+            .AsNoTracking()
             .ToList();
     }
 
     public Facility Get(long id)
     {
         return _dbContext.Facilities
-            .AsNoTracking()         
+            .AsNoTracking()
             .FirstOrDefault(f => f.Id == id);
     }
 
@@ -53,8 +53,15 @@ public class FacilityDbRepository : IFacilityRepository
 
     public Facility Update(Facility facility)
     {
-        _dbContext.Facilities.Update(facility);
+        var existing = _dbContext.Facilities.FirstOrDefault(f => f.Id == facility.Id);
+        if (existing == null) return null;
+
+        existing.Name = facility.Name;
+        existing.Latitude = facility.Latitude;
+        existing.Longitude = facility.Longitude;
+        existing.Category = facility.Category;
+
         _dbContext.SaveChanges();
-        return facility;
+        return existing;
     }
 }

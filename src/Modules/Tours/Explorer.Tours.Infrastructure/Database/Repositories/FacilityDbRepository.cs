@@ -53,8 +53,15 @@ public class FacilityDbRepository : IFacilityRepository
 
     public Facility Update(Facility facility)
     {
-        _dbContext.Facilities.Update(facility);
+        var existing = _dbContext.Facilities.FirstOrDefault(f => f.Id == facility.Id);
+        if (existing == null) return null;
+
+        existing.Name = facility.Name;
+        existing.Latitude = facility.Latitude;
+        existing.Longitude = facility.Longitude;
+        existing.Category = facility.Category;
+
         _dbContext.SaveChanges();
-        return facility;
+        return existing;
     }
 }

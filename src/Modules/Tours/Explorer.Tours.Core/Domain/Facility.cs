@@ -14,10 +14,11 @@ namespace Explorer.Tours.Core.Domain
 
     public class Facility : Entity
     {
-        public string Name { get; protected set; }
-        public double Latitude { get; protected set; }
-        public double Longitude { get; protected set; }
-        public FacilityCategory Category { get; protected set; }
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public FacilityCategory Category { get; set; }
 
         public Facility() { }
 

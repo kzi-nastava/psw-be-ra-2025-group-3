@@ -44,7 +44,7 @@ public class ToursContext : DbContext
         //mapiranje za facilities
         modelBuilder.Entity<Facility>(entity =>
         {
-            entity.ToTable("Facilities");
+            entity.ToTable("Facilities", "tours");   // ⭐ KLJUČNA IZMJENA
 
             entity.HasKey(f => f.Id);
 
@@ -64,6 +64,7 @@ public class ToursContext : DbContext
                 .HasConversion<int>()
                 .IsRequired();
         });
+
 
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Name).IsRequired();
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Description).IsRequired();

@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Authoring;
@@ -36,6 +37,8 @@ public static class ToursStartup
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>(); // DODATO
 
+        services.AddScoped<IFacilityService, FacilityService>();
+
         services.AddScoped<IPositionService,PositionService>();
 
 
@@ -54,6 +57,8 @@ public static class ToursStartup
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
         services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
+
+        services.AddScoped<IFacilityRepository, FacilityDbRepository>();
 
         services.AddScoped<IPositionRepository, PositionDbRepository>();
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Blog.Core.Domain;
+namespace Explorer.Tours.Core.Domain;
 
 public enum FacilityCategory
 {

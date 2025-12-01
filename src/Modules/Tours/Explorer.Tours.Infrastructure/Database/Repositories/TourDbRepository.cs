@@ -54,4 +54,11 @@ public class TourDbRepository : ITourRepository
             .OrderByDescending(t => t.CreatedAt)
             .ToList();
     }
+
+    public IEnumerable<Tour> GetPublished()
+    {
+        return _context.Tours
+                  .Where(t => t.Status == TourStatus.Published)
+                  .ToList();
+    }
 }

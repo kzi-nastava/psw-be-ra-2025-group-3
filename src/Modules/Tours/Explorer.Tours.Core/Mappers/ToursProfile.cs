@@ -27,5 +27,8 @@ public class ToursProfile : Profile
         CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
         CreateMap<PagedResult<AwardEvent>, PagedResult<AwardEventDto>>();
 
+        CreateMap<OrderItem, ShoppingCartItemDto>();
+        CreateMap<ShoppingCart, ShoppingCartDto>();
+
     }
 }

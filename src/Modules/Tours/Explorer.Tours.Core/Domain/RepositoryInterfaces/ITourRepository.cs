@@ -13,4 +13,5 @@ public interface ITourRepository
     void Delete(long id);
     Tour? GetById(long id);
     List<Tour> GetByAuthorId(long authorId);
+    IEnumerable<Tour> GetPublished();
 }

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Tourist;
+﻿using System.Security.Claims;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,12 +38,7 @@ public class TouristEquipmentController : ControllerBase
     public ActionResult<EquipmentWithOwnershipDto> AddEquipment([FromBody] long equipmentId)
     {
         var touristId = GetTouristId();
-        var dto = new TouristEquipmentCreateDto
-        {
-            TouristId = touristId,
-            EquipmentId = equipmentId
-        };
-        var result = _touristEquipmentService.AddEquipmentToTourist(dto);
+        var result = _touristEquipmentService.AddEquipmentToTourist(touristId, equipmentId);
         return Ok(result);
     }
 

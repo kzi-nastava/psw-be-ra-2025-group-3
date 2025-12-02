@@ -17,20 +17,18 @@ public class ToursProfile : Profile
         CreateMap<MonumentDto, Monument>().ReverseMap();
 
 
-        CreateMap<PreferenceDto, Preference>().ReverseMap();
-        CreateMap<PreferenceCreateDto, Preference>();
-        CreateMap<PreferenceUpdateDto, Preference>();
-
+       
         CreateMap<PositionDto, Position>().ReverseMap();
 
-        CreateMap<TouristEquipmentCreateDto, TouristEquipment>();
-        CreateMap<EquipmentWithOwnershipDto, Equipment>().ReverseMap();
 
         CreateMap<AwardEvent, AwardEventDto>().ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
         CreateMap<AwardEventCreateDto, AwardEvent>();
         CreateMap<AwardEventUpdateDto, AwardEvent>();
         CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
         CreateMap<PagedResult<AwardEvent>, PagedResult<AwardEventDto>>();
+
+        CreateMap<OrderItem, ShoppingCartItemDto>();
+        CreateMap<ShoppingCart, ShoppingCartDto>();
 
     }
 }

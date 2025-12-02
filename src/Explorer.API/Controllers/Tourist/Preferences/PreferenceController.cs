@@ -1,7 +1,7 @@
 ﻿using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Tourist;
+using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,8 +24,10 @@ public class PreferenceController : ControllerBase
     {
         var touristId = User.PersonId();
         var result = _preferenceService.GetByTouristId(touristId);
+
         if (result == null)
             return NotFound(); // 404 umesto exception
+
         return Ok(result);
     }
 
@@ -36,6 +38,7 @@ public class PreferenceController : ControllerBase
         var result = _preferenceService.Create(preferenceDto, touristId);
         return Ok(result);
     }
+
     [HttpPut]
     public ActionResult<PreferenceDto> Update([FromBody] PreferenceUpdateDto? preferenceDto)
     {
@@ -57,6 +60,6 @@ public class PreferenceController : ControllerBase
     {
         var touristId = User.PersonId();
         _preferenceService.Delete(touristId);
-        return Ok(); // ← Promenjeno sa NoContent() na Ok()
+        return Ok();
     }
 }

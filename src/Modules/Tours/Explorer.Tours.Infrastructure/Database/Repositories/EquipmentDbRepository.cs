@@ -4,6 +4,8 @@ using Explorer.BuildingBlocks.Infrastructure.Database;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
@@ -23,6 +25,12 @@ public class EquipmentDbRepository : IEquipmentRepository
         var task = _dbSet.GetPagedById(page, pageSize);
         task.Wait();
         return task.Result;
+    }
+
+    // DODATO
+    public List<Equipment> GetAll()
+    {
+        return _dbSet.ToList();
     }
 
     public Equipment Get(long id)

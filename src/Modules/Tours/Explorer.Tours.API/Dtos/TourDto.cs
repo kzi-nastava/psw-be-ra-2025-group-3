@@ -12,4 +12,5 @@ public class TourDto
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<string> Tags { get; set; }
+    public List<EquipmentDto> Equipment { get; set; }
 }

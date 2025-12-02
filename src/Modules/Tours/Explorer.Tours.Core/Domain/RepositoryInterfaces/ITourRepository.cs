@@ -14,4 +14,5 @@ public interface ITourRepository
     Tour? GetById(long id);
     List<Tour> GetByAuthorId(long authorId);
     IEnumerable<Tour> GetPublished();
+    Tour? GetByIdWithKeyPoints(long id); //za tour-execution
 }

@@ -65,6 +65,22 @@ public class TourController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{tourId}/equipment/{equipmentId}")]
+    public ActionResult<TourDto> AddEquipment(long tourId, long equipmentId)
+    {
+        var authorId = GetAuthorId();
+        var result = _tourService.AddEquipment(tourId, equipmentId, authorId);
+        return Ok(result);
+    }
+
+    [HttpDelete("{tourId}/equipment/{equipmentId}")]
+    public ActionResult<TourDto> RemoveEquipment(long tourId, long equipmentId)
+    {
+        var authorId = GetAuthorId();
+        var result = _tourService.RemoveEquipment(tourId, equipmentId, authorId);
+        return Ok(result);
+    }
+
     // Helper metoda za ekstrakciju Author ID iz JWT tokena
     private long GetAuthorId()
     {

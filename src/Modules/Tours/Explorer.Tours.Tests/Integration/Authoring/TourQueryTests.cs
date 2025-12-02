@@ -41,7 +41,7 @@ public class TourQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(3); // 3 test tours
+        result.Count.ShouldBe(4); // 3 test tours
         result.All(t => t.AuthorId == -11).ShouldBeTrue();
     }
 

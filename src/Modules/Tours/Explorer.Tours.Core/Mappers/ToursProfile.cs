@@ -15,7 +15,7 @@ public class ToursProfile : Profile
         CreateMap<TourUpdateDto, Tour>();
 
         CreateMap<MonumentDto, Monument>().ReverseMap();
-
+        CreateMap<TourPurchaseTokenDto, TourPurchaseToken>().ReverseMap();
 
        
         CreateMap<PositionDto, Position>().ReverseMap();

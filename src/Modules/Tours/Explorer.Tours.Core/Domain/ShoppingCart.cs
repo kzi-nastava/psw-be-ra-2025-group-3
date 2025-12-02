@@ -46,7 +46,11 @@ namespace Explorer.Tours.Core.Domain
             Items.Remove(existing);
             RecalculateTotal();
         }
-
+        public void Clear()
+        {
+            Items.Clear();
+            TotalPrice = 0;
+        }
         private void RecalculateTotal()
         {
             TotalPrice = Items.Sum(i => i.Price);

@@ -56,4 +56,41 @@ public class TourExecutionService : ITourExecutionService
 
         return _mapper.Map<TourExecutionDto>(created);
     }
+
+    //task2
+    public LocationCheckResultDto CheckLocationProgress(LocationCheckDto dto, long touristId)
+    {
+        //  Učitaj aktivnu TourExecution sesiju
+        var execution = _executionRepository.GetActiveExecution(touristId, dto.TourId); // tour id u dto
+
+        if (execution == null)
+            throw new InvalidOperationException("No active tour session found.");
+
+        //  Učitaj KeyPoints ture
+        var tour = _tourRepository.GetByIdWithKeyPoints(execution.TourId);
+
+        if (tour == null || tour.KeyPoints == null)
+            throw new InvalidOperationException("Tour or KeyPoints not found.");
+
+        // 3. Pozovi agregat metodu
+        bool keyPointCompleted = execution.CheckLocationProgress(
+            dto.CurrentLatitude,
+            dto.CurrentLongitude,
+            tour.KeyPoints.ToList()
+        );
+
+        //  Sačuvaj izmene
+        _executionRepository.Update(execution);
+
+        //  Vrati rezultat
+        return new LocationCheckResultDto
+        {
+            KeyPointCompleted = keyPointCompleted,
+            CompletedKeyPointId = keyPointCompleted
+                ? execution.CompletedKeyPoints.Last().KeyPointId
+                : null,
+            LastActivity = execution.LastActivity,
+            TotalCompletedKeyPoints = execution.CompletedKeyPoints.Count
+        };
+    }
 }

@@ -31,4 +31,20 @@ public class TourExecutionController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    //task2
+    [HttpPost("check-location")]
+    public ActionResult<LocationCheckResultDto> CheckLocation([FromBody] LocationCheckDto dto)
+    {
+        try
+        {
+            long touristId = long.Parse(User.FindFirst("id")!.Value);
+            var result = _tourExecutionService.CheckLocationProgress(dto, touristId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

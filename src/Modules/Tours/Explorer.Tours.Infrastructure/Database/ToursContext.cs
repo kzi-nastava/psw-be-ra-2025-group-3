@@ -152,6 +152,22 @@ public class ToursContext : DbContext
                 .IsRequired();
             builder.Property(te => te.StartLatitude).IsRequired();
             builder.Property(te => te.StartLongitude).IsRequired();
+            builder.Property(te => te.LastActivity).IsRequired(); // task2
+
+            //  KeyPointCompletion kao JSON
+            builder.Property(te => te.CompletedKeyPoints)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<KeyPointCompletion>>(v, (JsonSerializerOptions?)null) ?? new List<KeyPointCompletion>()
+                )
+                .Metadata.SetValueComparer(
+                    new ValueComparer<List<KeyPointCompletion>>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()
+                    )
+                );
 
             builder.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
         });

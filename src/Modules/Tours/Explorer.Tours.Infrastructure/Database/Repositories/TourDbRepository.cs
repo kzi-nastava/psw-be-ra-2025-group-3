@@ -72,4 +72,12 @@ public class TourDbRepository : ITourRepository
                   .Where(t => t.Status == TourStatus.Published)
                   .ToList();
     }
+
+    public Tour? GetByIdWithKeyPoints(long id)
+    {
+        return _context.Tours
+            .Include(t => t.Equipment)
+            .Include(t => t.KeyPoints)
+            .FirstOrDefault(t => t.Id == id);  //za tour-execution
+    }
 }

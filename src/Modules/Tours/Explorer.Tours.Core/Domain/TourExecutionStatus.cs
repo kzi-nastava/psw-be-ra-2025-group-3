@@ -10,6 +10,6 @@ namespace Explorer.Tours.Core.Domain
     {
         Active = 0,      //  u toku
         Completed = 1,   //  uspešno završena
-        Abandoned = 2    //  napuštena
+        Abandoned = 2    //  napuštena 
     }
 }

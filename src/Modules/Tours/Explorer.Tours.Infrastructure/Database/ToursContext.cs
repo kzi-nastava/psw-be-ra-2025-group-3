@@ -22,6 +22,8 @@ public class ToursContext : DbContext
 
     public DbSet<KeyPoint> KeyPoints { get; set; }
 
+    public DbSet<TourExecution> TourExecutions { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +73,12 @@ public class ToursContext : DbContext
             .WithMany()
             .UsingEntity(j => j.ToTable("TourEquipment"));
 
+        modelBuilder.Entity<Tour>()
+            .HasMany(t => t.KeyPoints)
+            .WithOne()
+            .HasForeignKey(kp => kp.TourId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Name).IsRequired();
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Description).IsRequired();
 
@@ -110,6 +118,24 @@ public class ToursContext : DbContext
                         c => c.ToList()
                     )
                 );
+        });
+
+        modelBuilder.Entity<TourExecution>(builder =>
+        {
+            builder.ToTable("TourExecutions", "tours");
+            builder.HasKey(te => te.Id);
+            builder.Property(te => te.Id).ValueGeneratedOnAdd();
+
+            builder.Property(te => te.TouristId).IsRequired();
+            builder.Property(te => te.TourId).IsRequired();
+            builder.Property(te => te.StartTime).IsRequired();
+            builder.Property(te => te.Status)
+                .HasConversion<int>()
+                .IsRequired();
+            builder.Property(te => te.StartLatitude).IsRequired();
+            builder.Property(te => te.StartLongitude).IsRequired();
+
+            builder.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
         });
     }
 }

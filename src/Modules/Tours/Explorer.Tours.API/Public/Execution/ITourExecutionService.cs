@@ -10,4 +10,5 @@ namespace Explorer.Tours.API.Public.Execution;
 public interface ITourExecutionService
 {
     TourExecutionDto StartTour(TourExecutionCreateDto dto, long touristId);
+    LocationCheckResultDto CheckLocationProgress(LocationCheckDto dto, long touristId); //task2
 }

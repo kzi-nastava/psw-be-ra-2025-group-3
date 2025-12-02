@@ -41,6 +41,11 @@ public class ToursContext : DbContext
                 c => c.ToList()
             ));
 
+        
+        modelBuilder.Entity<Tour>()
+            .HasMany(t => t.Equipment)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("TourEquipment"));
 
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Name).IsRequired();
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Description).IsRequired();

@@ -14,6 +14,8 @@ public class ToursContext : DbContext
     public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
 
+    public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
+
     public DbSet<TourProblem> TourProblems { get; set; }
 
     public DbSet<Position> Positions { get; set; }

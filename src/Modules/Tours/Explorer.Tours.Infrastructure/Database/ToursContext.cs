@@ -20,7 +20,7 @@ public class ToursContext : DbContext
 
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
 
-
+    public DbSet<KeyPoint> KeyPoints { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 

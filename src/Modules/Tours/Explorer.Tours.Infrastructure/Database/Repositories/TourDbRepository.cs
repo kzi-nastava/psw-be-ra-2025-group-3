@@ -49,11 +49,14 @@ public class TourDbRepository : ITourRepository
         }
     }
 
-    // === IZMENJENO: Dodat .Include(t => t.Equipment) ===
     public Tour? GetById(long id)
     {
+        return _context.Tours.Find(id);
+    }
+    public Tour? GetWithEquipment(long id)
+    {
         return _context.Tours
-            .Include(t => t.Equipment) // <--- KLJUČNO ZA EDIT
+            .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }
 

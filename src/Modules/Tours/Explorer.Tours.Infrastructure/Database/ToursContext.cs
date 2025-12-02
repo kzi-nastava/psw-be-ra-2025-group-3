@@ -24,6 +24,7 @@ public class ToursContext : DbContext
 
     public DbSet<KeyPoint> KeyPoints { get; set; }
 
+    public DbSet<Message> Messages { get; set; }
     public DbSet<TourExecution> TourExecutions { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
@@ -122,6 +123,21 @@ public class ToursContext : DbContext
                 );
         });
 
+        // Podtask 1 
+        modelBuilder.Entity<TourProblem>()
+            .HasMany(tp => tp.Messages)           
+            .WithOne()                            
+            .HasForeignKey("TourProblemId")        // Foreign key u Message tabeli
+            .OnDelete(DeleteBehavior.Cascade);     // Brisanje TourProblem-a brise sve Messages
+
+        // Enum konverzije
+        modelBuilder.Entity<TourProblem>()
+            .Property(tp => tp.Status)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Message>()
+            .Property(m => m.AuthorType)
+            .HasConversion<int>();
         modelBuilder.Entity<TourExecution>(builder =>
         {
             builder.ToTable("TourExecutions", "tours");

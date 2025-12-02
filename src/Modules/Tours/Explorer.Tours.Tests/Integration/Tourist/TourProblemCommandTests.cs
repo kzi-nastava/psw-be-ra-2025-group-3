@@ -36,7 +36,10 @@ public class TourProblemCommandTests : BaseToursIntegrationTest
             (-1, -1, -11, -21, 0, 2, 'Bus was 30 minutes late at pickup point', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
             (-2, -1, -11, -21, 2, 1, 'Tour guide spoke too quietly, hard to hear explanations', '2024-11-15 10:15:00', '2024-11-15 12:00:00', NULL, 0, NULL, false, NULL),
             (-3, -2, -12, -22, 3, 3, 'Main attraction was closed without prior notice', '2024-11-14 14:00:00', '2024-11-14 15:30:00', NULL, 0, NULL, false, NULL),
-            (-4, -1, -12, -21, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL, 0, NULL, false, NULL);
+            (-4, -1, -12, -21, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL, 0, NULL, false, NULL),
+            (-5, -1, -11, -21, 0, 2, 'Problem for resolving test', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
+            (-6, -1, -11, -21, 0, 2, 'Problem for unresolving test', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
+            (-7, -1, -11, -21, 0, 2, 'Problem for message test', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL);
         ");
     }
 
@@ -160,5 +163,156 @@ public class TourProblemCommandTests : BaseToursIntegrationTest
 
         // Act & Assert
         Should.Throw<Exception>(() => service.Delete(-1, -12));
+    }
+
+    [Theory]
+    [InlineData(-5, -11, "Problem is now resolved, thank you!", 1)] // Tourist marks as resolved
+    public void Marks_problem_as_resolved(long problemId, long touristId, string comment, int expectedStatus)
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        // Act
+        var result = service.MarkAsResolved(problemId, comment, touristId);
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(expectedStatus);
+        result.ResolvedByTouristComment.ShouldBe(comment);
+
+        // Assert - Database
+        var storedEntity = dbContext.TourProblems.FirstOrDefault(p => p.Id == problemId);
+        storedEntity.ShouldNotBeNull();
+        storedEntity.Status.ShouldBe((Explorer.Tours.Core.Domain.TourProblemStatus)expectedStatus);
+        storedEntity.ResolvedByTouristComment.ShouldBe(comment);
+    }
+
+    [Fact]
+    public void Mark_as_resolved_fails_invalid_tourist()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => service.MarkAsResolved(-1, "Comment", -12));
+    }
+
+    [Fact]
+    public void Mark_as_resolved_fails_empty_comment()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => service.MarkAsResolved(-5, "", -11));
+    }
+
+    [Theory]
+    [InlineData(-6, -11, "Problem is still not resolved, needs more attention!", 2)] // Tourist marks as unresolved
+    public void Marks_problem_as_unresolved(long problemId, long touristId, string comment, int expectedStatus)
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        // Act
+        var result = service.MarkAsUnresolved(problemId, comment, touristId);
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe(expectedStatus);
+        result.ResolvedByTouristComment.ShouldBe(comment);
+
+        // Assert - Database
+        var storedEntity = dbContext.TourProblems.FirstOrDefault(p => p.Id == problemId);
+        storedEntity.ShouldNotBeNull();
+        storedEntity.Status.ShouldBe((Explorer.Tours.Core.Domain.TourProblemStatus)expectedStatus);
+        storedEntity.ResolvedByTouristComment.ShouldBe(comment);
+    }
+
+    [Fact]
+    public void Mark_as_unresolved_fails_invalid_tourist()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert
+        Should.Throw<Exception>(() => service.MarkAsUnresolved(-1, "Comment", -12));
+    }
+
+    [Fact]
+    public void Mark_as_unresolved_fails_empty_comment()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => service.MarkAsUnresolved(-6, "", -11));
+    }
+
+    [Theory]
+    [InlineData(-7, -11, "This is a message from tourist", 0)] // Tourist sends message
+    [InlineData(-7, -21, "This is a response from tour author", 1)] // Author sends message
+    public void Adds_message_to_problem(long problemId, long authorId, string content, int authorType)
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        // Act
+        var result = service.AddMessage(problemId, authorId, content, authorType);
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Messages.ShouldNotBeEmpty();
+        result.Messages.ShouldContain(m => m.Content == content && m.AuthorId == authorId);
+
+        // Assert - Database
+        var storedEntity = dbContext.TourProblems
+            .Include(p => p.Messages)
+            .FirstOrDefault(p => p.Id == problemId);
+        storedEntity.ShouldNotBeNull();
+        storedEntity.Messages.ShouldContain(m => m.Content == content && m.AuthorId == authorId);
+    }
+
+    [Fact]
+    public void Add_message_fails_empty_content()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => service.AddMessage(-7, -11, "", 0));
+    }
+
+    [Fact]
+    public void Add_message_fails_invalid_tourist()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert - Wrong tourist trying to send message as Tourist
+        Should.Throw<InvalidOperationException>(() => service.AddMessage(-7, -12, "Invalid message", 0));
+    }
+
+    [Fact]
+    public void Add_message_fails_invalid_author()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert - Wrong author trying to send message as Author
+        Should.Throw<InvalidOperationException>(() => service.AddMessage(-7, -22, "Invalid message", 1));
     }
 }

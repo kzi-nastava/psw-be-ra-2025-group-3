@@ -82,4 +82,49 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         // Act & Assert
         Should.Throw<Exception>(() => service.GetById(-1, -12));
     }
+
+    [Theory]
+    [InlineData(-21, 3)] // FIXED: Author -21 has 3 problems on his tours (-1, -2, and -4)
+    [InlineData(-22, 1)] // Author -22 has 1 problem on his tours (-3)
+    public void Retrieves_problems_by_author_id(long authorId, int expectedCount)
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act
+        var result = service.GetByAuthorId(authorId);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(expectedCount);
+        result.ShouldAllBe(p => p.AuthorId == authorId);
+    }
+
+    [Fact]
+    public void Get_by_id_succeeds_for_author()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act - Author -21 can view problem -1 on his tour
+        var result = service.GetById(-1, -21);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(-1);
+        result.AuthorId.ShouldBe(-21);
+    }
+
+    [Fact]
+    public void Get_by_id_fails_for_unauthorized_user()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert - User -22 cannot view problem -1 (not tourist who reported it, not author)
+        Should.Throw<Exception>(() => service.GetById(-1, -22));
+    }
 }

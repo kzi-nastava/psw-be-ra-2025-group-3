@@ -9,5 +9,6 @@ namespace Explorer.Tours.Core.Domain;
 public enum TourStatus
 {
     Draft = 0,
-    Published = 1
+    Published = 1,
+    Archived = 2
 }

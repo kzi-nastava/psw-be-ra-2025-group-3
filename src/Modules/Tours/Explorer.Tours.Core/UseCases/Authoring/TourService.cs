@@ -109,4 +109,10 @@ public class TourService : ITourService
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
     }
+
+    public List<TourDto> GetPublished()
+    {
+        var tours = _tourRepository.GetPublished();
+        return _mapper.Map<List<TourDto>>(tours);
+    }
 }

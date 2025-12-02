@@ -1,25 +1,24 @@
-﻿using System;
+﻿using AutoMapper;
+using Explorer.Tours.API.Dtos;
+using Explorer.Tours.Core.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using AutoMapper;
-using Explorer.Blog.API.Dtos;
-using Explorer.Blog.Core.Domain;
-
-namespace Explorer.Blog.Core.Mappers;
+namespace Explorer.Tours.Core.Mappers;
 
 public class FacilityProfile : Profile
 {
     public FacilityProfile()
     {
-        
+
         CreateMap<Facility, FacilityDto>()
             .ForMember(dest => dest.Category,
                 opt => opt.MapFrom(src => (int)src.Category));
 
-       
+
         CreateMap<FacilityCreateDto, Facility>()
             .ConstructUsing(dto =>
                 new Facility(
@@ -30,7 +29,7 @@ public class FacilityProfile : Profile
                 )
             );
 
-        
+
         CreateMap<FacilityUpdateDto, Facility>()
             .ForMember(dest => dest.Id, opt => opt.Ignore()) // Id se ne menja
             .AfterMap((dto, entity) =>

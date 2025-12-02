@@ -47,4 +47,11 @@ public class TourExecutionDbRepository : ITourExecutionRepository
                                && te.TourId == tourId
                                && te.Status == TourExecutionStatus.Active);
     }
+    public TourExecution? GetLatestForTouristAndTour(long touristId, long tourId)
+    {
+        return _context.TourExecutions
+            .Where(te => te.TouristId == touristId && te.TourId == tourId)
+            .OrderByDescending(te => te.LastActivity)
+            .FirstOrDefault();
+    }
 }

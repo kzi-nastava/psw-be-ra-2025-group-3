@@ -27,6 +27,9 @@ public class ToursContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<TourExecution> TourExecutions { get; set; }
 
+    public DbSet<TourReview> TourReviews { get; set; }
+
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -153,6 +156,9 @@ public class ToursContext : DbContext
             builder.Property(te => te.StartLatitude).IsRequired();
             builder.Property(te => te.StartLongitude).IsRequired();
             builder.Property(te => te.LastActivity).IsRequired(); // task2
+            builder.Property(te => te.ProgressPercentage).IsRequired(); // task3
+
+
 
             //  KeyPointCompletion kao JSON
             builder.Property(te => te.CompletedKeyPoints)
@@ -170,6 +176,24 @@ public class ToursContext : DbContext
                 );
 
             builder.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
+        });
+        // TourReview konfiguracija
+        modelBuilder.Entity<TourReview>(builder =>
+        {
+            builder.ToTable("TourReviews", "tours");
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.Id).ValueGeneratedOnAdd();
+            builder.Property(r => r.TourId).IsRequired();
+            builder.Property(r => r.TouristId).IsRequired();
+            builder.Property(r => r.Rating).IsRequired();
+            builder.Property(r => r.Comment).HasMaxLength(1000);
+            builder.Property(r => r.CreatedAt).IsRequired();
+            builder.Property(r => r.ProgressPercentage).IsRequired();
+            builder.Property(r => r.IsEdited).IsRequired();
+
+            // Indeks za brže pretraživanje
+            builder.HasIndex(r => new { r.TourId, r.TouristId }).IsUnique();
+            builder.HasIndex(r => r.TourId);
         });
     }
 }

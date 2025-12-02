@@ -19,6 +19,12 @@ public class Tour : Entity
     public DateTime? UpdatedAt { get; private set; }
     public List<string> Tags { get; private set; } //Lista stringova
 
+    // Lista opreme potrebne za turu
+    public ICollection<Equipment> Equipment { get; private set; }
+
+    // lista ključnih tačaka za tour-execution
+    public ICollection<KeyPoint> KeyPoints { get; private set; }
+
     // Prazan konstruktor za Entity Framework
     public Tour() { }
 
@@ -39,11 +45,17 @@ public class Tour : Entity
         AuthorId = authorId;
         CreatedAt = DateTime.UtcNow;
         Tags = tags ?? new List<string>(); // Inicijalizacija prazne liste ako nije prosleđena
+        Equipment = new List<Equipment>(); // Inicijalizacija liste opreme
+        KeyPoints = new List<KeyPoint>();  // inicijalizuje listu ključ. t
     }
 
     // Metoda za izmenu ture
     public void Update(string name, string description, TourDifficulty difficulty, decimal price, List<string>? tags = null)
     {
+        // Provera da li je tura arhivirana pre izmene
+        if (Status == TourStatus.Archived)
+            throw new InvalidOperationException("Cannot modify an archived tour.");
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Tour name cannot be empty.", nameof(name));
         if (string.IsNullOrWhiteSpace(description))
@@ -65,7 +77,47 @@ public class Tour : Entity
         if (Status == TourStatus.Published)
             throw new InvalidOperationException("Tour is already published.");
 
+        // Ne moze se objaviti ako je arhivirana
+        if (Status == TourStatus.Archived)
+            throw new InvalidOperationException("Cannot publish an archived tour.");
+
         Status = TourStatus.Published;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    // Metoda za arhiviranje ture
+    public void Archive()
+    {
+        if (Status != TourStatus.Published)
+            throw new InvalidOperationException("Only published tours can be archived.");
+
+        Status = TourStatus.Archived;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    // Metoda za dodavanje opreme ukoliko tura nije arhivirana
+    public void AddEquipment(Equipment equipment)
+    {
+        if (Status == TourStatus.Archived)
+            throw new InvalidOperationException("Cannot add equipment to an archived tour.");
+
+        if (!Equipment.Contains(equipment))
+        {
+            Equipment.Add(equipment);
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    // Metoda za uklanjanje opreme ukoliko tura nije arhivirana
+    public void RemoveEquipment(Equipment equipment)
+    {
+        if (Status == TourStatus.Archived)
+            throw new InvalidOperationException("Cannot remove equipment from an archived tour.");
+
+        if (Equipment.Contains(equipment))
+        {
+            Equipment.Remove(equipment);
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

@@ -18,6 +18,8 @@ using Explorer.Tours.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Explorer.Tours.API.Public.Execution;
+using Explorer.Tours.Core.UseCases.Execution;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -53,6 +55,8 @@ public static class ToursStartup
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
         services.AddScoped<IKeyPointService, KeyPointService>();
+
+        services.AddScoped<ITourExecutionService, TourExecutionService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -73,6 +77,8 @@ public static class ToursStartup
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
 
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
+
+        services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

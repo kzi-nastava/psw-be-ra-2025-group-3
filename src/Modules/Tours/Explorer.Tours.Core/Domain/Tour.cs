@@ -22,6 +22,9 @@ public class Tour : Entity
     // Lista opreme potrebne za turu
     public ICollection<Equipment> Equipment { get; private set; }
 
+    // lista ključnih tačaka za tour-execution
+    public ICollection<KeyPoint> KeyPoints { get; private set; }
+
     // Prazan konstruktor za Entity Framework
     public Tour() { }
 
@@ -43,6 +46,7 @@ public class Tour : Entity
         CreatedAt = DateTime.UtcNow;
         Tags = tags ?? new List<string>(); // Inicijalizacija prazne liste ako nije prosleđena
         Equipment = new List<Equipment>(); // Inicijalizacija liste opreme
+        KeyPoints = new List<KeyPoint>();  // inicijalizuje listu ključ. t
     }
 
     // Metoda za izmenu ture

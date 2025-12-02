@@ -31,4 +31,27 @@ public class TourExecutionDbRepository : ITourExecutionRepository
                     && te.TourId == tourId
                     && te.Status == TourExecutionStatus.Active);
     }
+
+    //task2
+    public TourExecution Update(TourExecution execution)
+    {
+        _context.TourExecutions.Update(execution);
+        _context.SaveChanges();
+        return execution;
+    }
+    //task2
+    public TourExecution? GetActiveExecution(long touristId, long tourId)
+    {
+        return _context.TourExecutions
+            .FirstOrDefault(te => te.TouristId == touristId
+                               && te.TourId == tourId
+                               && te.Status == TourExecutionStatus.Active);
+    }
+    public TourExecution? GetLatestForTouristAndTour(long touristId, long tourId)
+    {
+        return _context.TourExecutions
+            .Where(te => te.TouristId == touristId && te.TourId == tourId)
+            .OrderByDescending(te => te.LastActivity)
+            .FirstOrDefault();
+    }
 }

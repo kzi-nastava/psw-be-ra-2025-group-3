@@ -10,4 +10,7 @@ public interface ITourExecutionRepository
 {
     TourExecution Create(TourExecution execution);
     bool HasActiveSession(long touristId, long tourId);
+    TourExecution Update(TourExecution execution); // task2
+    TourExecution? GetActiveExecution(long touristId, long tourId); // task2
+    TourExecution? GetLatestForTouristAndTour(long touristId, long tourId); //task3
 }

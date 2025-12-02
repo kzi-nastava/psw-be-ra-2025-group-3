@@ -20,6 +20,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.UseCases.Execution;
+using Explorer.Tours.API.Public.Review;
+using Explorer.Tours.Core.UseCases.Review;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -57,6 +59,9 @@ public static class ToursStartup
         services.AddScoped<IKeyPointService, KeyPointService>();
 
         services.AddScoped<ITourExecutionService, TourExecutionService>();
+
+        services.AddScoped<ITourReviewService, TourReviewService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -82,6 +87,8 @@ public static class ToursStartup
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
 
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
+
+        services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
 
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));

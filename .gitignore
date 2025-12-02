@@ -550,3 +550,11 @@ $RECYCLE.BIN/
 # Migrations
 src/**/Migrations/*
 /src/Explorer.API/wwwroot/images
+
+# Ignore all uploaded files, but keep folder structure
+wwwroot/uploads/**
+
+# Allow these folders to exist in git
+!wwwroot/uploads/
+!wwwroot/uploads/blog-images/
+!wwwroot/uploads/**/.gitkeep

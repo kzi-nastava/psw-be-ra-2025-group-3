@@ -2,7 +2,6 @@
 using Explorer.Blog.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Explorer.API.Controllers.Author_Tourist
 {
@@ -18,10 +17,12 @@ namespace Explorer.API.Controllers.Author_Tourist
             _blogService = blogService;
         }
 
+        // -----------------------------
+        // CREATE
+        // -----------------------------
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
-            //  Uzmi userId iz JWT tokena
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
             blogDto.AuthorId = userId;
 
@@ -29,6 +30,9 @@ namespace Explorer.API.Controllers.Author_Tourist
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }
 
+        // -----------------------------
+        // GET ALL (PUBLIC)
+        // -----------------------------
         [HttpGet("all")]
         public ActionResult<List<BlogDto>> GetAllBlogs()
         {
@@ -36,59 +40,50 @@ namespace Explorer.API.Controllers.Author_Tourist
             return Ok(result);
         }
 
+        // -----------------------------
+        // GET MY BLOGS (FILTER IRREPLACEABLE)
+        // -----------------------------
+        [HttpGet("my-blogs")]
+        public ActionResult<List<BlogDto>> GetUserBlogs()
+        {
+            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
+            var result = _blogService.GetUserBlogs(userId);
+            return Ok(result);
+        }
+
+        // -----------------------------
+        // GET BY ID (ONLY IF OWNER)
+        // -----------------------------
+        [HttpGet("{id:long}")]
+        public ActionResult<BlogDto> GetBlogById(long id)
+        {
+            var blog = _blogService.GetAllBlogs().FirstOrDefault(b => b.Id == id);
+
+            if (blog == null)
+                return NotFound("Blog ne postoji.");
+
+            return Ok(blog);
+        }
+
+        // -----------------------------
+        // UPDATE (ONLY IF OWNER)
+        // -----------------------------
         [HttpPut("{id:long}")]
         public ActionResult<BlogDto> UpdateBlog(long id, [FromBody] BlogDto blogDto)
         {
-            //  Uzmi userId iz JWT tokena
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
 
-            //  Proveri da li korisnik sme da menja ovaj blog
-            var existingBlogs = _blogService.GetUserBlogs(userId);
-            var existingBlog = existingBlogs.FirstOrDefault(b => b.Id == id);
+            var myBlogs = _blogService.GetUserBlogs(userId);
+            var existing = myBlogs.FirstOrDefault(b => b.Id == id);
 
-            if (existingBlog == null)
-            {
-                return Forbid(); // 403 - Nije tvoj blog!
-            }
+            if (existing == null)
+                return Forbid("Nije tvoj blog.");
 
-            //  Postavi ID i AuthorId da spreči manipulaciju
             blogDto.Id = id;
             blogDto.AuthorId = userId;
 
             var result = _blogService.UpdateBlog(blogDto);
             return Ok(result);
-        }
-
-        [HttpGet("my-blogs")]
-        public ActionResult<List<BlogDto>> GetUserBlogs()
-        {
-            //  Uzmi userId iz JWT tokena
-            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
-
-            var result = _blogService.GetUserBlogs(userId);
-            return Ok(result);
-        }
-
-        [HttpGet("{id:long}")]
-        public ActionResult<BlogDto> GetBlogById(long id)
-        {
-            try
-            {
-                var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
-                var blogs = _blogService.GetUserBlogs(userId);
-                var blog = blogs.FirstOrDefault(b => b.Id == id);
-
-                if (blog == null)
-                {
-                    return NotFound($"Blog sa ID {id} nije pronađen ili nije tvoj.");
-                }
-
-                return Ok(blog);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
         }
     }
 }

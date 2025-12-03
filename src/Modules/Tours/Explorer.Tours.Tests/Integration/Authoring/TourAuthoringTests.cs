@@ -105,7 +105,7 @@ public class TourAuthoringTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         // 1. Kreiramo turu
-        var tourDto = new TourCreateDto { Name = "Archived Test", Description = "Desc", Difficulty = 0, Tags = new List<string>() };
+        var tourDto = new TourCreateDto { Name = "Archived Test", Description = "Desc", Difficulty = 0, Tags = new List<string> { "test-tag" } };
         var createdTour = service.Create(tourDto, -11);
 
         // 2. Rucno je arhiviramo kroz bazu
@@ -116,8 +116,8 @@ public class TourAuthoringTests : BaseToursIntegrationTest
             new TourDuration(60, TransportType.Walking)
         });
 
-        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP1", "Desc1", "url", "secret", 45.0, 19.0));
-        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP2", "Desc2", "url", "secret", 45.1, 19.1));
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP1", "Desc1", "http://img.com", "secret", 45.0, 19.0));
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP2", "Desc2", "http://img.com", "secret", 45.1, 19.1));
         dbContext.SaveChanges();
 
         tourEntity.Publish();

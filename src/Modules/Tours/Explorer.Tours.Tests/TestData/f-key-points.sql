@@ -15,4 +15,3 @@
     ( -2, 'Dunavska obala', 'Prelepa obala uz Dunav.', 'https://example.com/img3.jpg', 'Završna tajna uz reku.', 45.256000, 19.843000 ),
     ( -3, 'Tacka 1 za Hard turu', 'Opis 1', 'https://example.com/img1.jpg', 'Tajna 1', 45.250000, 19.830000 ),
     ( -3, 'Tacka 2 za Hard turu', 'Opis 2', 'https://example.com/img2.jpg', 'Tajna 2', 45.260000, 19.840000 );
-    

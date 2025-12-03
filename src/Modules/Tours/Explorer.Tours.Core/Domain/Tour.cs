@@ -27,7 +27,7 @@ public class Tour : Entity
     // lista ključnih tačaka za tour-execution
     public ICollection<KeyPoint> KeyPoints { get; private set; }
 
-    
+
 
     // Prazan konstruktor za Entity Framework
     public Tour() { }
@@ -87,20 +87,20 @@ public class Tour : Entity
     // Metoda za objavljivanje ture
     public void Publish()
     {
-        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Tags == null || Tags.Count == 0)
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description)) // || Tags == null || Tags.Count == 0 dodaj ovo vukasine
         {
             throw new InvalidOperationException("Cannot publish: Basic info is missing.");
         }
 
-        if (KeyPoints == null || KeyPoints.Count < 2)
+        /*if (KeyPoints == null || KeyPoints.Count < 2)
         {
             throw new InvalidOperationException("Cannot publish: Tour must have at least 2 key points.");
-        }
+        }*/
 
-        if (TourDurations == null || TourDurations.Count < 1)
+        /*if (TourDurations == null || TourDurations.Count < 1)
         {
             throw new InvalidOperationException("Cannot publish: Tour must have at least 1 transportation duration defined.");
-        }
+        }*/
 
         if (Status == TourStatus.Published)
             throw new InvalidOperationException("Tour is already published.");

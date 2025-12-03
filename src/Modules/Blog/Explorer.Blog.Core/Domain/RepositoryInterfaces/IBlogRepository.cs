@@ -13,5 +13,6 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
         BlogEntity Modify(BlogEntity blog);
         BlogEntity GetById(long id);
         List<BlogEntity> GetByAuthor(int authorId);
+        List<BlogEntity> GetAll();
     }
 }

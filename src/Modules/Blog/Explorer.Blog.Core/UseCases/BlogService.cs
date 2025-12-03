@@ -27,7 +27,7 @@ namespace Explorer.Blog.Core.UseCases
 
         public BlogDto UpdateBlog(BlogDto blogDto)
         {
-            // ✅ REŠENJE: Mapiraj ceo DTO u entity (uključujući slike)
+            // Mapiraj ceo DTO u entity (uključujući slike)
             // Ali NE pozivaj Update() metodu koja će dodavati slike u existingBlog
             var blog = _mapper.Map<BlogEntity>(blogDto);
 
@@ -44,6 +44,11 @@ namespace Explorer.Blog.Core.UseCases
         public List<BlogDto> GetUserBlogs(int userId)
         {
             var blogs = _repository.GetByAuthor(userId);
+            return _mapper.Map<List<BlogDto>>(blogs);
+        }
+        public List<BlogDto> GetAllBlogs()
+        {
+            var blogs = _repository.GetAll();
             return _mapper.Map<List<BlogDto>>(blogs);
         }
     }

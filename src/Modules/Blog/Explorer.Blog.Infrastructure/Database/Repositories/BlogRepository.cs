@@ -86,5 +86,12 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
                 .OrderByDescending(b => b.CreationDate)
                 .ToList();
         }
+        public List<BlogEntity> GetAll()
+        {
+            return _context.Blogs
+                .Include(b => b.Images)
+                .OrderByDescending(b => b.CreationDate)
+                .ToList();
+        }
     }
 }

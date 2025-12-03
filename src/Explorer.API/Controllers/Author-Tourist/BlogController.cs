@@ -21,7 +21,7 @@ namespace Explorer.API.Controllers.Author_Tourist
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
-            // ✅ Uzmi userId iz JWT tokena
+            //  Uzmi userId iz JWT tokena
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
             blogDto.AuthorId = userId;
 
@@ -29,13 +29,20 @@ namespace Explorer.API.Controllers.Author_Tourist
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }
 
+        [HttpGet("all")]
+        public ActionResult<List<BlogDto>> GetAllBlogs()
+        {
+            var result = _blogService.GetAllBlogs();
+            return Ok(result);
+        }
+
         [HttpPut("{id:long}")]
         public ActionResult<BlogDto> UpdateBlog(long id, [FromBody] BlogDto blogDto)
         {
-            // ✅ Uzmi userId iz JWT tokena
+            //  Uzmi userId iz JWT tokena
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
 
-            // ✅ Proveri da li korisnik sme da menja ovaj blog
+            //  Proveri da li korisnik sme da menja ovaj blog
             var existingBlogs = _blogService.GetUserBlogs(userId);
             var existingBlog = existingBlogs.FirstOrDefault(b => b.Id == id);
 
@@ -44,7 +51,7 @@ namespace Explorer.API.Controllers.Author_Tourist
                 return Forbid(); // 403 - Nije tvoj blog!
             }
 
-            // ✅ Postavi ID i AuthorId da spreči manipulaciju
+            //  Postavi ID i AuthorId da spreči manipulaciju
             blogDto.Id = id;
             blogDto.AuthorId = userId;
 
@@ -55,7 +62,7 @@ namespace Explorer.API.Controllers.Author_Tourist
         [HttpGet("my-blogs")]
         public ActionResult<List<BlogDto>> GetUserBlogs()
         {
-            // ✅ Uzmi userId iz JWT tokena
+            //  Uzmi userId iz JWT tokena
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
 
             var result = _blogService.GetUserBlogs(userId);

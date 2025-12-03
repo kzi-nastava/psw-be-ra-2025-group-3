@@ -21,6 +21,9 @@ public class TourExecution : AggregateRoot
     public DateTime LastActivity { get; private set; }//task2
     public List<KeyPointCompletion> CompletedKeyPoints { get; private set; }//task2
 
+    public double ProgressPercentage { get; private set; } //task3
+
+
     private TourExecution() { }
 
     public TourExecution(long touristId, long tourId, double startLatitude, double startLongitude)
@@ -42,6 +45,7 @@ public class TourExecution : AggregateRoot
         StartLongitude = startLongitude;
         LastActivity = DateTime.UtcNow; // task2
         CompletedKeyPoints = new List<KeyPointCompletion>();//task2
+        ProgressPercentage = 0; //task3
     }
 
     //metode za task2
@@ -62,6 +66,7 @@ public class TourExecution : AggregateRoot
             {
                 var completion = new KeyPointCompletion(keyPoint.Id, DateTime.UtcNow);
                 CompletedKeyPoints.Add(completion);
+                ProgressPercentage = (CompletedKeyPoints.Count / (double)tourKeyPoints.Count) * 100; //task3
                 return true; // Kompletirana nova tačka
             }
         }

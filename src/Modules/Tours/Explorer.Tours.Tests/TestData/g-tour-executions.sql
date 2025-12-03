@@ -1,0 +1,65 @@
+﻿INSERT INTO tours."TourExecutions"(
+    "TouristId", 
+    "TourId", 
+    "StartTime", 
+    "Status", 
+    "StartLatitude", 
+    "StartLongitude",
+    "LastActivity",
+    "ProgressPercentage",
+    "CompletedKeyPoints",
+    "CompletionTime",
+    "AbandonTime"
+) VALUES
+    (
+        -25,
+        -2,
+        '2025-11-29 10:00:00',
+        0,
+        45.2500,
+        19.8300,
+        '2025-11-30 10:00:00',
+        50.0,
+        '[]'::jsonb,
+        NULL,
+        NULL
+    ),
+    (
+        -26,
+        -2,
+        '2025-11-27 10:00:00',
+        0,
+        45.2500,
+        19.8300,
+        '2025-11-29 10:00:00',
+        20.0,
+        '[]'::jsonb,
+        NULL,
+        NULL
+    ),
+    (
+        -27,
+        -2,
+        '2025-11-17 10:00:00',
+        0,
+        45.2500,
+        19.8300,
+        '2025-11-22 10:00:00',
+        60.0,
+        '[]'::jsonb,
+        NULL,
+        NULL
+    ),
+    (
+        -28,
+        -2,
+        '2025-11-26 10:00:00',
+        0,
+        45.2500,
+        19.8300,
+        '2025-11-27 10:00:00',
+        40.0,
+        '[]'::jsonb,
+        NULL,
+        NULL
+    );

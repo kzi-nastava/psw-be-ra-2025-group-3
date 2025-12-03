@@ -96,7 +96,7 @@ namespace Explorer.Tours.Tests.Integration.Shopping
 
             if (status == TourStatus.Published)
             {
-                tour.Publish();
+                tour.TemporaryPublish();
             }
 
             var idProp = typeof(Tour).BaseType!.GetProperty("Id");

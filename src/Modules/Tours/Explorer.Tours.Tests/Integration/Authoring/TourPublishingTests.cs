@@ -54,6 +54,7 @@ public class TourPublishingTests : BaseToursIntegrationTest
         dbContext.KeyPoints.Add(new KeyPoint(tourDto.Id, "KP1", "D1", "img1", "sec1", 45.0, 19.0));
         dbContext.KeyPoints.Add(new KeyPoint(tourDto.Id, "KP2", "D2", "img2", "sec2", 45.1, 19.1));
 
+
         dbContext.SaveChanges();
 
         // Act

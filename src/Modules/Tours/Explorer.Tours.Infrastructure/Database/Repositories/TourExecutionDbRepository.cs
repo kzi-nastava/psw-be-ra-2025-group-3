@@ -32,6 +32,14 @@ public class TourExecutionDbRepository : ITourExecutionRepository
                     && te.Status == TourExecutionStatus.Active);
     }
 
+    public TourExecution? GetActiveByTouristId(long touristId)
+    {
+        return _context.TourExecutions
+            .Where(te => te.TouristId == touristId && te.Status == TourExecutionStatus.Active)
+            .OrderByDescending(te => te.StartTime)
+            .FirstOrDefault();
+    }
+
     //task2
     public TourExecution Update(TourExecution execution)
     {

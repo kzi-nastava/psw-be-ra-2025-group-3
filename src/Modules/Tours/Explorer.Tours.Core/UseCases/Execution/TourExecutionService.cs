@@ -30,21 +30,34 @@ public class TourExecutionService : ITourExecutionService
 
     public TourExecutionDto StartTour(TourExecutionCreateDto dto, long touristId)
     {
-        var tour = _tourRepository.GetByIdWithKeyPoints(dto.TourId);
+        // Proveri da li turista već ima bilo kakvu aktivnu turu
+        var existingActiveExecution = _executionRepository.GetActiveByTouristId(touristId);
+        if (existingActiveExecution != null)
+        {
+            throw new InvalidOperationException(
+                $"Cannot start: You already have an active tour (ID: {existingActiveExecution.TourId}). " +
+                "Please complete or abandon it first."
+            );
+        }
 
+        // Provera postojanja ture
+        var tour = _tourRepository.GetByIdWithKeyPoints(dto.TourId);
         if (tour == null)
             throw new NotFoundException($"Tour with id {dto.TourId} not found.");
 
+        // Provera statusa - Published ili Archived
         if (tour.Status != TourStatus.Published && tour.Status != TourStatus.Archived)
             throw new InvalidOperationException("Cannot start: Tour is not available.");
 
+        // Provera broja ključnih tačaka
         var keyPointCount = tour.KeyPoints?.Count ?? 0;
         if (keyPointCount < 2)
             throw new InvalidOperationException("Cannot start: Tour must have at least 2 key points.");
 
-        if (_executionRepository.HasActiveSession(touristId, dto.TourId))
-            throw new InvalidOperationException("Cannot start: You already have an active session for this tour.");
+        //if (_executionRepository.HasActiveSession(touristId, dto.TourId))
+            //throw new InvalidOperationException("Cannot start: You already have an active session for this tour.");
 
+        // Kreiranje nove sesije
         var execution = new TourExecution(
             touristId,
             dto.TourId,
@@ -53,8 +66,17 @@ public class TourExecutionService : ITourExecutionService
         );
 
         var created = _executionRepository.Create(execution);
-
         return _mapper.Map<TourExecutionDto>(created);
+    }
+
+    public TourExecutionDto? GetActiveTourExecution(long touristId)
+    {
+        var activeExecution = _executionRepository.GetActiveByTouristId(touristId);
+
+        if (activeExecution == null)
+            return null;
+
+        return _mapper.Map<TourExecutionDto>(activeExecution);
     }
 
     //task2

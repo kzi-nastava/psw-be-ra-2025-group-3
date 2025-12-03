@@ -32,6 +32,19 @@ public class TourExecutionController : ControllerBase
         }
     }
 
+    [HttpGet("active")]
+    public ActionResult<TourExecutionDto> GetActiveTourExecution()
+    {
+        long touristId = long.Parse(User.FindFirst("id")!.Value);
+
+        var activeTourExecution = _tourExecutionService.GetActiveTourExecution(touristId);
+
+        if (activeTourExecution == null)
+            return Ok(null);
+
+        return Ok(activeTourExecution);
+    }
+
     //task2
     [HttpPost("check-location")]
     public ActionResult<LocationCheckResultDto> CheckLocation([FromBody] LocationCheckDto dto)

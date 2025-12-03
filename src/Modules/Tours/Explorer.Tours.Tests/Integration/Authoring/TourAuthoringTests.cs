@@ -9,6 +9,7 @@ using Shouldly;
 using System;
 using System.Linq;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.Tests.Integration.Authoring;
 
@@ -109,6 +110,16 @@ public class TourAuthoringTests : BaseToursIntegrationTest
 
         // 2. Rucno je arhiviramo kroz bazu
         var tourEntity = dbContext.Tours.Find(createdTour.Id);
+
+        tourEntity.UpdateTourDurations(new List<TourDuration>
+        {
+            new TourDuration(60, TransportType.Walking)
+        });
+
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP1", "Desc1", "url", "secret", 45.0, 19.0));
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP2", "Desc2", "url", "secret", 45.1, 19.1));
+        dbContext.SaveChanges();
+
         tourEntity.Publish();
         tourEntity.Archive();
         dbContext.SaveChanges();

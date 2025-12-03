@@ -46,6 +46,20 @@ public class ToursContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             ));
+
+        modelBuilder.Entity<Tour>()
+            .Property(t => t.TourDurations)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<TourDuration>>(v, (JsonSerializerOptions?)null) ?? new List<TourDuration>()
+            )
+            .Metadata.SetValueComparer(new ValueComparer<List<TourDuration>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+
         //mapiranje za facilities
         modelBuilder.Entity<Facility>(entity =>
         {

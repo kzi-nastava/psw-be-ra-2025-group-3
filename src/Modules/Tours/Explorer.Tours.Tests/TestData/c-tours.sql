@@ -1,11 +1,10 @@
-﻿-- Test Ture
-INSERT INTO tours."Tours"("Id", "Name", "Description", "Difficulty", "Status", "Price", "AuthorId", "CreatedAt", "Tags")
+﻿INSERT INTO tours."Tours"(
+    "Id", "Name", "Description", "Difficulty", "Status", "Price", "AuthorId", "CreatedAt", "Tags", "TourDurations") 
 VALUES 
-    (-1, 'Test Tour Draft', 'Draft tour for testing', 0, 0, 0, -11, '2025-01-01 10:00:00', CAST('["test", "draft"]' AS jsonb)),
-
-    (-2, 'Test Tour Published', 'Published tour for testing', 1, 1, 500, -11, '2025-01-01 11:00:00', CAST('["test", "published"]' AS jsonb)),
-
-    (-3, 'Test Tour Hard', 'Hard difficulty tour', 2, 0, 1000, -11, '2025-01-01 12:00:00', CAST('["test", "hard"]' AS jsonb)),
-
-    -- ⭐ DODATA TURA ZA TVOJE TESTOVE
-    (-4, 'Test Tour Published 2', 'Another published tour for purchase tests', 1, 1, 700, -11, '2025-01-01 13:00:00', CAST('["test","purchase"]' AS jsonb));
+    (-1, 'Test Tour Draft', 'Draft tour for testing', 0, 0, 0, -11, '2025-01-01 10:00:00', CAST('["test", "draft"]' AS jsonb), CAST('[{"TimeInMinutes": 30, "Transportation": 0}]' AS jsonb)),
+    
+    (-2, 'Test Tour Published', 'Published tour for testing', 1, 1, 500, -11, '2025-01-01 11:00:00', CAST('["test", "published"]' AS jsonb), CAST('[{"TimeInMinutes": 60, "Transportation": 1}]' AS jsonb)),
+    
+    (-3, 'Test Tour Hard', 'Hard difficulty tour', 2, 0, 1000, -11, '2025-01-01 12:00:00', CAST('["test", "hard"]' AS jsonb), CAST('[{"TimeInMinutes": 120, "Transportation": 2}]' AS jsonb)),
+    
+    (-4, 'Test Tour Published 2', 'Another published tour for purchase tests', 1, 1, 700, -11, '2025-01-01 13:00:00', CAST('["test","purchase"]' AS jsonb), CAST('[{"TimeInMinutes": 45, "Transportation": 0}]' AS jsonb));

@@ -1,6 +1,7 @@
 ﻿using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Microsoft.Extensions.DependencyInjection;
+using Explorer.Tours.Core.Domain;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -65,7 +66,12 @@ public class TourCommandTests : BaseToursIntegrationTest
             Description = "Updated description",
             Difficulty = 2,
             Price = 999.99m,
-            Tags = new List<string> { "updated" }
+            Tags = new List<string> { "updated" },
+            Status = "Draft",
+            TourDurations = new List<TourDurationDto>
+            {
+                new TourDurationDto { TimeInMinutes = 60, Transportation = "Walking" }
+            }
         };
 
         // Act
@@ -78,6 +84,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.Difficulty.ShouldBe(2);
         result.Price.ShouldBe(999.99m);
         result.UpdatedAt.ShouldNotBeNull();
+        result.TourDurations.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -136,7 +143,8 @@ public class TourCommandTests : BaseToursIntegrationTest
             Description = "Trying to hack",
             Difficulty = 0,
             Price = 0,
-            Tags = new List<string>()
+            Tags = new List<string>(),
+            TourDurations = new List<TourDurationDto>()
         };
 
         // Act & Assert

@@ -60,9 +60,20 @@ public class TourController : ControllerBase
     [HttpPatch("{id}/publish")]
     public ActionResult<TourDto> Publish(long id)
     {
-        var authorId = GetAuthorId();
-        var result = _tourService.Publish(id, authorId);
-        return Ok(result);
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Publish(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut("{tourId}/equipment/{equipmentId}")]

@@ -11,6 +11,10 @@ public class TourDto
     public long AuthorId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
+    public DateTime? ArchivedAt { get; set; }
     public List<string> Tags { get; set; }
     public List<EquipmentDto> Equipment { get; set; }
+    public List<TourDurationDto> TourDurations { get; set; }
+    
 }

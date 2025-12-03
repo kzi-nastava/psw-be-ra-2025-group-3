@@ -43,6 +43,10 @@ public class TourService : ITourService
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only update your own tours.");
 
         tour.Update(tourDto.Name, tourDto.Description, (TourDifficulty)tourDto.Difficulty, tourDto.Price, tourDto.Tags);
+
+        var durations = _mapper.Map<List<TourDuration>>(tourDto.TourDurations);
+        tour.UpdateTourDurations(durations);
+
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
     }

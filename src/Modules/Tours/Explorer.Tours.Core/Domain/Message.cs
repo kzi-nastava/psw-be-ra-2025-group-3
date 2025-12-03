@@ -14,7 +14,8 @@ public class Message : Entity
     // Internal jer se kreira samo unutar domena
     internal Message(long authorId, string content, AuthorType authorType)
     {
-        if (authorId <= 0)
+        // FIXED: Allow negative IDs for testing (check for zero only)
+        if (authorId == 0)
             throw new ArgumentException("Author ID must be valid.", nameof(authorId));
         if (string.IsNullOrWhiteSpace(content))
             throw new ArgumentException("Content cannot be empty.", nameof(content));

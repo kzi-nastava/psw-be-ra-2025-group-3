@@ -17,13 +17,17 @@ public class Tour : Entity
     public long AuthorId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
+    public DateTime? PublishedAt { get; private set; }
     public List<string> Tags { get; private set; } //Lista stringova
+    public List<TourDuration> TourDurations { get; private set; }
 
     // Lista opreme potrebne za turu
     public ICollection<Equipment> Equipment { get; private set; }
 
     // lista ključnih tačaka za tour-execution
     public ICollection<KeyPoint> KeyPoints { get; private set; }
+
+
 
     // Prazan konstruktor za Entity Framework
     public Tour() { }
@@ -47,6 +51,7 @@ public class Tour : Entity
         Tags = tags ?? new List<string>(); // Inicijalizacija prazne liste ako nije prosleđena
         Equipment = new List<Equipment>(); // Inicijalizacija liste opreme
         KeyPoints = new List<KeyPoint>();  // inicijalizuje listu ključ. t
+        TourDurations = new List<TourDuration>();
     }
 
     // Metoda za izmenu ture
@@ -71,9 +76,32 @@ public class Tour : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // Metoda za objavljivanje ture
+    public void UpdateTourDurations(List<TourDuration> durations)
+    {
+        if (Status == TourStatus.Archived) throw new InvalidOperationException("Cannot update durations on an archived tour.");
+
+        TourDurations = durations ?? new List<TourDuration>();
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    
     public void Publish()
     {
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description)) // || Tags == null || Tags.Count == 0 dodaj ovo vukasine
+        {
+            throw new InvalidOperationException("Cannot publish: Basic info is missing.");
+        }
+
+        /*if (KeyPoints == null || KeyPoints.Count < 2)
+        {
+            throw new InvalidOperationException("Cannot publish: Tour must have at least 2 key points.");
+        }*/
+
+        /*if (TourDurations == null || TourDurations.Count < 1)
+        {
+            throw new InvalidOperationException("Cannot publish: Tour must have at least 1 transportation duration defined.");
+        }*/
+
         if (Status == TourStatus.Published)
             throw new InvalidOperationException("Tour is already published.");
 
@@ -82,6 +110,36 @@ public class Tour : Entity
             throw new InvalidOperationException("Cannot publish an archived tour.");
 
         Status = TourStatus.Published;
+        PublishedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    // Metoda za privremeno objavljivanje ture dok se ne sredi zajednicki Publsh
+    public void TemporaryPublish()
+    {
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Tags == null || Tags.Count == 0) 
+        {
+            throw new InvalidOperationException("Cannot publish: Basic info is missing.");
+        }
+
+        if (KeyPoints == null || KeyPoints.Count < 2)
+        {
+            throw new InvalidOperationException("Cannot publish: Tour must have at least 2 key points.");
+        }
+
+        if (TourDurations == null || TourDurations.Count < 1)
+        {
+            throw new InvalidOperationException("Cannot publish: Tour must have at least 1 transportation duration defined.");
+        }
+
+        if (Status == TourStatus.Published)
+            throw new InvalidOperationException("Tour is already published.");
+
+        // Ne moze se objaviti ako je arhivirana
+        if (Status == TourStatus.Archived)
+            throw new InvalidOperationException("Cannot publish an archived tour.");
+
+        Status = TourStatus.Published;
+        PublishedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
 

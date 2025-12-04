@@ -1,5 +1,7 @@
 ﻿using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System;
@@ -65,7 +67,12 @@ public class TourCommandTests : BaseToursIntegrationTest
             Description = "Updated description",
             Difficulty = 2,
             Price = 999.99m,
-            Tags = new List<string> { "updated" }
+            Tags = new List<string> { "updated" },
+            Status = "Draft",
+            TourDurations = new List<TourDurationDto>
+            {
+                new TourDurationDto { TimeInMinutes = 60, Transportation = "Walking" }
+            }
         };
 
         // Act
@@ -78,6 +85,7 @@ public class TourCommandTests : BaseToursIntegrationTest
         result.Difficulty.ShouldBe(2);
         result.Price.ShouldBe(999.99m);
         result.UpdatedAt.ShouldNotBeNull();
+        result.TourDurations.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -87,10 +95,12 @@ public class TourCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
 
-        service.Delete(-1, -11); 
+        var tempTour = service.Create(new TourCreateDto { Name = "To Delete", Description = "...", Difficulty = 0, Tags = new List<string> { "t" } }, -11);
+
+        service.Delete(tempTour.Id, -11); 
 
         // Verify by trying to get deleted tour
-        Should.Throw<Exception>(() => service.GetById(-1));
+        Should.Throw<Exception>(() => service.GetById(tempTour.Id));
     }
 
     [Fact]
@@ -112,9 +122,26 @@ public class TourCommandTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var tourDto = new TourCreateDto
+        {
+            Name = "Publish Test",
+            Description = "Desc",
+            Difficulty = 0,
+            Tags = new List<string> { "tag" }
+        };
+        var createdTour = service.Create(tourDto, -11);
+
+        var tourEntity = dbContext.Tours.Find(createdTour.Id);
+        tourEntity.UpdateTourDurations(new List<TourDuration> { new TourDuration(60, TransportType.Walking) });
+
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP1", "D1", "u", "s", 45.0, 19.0));
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP2", "D2", "u", "s", 45.1, 19.1));
+        dbContext.SaveChanges();
 
         // Act
-        var result = service.Publish(-3, -11);
+        var result = service.Publish(createdTour.Id, -11);
 
         // Assert
         result.ShouldNotBeNull();
@@ -136,7 +163,8 @@ public class TourCommandTests : BaseToursIntegrationTest
             Description = "Trying to hack",
             Difficulty = 0,
             Price = 0,
-            Tags = new List<string>()
+            Tags = new List<string>(),
+            TourDurations = new List<TourDurationDto>()
         };
 
         // Act & Assert

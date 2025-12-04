@@ -84,8 +84,8 @@ public class Tour : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // Metoda za privremeno objavljivanje ture dok se ne sredi zajednicki Publsh
-    public void TemporaryPublish()
+    
+    public void Publish()
     {
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description)) // || Tags == null || Tags.Count == 0 dodaj ovo vukasine
         {
@@ -113,8 +113,8 @@ public class Tour : Entity
         PublishedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
-
-    public void Publish()
+    // Metoda za privremeno objavljivanje ture dok se ne sredi zajednicki Publsh
+    public void TemporaryPublish()
     {
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Tags == null || Tags.Count == 0) 
         {

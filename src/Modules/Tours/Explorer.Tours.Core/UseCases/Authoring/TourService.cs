@@ -87,6 +87,17 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
+    public TourDto TemporaryPublish(long id, long authorId)
+    {
+        var tour = _tourRepository.GetById(id);
+        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only publish your own tours.");
+
+        tour.TemporaryPublish();
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
+
     // === IZMENJENO: Koristimo GetWithEquipment ===
     public TourDto AddEquipment(long tourId, long equipmentId, long authorId)
     {

@@ -58,7 +58,7 @@ public class TourPublishingTests : BaseToursIntegrationTest
         dbContext.SaveChanges();
 
         // Act
-        var result = service.Publish(tourDto.Id, -11);
+        var result = service.TemporaryPublish(tourDto.Id, -11);
 
         // Assert
         result.ShouldNotBeNull();
@@ -86,7 +86,7 @@ public class TourPublishingTests : BaseToursIntegrationTest
 
         // Act & Assert
         var exception = Should.Throw<InvalidOperationException>(() =>
-            service.Publish(tourDto.Id, -11)
+            service.TemporaryPublish(tourDto.Id, -11)
         );
         exception.Message.ShouldContain("2 key points");
     }
@@ -108,7 +108,7 @@ public class TourPublishingTests : BaseToursIntegrationTest
 
         // Act & Assert
         var exception = Should.Throw<InvalidOperationException>(() =>
-            service.Publish(tourDto.Id, -11)
+            service.TemporaryPublish(tourDto.Id, -11)
         );
         exception.Message.ShouldContain("duration defined");
     }
@@ -134,7 +134,7 @@ public class TourPublishingTests : BaseToursIntegrationTest
 
         // Act & Assert
         var exception = Should.Throw<InvalidOperationException>(() =>
-            service.Publish(tourDto.Id, -11)
+            service.TemporaryPublish(tourDto.Id, -11)
         );
         exception.Message.ShouldContain("Basic info is missing");
     }

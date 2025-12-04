@@ -13,9 +13,12 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public int AuthorId { get; private set; }
         public List<BlogImage> Images { get; private set; }
 
+        public List<BlogRating> Ratings { get; private set; }
+
         public Blog()
         {
             Images = new List<BlogImage>();
+            Ratings = new List<BlogRating>();
         }
 
         public Blog(string title, string description, int authorId, List<BlogImage> images = null)
@@ -28,6 +31,7 @@ namespace Explorer.Blog.Core.Domain.Blogs
             CreationDate = DateTime.UtcNow;
             AuthorId = authorId;
             Images = images ?? new List<BlogImage>();
+            Ratings = new List<BlogRating>();
         }
 
         /// <summary>
@@ -62,6 +66,31 @@ namespace Explorer.Blog.Core.Domain.Blogs
             var image = Images.FirstOrDefault(i => i.Id == imageId);
             if (image != null)
                 Images.Remove(image);
+        }
+
+        public void Rate(int userId, VoteType voteType, DateTime now)
+        {
+            // TODO: provera za status bloga (samo objavljeni)
+            var existingVote = Ratings.FirstOrDefault(r => r.UserId == userId);
+
+            if (existingVote == null)
+            {
+                var rating = new BlogRating(this.Id, userId, voteType, now);
+                Ratings.Add(rating);
+                return;
+            }
+
+            if (existingVote.VoteType == voteType)
+            {
+                Ratings.Remove(existingVote);
+                return;
+            }
+            existingVote.ChangeVote(voteType, now);
+        }
+
+        public int GetScore()
+        {
+            return Ratings.Sum(r => (int)r.VoteType);
         }
     }
 }

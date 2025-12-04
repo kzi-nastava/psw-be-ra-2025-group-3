@@ -18,6 +18,18 @@ namespace Explorer.API.Controllers.Author_Tourist
             _blogService = blogService;
         }
 
+        private int GetUserId()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id" || c.Type == ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
+
+            return userId;
+        }
+
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
@@ -82,6 +94,28 @@ namespace Explorer.API.Controllers.Author_Tourist
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        // POST api/blog/{id}/vote
+        [HttpPost("{id:long}/vote")]
+        public ActionResult<BlogVoteStateDto> Vote (long id, [FromBody] BlogVoteDto dto)
+        {
+            var userId = GetUserId();
+            if (dto.BlogId != 0 && dto.BlogId != id)
+                return BadRequest("BlogId in body does not match route id.");
+
+            var result = _blogService.Vote(id, userId, dto.IsUpvote);
+
+            return Ok(result);
+        }
+
+        // GET api/blog/{id}/vote
+        [HttpGet("{id:long}/vote")]
+        public ActionResult<BlogVoteStateDto> GetVoteState(long id)
+        {
+            var userId = GetUserId();
+            var result = _blogService.GetUserVoteState(id, userId);
+            return Ok(result);
         }
     }
 }

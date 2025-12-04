@@ -12,5 +12,8 @@ namespace Explorer.Blog.API.Public
         BlogDto CreateBlog(BlogDto blog);
         BlogDto UpdateBlog(BlogDto blog);
         List<BlogDto> GetUserBlogs(int userId);
+
+        BlogVoteStateDto Vote(long blogId, int userId, bool isUpvote);
+        BlogVoteStateDto GetUserVoteState(long blogId, int userId);
     }
 }

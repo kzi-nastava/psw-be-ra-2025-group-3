@@ -21,5 +21,6 @@ namespace Explorer.Blog.API.Dtos
         public int AuthorId { get; set; }
 
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
+        public List<BlogVoteDto> Ratings { get; set; } = new List<BlogVoteDto>();
     }
 }

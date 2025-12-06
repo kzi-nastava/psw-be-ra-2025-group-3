@@ -32,10 +32,10 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
                 ""Status"", ""ResolvedByTouristComment"", ""IsHighlighted"", ""AdminDeadline""
             )
             VALUES 
-            (-1, -1, -11, -21, 0, 2, 'Bus was 30 minutes late at pickup point', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
-            (-2, -1, -11, -21, 2, 1, 'Tour guide spoke too quietly, hard to hear explanations', '2024-11-15 10:15:00', '2024-11-15 12:00:00', NULL, 0, NULL, false, NULL),
-            (-3, -2, -12, -22, 3, 3, 'Main attraction was closed without prior notice', '2024-11-14 14:00:00', '2024-11-14 15:30:00', NULL, 0, NULL, false, NULL),
-            (-4, -1, -12, -21, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL, 0, NULL, false, NULL);
+            (-1, -1, -21, -11, 0, 2, 'Bus was 30 minutes late at pickup point', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
+            (-2, -1, -21, -11, 2, 1, 'Tour guide spoke too quietly, hard to hear explanations', '2024-11-15 10:15:00', '2024-11-15 12:00:00', NULL, 0, NULL, false, NULL),
+            (-3, -2, -22, -12, 3, 3, 'Main attraction was closed without prior notice', '2024-11-14 14:00:00', '2024-11-14 15:30:00', NULL, 0, NULL, false, NULL),
+            (-4, -1, -22, -11, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL, 0, NULL, false, NULL);
         ");
     }
 
@@ -46,8 +46,8 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act
-        var result = service.GetByTouristId(-11);
+        // Act - Get problems for tourist -21
+        var result = service.GetByTouristId(-21);
 
         // Assert
         result.ShouldNotBeNull();
@@ -61,13 +61,13 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act
-        var result = service.GetById(-1, -11);
+        // Act - Tourist -21 retrieves their problem
+        var result = service.GetById(-1, -21);
 
         // Assert
         result.ShouldNotBeNull();
         result.Id.ShouldBe(-1);
-        result.TouristId.ShouldBe(-11);
+        result.TouristId.ShouldBe(-21);
         result.Category.ShouldBe(0);
         result.Priority.ShouldBe(2);
     }
@@ -79,13 +79,13 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act & Assert
-        Should.Throw<Exception>(() => service.GetById(-1, -12));
+        // Act & Assert - Tourist -22 cannot view problem created by -21
+        Should.Throw<Exception>(() => service.GetById(-1, -22));
     }
 
     [Theory]
-    [InlineData(-21, 3)] // FIXED: Author -21 has 3 problems on his tours (-1, -2, and -4)
-    [InlineData(-22, 1)] // Author -22 has 1 problem on his tours (-3)
+    [InlineData(-11, 3)] // Author -11 has 3 problems on his tours (-1, -2, -4)
+    [InlineData(-12, 1)] // Author -12 has 1 problem on his tours (-3)
     public void Retrieves_problems_by_author_id(long authorId, int expectedCount)
     {
         // Arrange
@@ -108,13 +108,13 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act - Author -21 can view problem -1 on his tour
-        var result = service.GetById(-1, -21);
+        // Act - Author -11 can view problem -1 on his tour
+        var result = service.GetById(-1, -11);
 
         // Assert
         result.ShouldNotBeNull();
         result.Id.ShouldBe(-1);
-        result.AuthorId.ShouldBe(-21);
+        result.AuthorId.ShouldBe(-11);
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act & Assert - User -22 cannot view problem -1 (not tourist who reported it, not author)
-        Should.Throw<Exception>(() => service.GetById(-1, -22));
+        // Act & Assert - User -12 cannot view problem -1 (not tourist who reported it, not author)
+        Should.Throw<Exception>(() => service.GetById(-1, -12));
     }
 }

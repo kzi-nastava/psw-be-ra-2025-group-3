@@ -8,9 +8,9 @@ public class Notification : Entity
     public NotificationType Type { get; private set; }
     public long RelatedEntityId { get; private set; } //TourProblemID za nas task (Tour Issue Lifecycle)
     public string Message { get; private set; }
-    public bool IsRead { get; private set; }
+    public bool IsRead { get; set; }
     public DateTime CreatedAt { get; private set; }
-    public DateTime? ReadAt { get; private set; }
+    public DateTime? ReadAt { get; set; }
 
     public Notification(long recipientId, NotificationType type, long relatedEntityId, string message)
     {

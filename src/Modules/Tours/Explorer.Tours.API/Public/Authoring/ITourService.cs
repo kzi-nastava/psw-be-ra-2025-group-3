@@ -15,8 +15,8 @@ public interface ITourService
     TourDto GetById(long id);
     List<TourDto> GetByAuthorId(long authorId);
     TourDto Publish(long id, long authorId);
-    TourDto TemporaryPublish(long id, long authorId);
-
+    TourDto Archive(long id, long authorId);
+    TourDto Reactivate(long id, long authorId);
     TourDto AddEquipment(long tourId, long equipmentId, long authorId);
     TourDto RemoveEquipment(long tourId, long equipmentId, long authorId);
 

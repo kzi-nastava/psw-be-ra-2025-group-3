@@ -77,25 +77,6 @@ public class TourController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}/temporary-publish")]
-    public ActionResult<TourDto> TemporaryPublish(long id)
-    {
-        try
-        {
-            var authorId = GetAuthorId();
-            var result = _tourService.TemporaryPublish(id, authorId);
-            return Ok(result);
-        }
-        catch (InvalidOperationException e)
-        {
-            return BadRequest(e.Message);
-        }
-        catch (ArgumentException e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-
     [HttpPut("{tourId}/equipment/{equipmentId}")]
     public ActionResult<TourDto> AddEquipment(long tourId, long equipmentId)
     {

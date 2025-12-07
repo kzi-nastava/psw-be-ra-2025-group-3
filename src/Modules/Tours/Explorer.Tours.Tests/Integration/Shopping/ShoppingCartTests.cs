@@ -91,8 +91,20 @@ namespace Explorer.Tours.Tests.Integration.Shopping
 
         private static Tour CreateTourWithStatus(TourStatus status, decimal price, long id = 1)
         {
-            var tour = new Tour("Test tura", "Opis", TourDifficulty.Easy, -11);
-            tour.Update("Test tura", "Opis", TourDifficulty.Easy, price, null);
+            var tags = new List<string> { "cycling", "nature" };
+
+            var tour = new Tour("Test tura", "Opis", TourDifficulty.Easy, -11, tags);
+            tour.Update("Test tura", "Opis", TourDifficulty.Easy, price, tags);
+
+            tour.KeyPoints.Add(new KeyPoint(id, "Start Point", "Description", "image1.jpg", "secret", 45.25, 19.82));
+            tour.KeyPoints.Add(new KeyPoint(id, "End Point", "Description", "image2.jpg", "secret", 45.26, 19.83));
+
+            var durations = new List<TourDuration>
+            {
+                new TourDuration(60, TransportType.Walking),
+                new TourDuration(30, TransportType.Bicycle)
+            };
+            tour.UpdateTourDurations(durations);
 
             if (status == TourStatus.Published)
             {

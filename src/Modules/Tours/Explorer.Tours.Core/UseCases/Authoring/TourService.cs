@@ -78,22 +78,11 @@ public class TourService : ITourService
 
     public TourDto Publish(long id, long authorId)
     {
-        var tour = _tourRepository.GetById(id); // Za publish nam ne treba oprema
+        var tour = _tourRepository.GetByIdWithKeyPoints(id);
         if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only publish your own tours.");
 
         tour.Publish();
-        var result = _tourRepository.Update(tour);
-        return _mapper.Map<TourDto>(result);
-    }
-
-    public TourDto TemporaryPublish(long id, long authorId)
-    {
-        var tour = _tourRepository.GetById(id);
-        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
-        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only publish your own tours.");
-
-        tour.TemporaryPublish();
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
     }

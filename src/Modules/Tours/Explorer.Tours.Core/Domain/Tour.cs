@@ -7,7 +7,7 @@ using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain;
 
-public class Tour : Entity
+public class Tour : AggregateRoot
 {
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -84,37 +84,7 @@ public class Tour : Entity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    
     public void Publish()
-    {
-        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description)) // || Tags == null || Tags.Count == 0 dodaj ovo vukasine
-        {
-            throw new InvalidOperationException("Cannot publish: Basic info is missing.");
-        }
-
-        /*if (KeyPoints == null || KeyPoints.Count < 2)
-        {
-            throw new InvalidOperationException("Cannot publish: Tour must have at least 2 key points.");
-        }*/
-
-        /*if (TourDurations == null || TourDurations.Count < 1)
-        {
-            throw new InvalidOperationException("Cannot publish: Tour must have at least 1 transportation duration defined.");
-        }*/
-
-        if (Status == TourStatus.Published)
-            throw new InvalidOperationException("Tour is already published.");
-
-        // Ne moze se objaviti ako je arhivirana
-        if (Status == TourStatus.Archived)
-            throw new InvalidOperationException("Cannot publish an archived tour.");
-
-        Status = TourStatus.Published;
-        PublishedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-    // Metoda za privremeno objavljivanje ture dok se ne sredi zajednicki Publsh
-    public void TemporaryPublish()
     {
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Description) || Tags == null || Tags.Count == 0) 
         {

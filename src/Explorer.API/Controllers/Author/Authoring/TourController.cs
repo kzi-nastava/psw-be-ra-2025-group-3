@@ -77,6 +77,44 @@ public class TourController : ControllerBase
         }
     }
 
+    [HttpPatch("{id}/archive")]
+    public ActionResult<TourDto> Archive(long id)
+    {
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Archive(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpPatch("{id}/reactivate")]
+    public ActionResult<TourDto> Reactivate(long id)
+    {
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Reactivate(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
     [HttpPut("{tourId}/equipment/{equipmentId}")]
     public ActionResult<TourDto> AddEquipment(long tourId, long equipmentId)
     {

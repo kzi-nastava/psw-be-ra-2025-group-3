@@ -87,6 +87,28 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
+    public TourDto Archive(long id, long authorId)
+    {
+        var tour = _tourRepository.GetById(id);
+        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only archive your own tours.");
+
+        tour.Archive();
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
+
+    public TourDto Reactivate(long id, long authorId)
+    {
+        var tour = _tourRepository.GetById(id);
+        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only reactivate your own tours.");
+
+        tour.Reactivate();
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
+
     // === IZMENJENO: Koristimo GetWithEquipment ===
     public TourDto AddEquipment(long tourId, long equipmentId, long authorId)
     {

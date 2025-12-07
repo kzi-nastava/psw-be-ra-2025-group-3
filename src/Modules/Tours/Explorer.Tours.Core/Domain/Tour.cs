@@ -18,6 +18,7 @@ public class Tour : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public DateTime? PublishedAt { get; private set; }
+    public DateTime? ArchivedAt { get; private set; }
     public List<string> Tags { get; private set; } //Lista stringova
     public List<TourDuration> TourDurations { get; private set; }
 
@@ -26,7 +27,6 @@ public class Tour : AggregateRoot
 
     // lista ključnih tačaka za tour-execution
     public ICollection<KeyPoint> KeyPoints { get; private set; }
-
 
 
     // Prazan konstruktor za Entity Framework
@@ -111,6 +111,8 @@ public class Tour : AggregateRoot
         Status = TourStatus.Published;
         PublishedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        ArchivedAt = null;
     }
 
     // Metoda za arhiviranje ture
@@ -120,6 +122,17 @@ public class Tour : AggregateRoot
             throw new InvalidOperationException("Only published tours can be archived.");
 
         Status = TourStatus.Archived;
+        ArchivedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Reactivate()
+    {
+        if (Status != TourStatus.Archived)
+            throw new InvalidOperationException("Only archived tours can be reactivated.");
+
+        Status = TourStatus.Published;
+        ArchivedAt = null;
         UpdatedAt = DateTime.UtcNow;
     }
 

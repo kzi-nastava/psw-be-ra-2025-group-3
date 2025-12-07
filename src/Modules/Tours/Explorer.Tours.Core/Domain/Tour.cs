@@ -7,7 +7,7 @@ using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain;
 
-public class Tour : Entity
+public class Tour : AggregateRoot
 {
     public string Name { get; private set; }
     public string Description { get; private set; }

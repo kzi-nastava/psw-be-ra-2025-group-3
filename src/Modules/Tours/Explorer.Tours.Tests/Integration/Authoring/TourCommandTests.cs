@@ -71,7 +71,7 @@ public class TourCommandTests : BaseToursIntegrationTest
             Status = "Draft",
             TourDurations = new List<TourDurationDto>
             {
-                new TourDurationDto { TimeInMinutes = 60, Transportation = "Walking" }
+                new TourDurationDto { TimeInMinutes = 60, TransportType = 0 }
             }
         };
 

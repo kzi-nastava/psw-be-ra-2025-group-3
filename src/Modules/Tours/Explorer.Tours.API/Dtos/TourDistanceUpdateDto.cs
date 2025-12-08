@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Explorer.Tours.API.Dtos
 {
-    internal class TourDistanceUpdateDto
+    public class TourDistanceUpdateDto
     {
+        public double DistanceInKm { get; set; }
     }
 }

@@ -137,4 +137,17 @@ public class TourService : ITourService
         var tours = _tourRepository.GetPublished();
         return _mapper.Map<List<TourDto>>(tours);
     }
+
+    // Azuriranje duzine ture (u km)
+    public TourDto UpdateDistance(long tourId, double distanceInKm, long authorId)
+    {
+        var tour = _tourRepository.GetById(tourId);
+        if (tour == null) throw new NotFoundException($"Tour with id {tourId} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only update your own tours.");
+
+        tour.UpdateDistance(distanceInKm);
+
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
 }

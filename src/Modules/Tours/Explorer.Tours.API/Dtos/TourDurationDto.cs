@@ -9,6 +9,6 @@ namespace Explorer.Tours.API.Dtos
     public class TourDurationDto
     {
         public int TimeInMinutes { get; set; }
-        public string Transportation { get; set; }
+        public int TransportType { get; set; }
     }
 }

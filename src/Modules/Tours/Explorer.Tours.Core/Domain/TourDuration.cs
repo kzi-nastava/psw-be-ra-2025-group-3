@@ -11,19 +11,19 @@ namespace Explorer.Tours.Core.Domain
     public class TourDuration : ValueObject
     {
         public int TimeInMinutes { get; private set; }
-        public TransportType Transportation { get; private set; }
+        public TransportType TransportType { get; private set; }
 
         [JsonConstructor]
-        public TourDuration(int timeInMinutes, TransportType transportation)
+        public TourDuration(int timeInMinutes, TransportType transportType)
         {
             TimeInMinutes = timeInMinutes;
-            Transportation = transportation;
+            TransportType = transportType;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return TimeInMinutes;
-            yield return Transportation;
+            yield return TransportType;
         }
     }
 }

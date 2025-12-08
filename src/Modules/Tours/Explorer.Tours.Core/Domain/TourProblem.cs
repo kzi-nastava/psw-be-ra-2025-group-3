@@ -17,7 +17,6 @@ public class TourProblem : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public long AuthorId { get; private set; }
-
     public TourProblemStatus Status { get; private set; }
     public string? ResolvedByTouristComment { get; private set; }
     public List<Message> Messages { get; private set; } // Za agregaciju poruka vezanih za problem

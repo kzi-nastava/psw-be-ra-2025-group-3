@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.BuildingBlocks.Core.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Explorer.Tours.Core.UseCases.Tourist;
 
@@ -14,12 +15,14 @@ public class TourProblemService : ITourProblemService
 {
     private readonly ITourProblemRepository _tourProblemRepository;
     private readonly ITourRepository _tourRepository;
+    private readonly INotificationService _notificationService;
     private readonly IMapper _mapper;
 
-    public TourProblemService(ITourProblemRepository repository, ITourRepository tourRepository, IMapper mapper)
+    public TourProblemService(ITourProblemRepository repository, ITourRepository tourRepository, INotificationService notificationService, IMapper mapper)
     {
         _tourProblemRepository = repository;
         _tourRepository = tourRepository;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -115,6 +118,12 @@ public class TourProblemService : ITourProblemService
         // Sacuvaj agregat
         var result = _tourProblemRepository.Update(problem);
 
+        // Kreiraj notifikaciju
+        _notificationService.CreateProblemResolvedNotification(
+        recipientId: problem.AuthorId,
+        problemId: problemId
+        );
+
         return _mapper.Map<TourProblemDto>(result);
     }
 
@@ -135,6 +144,12 @@ public class TourProblemService : ITourProblemService
         // Sacuvaj agregat
         var result = _tourProblemRepository.Update(problem);
 
+        // Kreiraj notifikaciju
+        _notificationService.CreateProblemUnresolvedNotification(
+        recipientId: problem.AuthorId,
+        problemId: problemId
+        );
+
         return _mapper.Map<TourProblemDto>(result);
     }
 
@@ -146,7 +161,7 @@ public class TourProblemService : ITourProblemService
 
     public TourProblemDto AddMessage(long problemId, long authorId, string content, int authorType)
     {
-        // 1. Ucitaj agregat
+        // Ucitaj agregat
         var problem = _tourProblemRepository.GetById(problemId);
         if (problem == null)
             throw new NotFoundException($"Tour problem with id {problemId} not found.");
@@ -154,11 +169,32 @@ public class TourProblemService : ITourProblemService
         // Validacija
         var authorTypeEnum = (AuthorType)authorType;
 
-        // 2. Pozovi metodu 
+        // Pozovi metodu 
         problem.AddMessage(authorId, content, authorTypeEnum);
 
-        // 3. Sacuvaj agregat
+        // Sacuvaj agregat
         var result = _tourProblemRepository.Update(problem);
+
+
+        // Kreiraj notifikaciju
+        if (authorType == (int)AuthorType.Tourist)
+        {
+            // Turista poslao poruku -> notifikuj autora
+            _notificationService.CreateNewMessageNotification(
+                recipientId: problem.AuthorId,
+                problemId: problemId,
+                senderType: "Tourist"
+            );
+        }
+        else if (authorType == (int)AuthorType.Author)
+        {
+            // Autor poslao poruku -> notifikuj turista
+            _notificationService.CreateNewMessageNotification(
+                recipientId: problem.TouristId,
+                problemId: problemId,
+                senderType: "Author"
+            );
+        }
 
         return _mapper.Map<TourProblemDto>(result);
     }

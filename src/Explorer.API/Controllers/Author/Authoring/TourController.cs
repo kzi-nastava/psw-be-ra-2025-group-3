@@ -77,13 +77,32 @@ public class TourController : ControllerBase
         }
     }
 
-    [HttpPatch("{id}/temporary-publish")]
-    public ActionResult<TourDto> TemporaryPublish(long id)
+    [HttpPatch("{id}/archive")]
+    public ActionResult<TourDto> Archive(long id)
     {
         try
         {
             var authorId = GetAuthorId();
-            var result = _tourService.TemporaryPublish(id, authorId);
+            var result = _tourService.Archive(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpPatch("{id}/reactivate")]
+    public ActionResult<TourDto> Reactivate(long id)
+    {
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Reactivate(id, authorId);
             return Ok(result);
         }
         catch (InvalidOperationException e)

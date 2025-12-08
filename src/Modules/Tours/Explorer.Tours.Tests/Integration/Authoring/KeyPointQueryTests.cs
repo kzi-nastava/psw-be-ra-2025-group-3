@@ -11,6 +11,8 @@ namespace Explorer.Tours.Tests.Integration.Authoring;
 [Collection("Sequential")]
 public class KeyPointQueryTests : BaseToursIntegrationTest
 {
+    private const long AuthorId = -11;   // isti author kao u ostalim testovima
+
     public KeyPointQueryTests(ToursTestFactory factory) : base(factory) { }
 
     private long CreateTestTour(ITourService tourService)
@@ -23,7 +25,7 @@ public class KeyPointQueryTests : BaseToursIntegrationTest
             Tags = new List<string> { "kp-query" }
         };
 
-        var created = tourService.Create(tourDto, -11);
+        var created = tourService.Create(tourDto, AuthorId);
         created.Id.ShouldNotBe(0);
         return created.Id;
     }
@@ -46,7 +48,7 @@ public class KeyPointQueryTests : BaseToursIntegrationTest
             Secret = "Tajna",
             Latitude = 45.4,
             Longitude = 19.5
-        });
+        }, AuthorId);
 
         // Act
         var result = keyPointService.GetById(created.Id);
@@ -67,7 +69,6 @@ public class KeyPointQueryTests : BaseToursIntegrationTest
 
         // Act & Assert
         Should.Throw<NotFoundException>(() => keyPointService.GetById(123456789)); // ID koji sigurno ne postoji
-
     }
 
     [Fact]
@@ -88,7 +89,7 @@ public class KeyPointQueryTests : BaseToursIntegrationTest
             Secret = "Tajna 1",
             Latitude = 45.0,
             Longitude = 19.8
-        });
+        }, AuthorId);
 
         keyPointService.Create(new KeyPointDto
         {
@@ -99,10 +100,10 @@ public class KeyPointQueryTests : BaseToursIntegrationTest
             Secret = "Tajna 2",
             Latitude = 45.1,
             Longitude = 19.9
-        });
+        }, AuthorId);
 
         // Act
-        var page = keyPointService.GetPaged(0, 10);
+        var page = keyPointService.GetPaged(tourId, 0, 10);
 
         // Assert
         page.ShouldNotBeNull();

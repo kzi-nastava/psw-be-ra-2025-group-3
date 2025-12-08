@@ -35,8 +35,7 @@ public class TourService : ITourService
 
     public TourDto Update(TourUpdateDto tourDto, long authorId)
     {
-        // Ovde je OK koristiti obican GetById jer Update ne dira opremu direktno
-        // (osim ako ne zelis da vratis opremu u responsu, onda stavi GetWithEquipment)
+
         var tour = _tourRepository.GetById(tourDto.Id);
 
         if (tour == null) throw new NotFoundException($"Tour with id {tourDto.Id} not found.");
@@ -61,8 +60,6 @@ public class TourService : ITourService
         _tourRepository.Delete(id);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
-    // Ovo je kljucno da bi Edit forma na frontendu dobila listu opreme
     public TourDto GetById(long id)
     {
         var tour = _tourRepository.GetWithEquipment(id);
@@ -109,10 +106,8 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
     public TourDto AddEquipment(long tourId, long equipmentId, long authorId)
     {
-        // Moramo ucitati opremu da bi domenska logika (Contains) radila ispravno
         var tour = _tourRepository.GetWithEquipment(tourId);
         if (tour == null) throw new NotFoundException($"Tour with ID {tourId} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("Only the author can add equipment.");
@@ -126,10 +121,8 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
     public TourDto RemoveEquipment(long tourId, long equipmentId, long authorId)
     {
-        // Isto kao za Add, moramo znati sta je unutra
         var tour = _tourRepository.GetWithEquipment(tourId);
         if (tour == null) throw new NotFoundException($"Tour with ID {tourId} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("Only the author can remove equipment.");

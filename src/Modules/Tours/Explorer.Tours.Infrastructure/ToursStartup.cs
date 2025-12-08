@@ -39,7 +39,7 @@ public static class ToursStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
-        services.AddScoped<ITourService, TourService>(); // DODATO
+        services.AddScoped<ITourService, TourService>(); 
 
         services.AddScoped<IFacilityService, FacilityService>();
 
@@ -62,12 +62,14 @@ public static class ToursStartup
 
         services.AddScoped<ITourReviewService, TourReviewService>();
 
+        services.AddScoped<ITouristTourService, TouristTourService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
-        services.AddScoped<ITourRepository, TourDbRepository>(); // DODATO
+        services.AddScoped<ITourRepository, TourDbRepository>(); 
 
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
 

@@ -9,25 +9,18 @@ public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<Tour> Tours { get; set; }
-
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
-
     public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
-
     public DbSet<TourProblem> TourProblems { get; set; }
-
     public DbSet<Position> Positions { get; set; }
-
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
-
     public DbSet<KeyPoint> KeyPoints { get; set; }
-
     public DbSet<Message> Messages { get; set; }
     public DbSet<TourExecution> TourExecutions { get; set; }
-
     public DbSet<TourReview> TourReviews { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
@@ -140,14 +133,12 @@ public class ToursContext : DbContext
                 );
         });
 
-        // Podtask 1 
         modelBuilder.Entity<TourProblem>()
             .HasMany(tp => tp.Messages)           
             .WithOne()                            
-            .HasForeignKey("TourProblemId")        // Foreign key u Message tabeli
-            .OnDelete(DeleteBehavior.Cascade);     // Brisanje TourProblem-a brise sve Messages
+            .HasForeignKey("TourProblemId")        
+            .OnDelete(DeleteBehavior.Cascade);     
 
-        // Enum konverzije
         modelBuilder.Entity<TourProblem>()
             .Property(tp => tp.Status)
             .HasConversion<int>();
@@ -155,6 +146,15 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Message>()
             .Property(m => m.AuthorType)
             .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Type)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.RecipientId, n.IsRead })
+            .HasDatabaseName("IX_Notifications_RecipientId_IsRead");
+
         modelBuilder.Entity<TourExecution>(builder =>
         {
             builder.ToTable("TourExecutions", "tours");

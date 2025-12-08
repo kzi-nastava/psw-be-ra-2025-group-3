@@ -39,59 +39,38 @@ public static class ToursStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEquipmentService, EquipmentService>();
-        services.AddScoped<ITourService, TourService>(); 
-
+        services.AddScoped<ITourService, TourService>();
         services.AddScoped<IFacilityService, FacilityService>();
-
-        services.AddScoped<IPositionService,PositionService>();
+        services.AddScoped<IPositionService, PositionService>();
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
-
         services.AddScoped<IMonumentService, MonumentService>();
-
         services.AddScoped<IAwardEventService, AwardEventService>();
-
         services.AddScoped<ITourProblemService, TourProblemService>();
-
         services.AddScoped<IInternalEquipmentService, InternalEquipmentService>();
-
         services.AddScoped<IShoppingCartService, ShoppingCartService>();
-
         services.AddScoped<IKeyPointService, KeyPointService>();
-
         services.AddScoped<ITourExecutionService, TourExecutionService>();
-
         services.AddScoped<ITourReviewService, TourReviewService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.AddScoped<ITouristTourService, TouristTourService>();
-
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEquipmentRepository, EquipmentDbRepository>();
-        services.AddScoped<ITourRepository, TourDbRepository>(); 
-
+        services.AddScoped<ITourRepository, TourDbRepository>();
         services.AddScoped<IFacilityRepository, FacilityDbRepository>();
-
         services.AddScoped<IPositionRepository, PositionDbRepository>();
-
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
-
         services.AddScoped<IAwardEventRepository, AwardEventRepository>();
-
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
-
         services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
-
-
         services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
-
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
-
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
-
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
-
+        services.AddScoped<INotificationRepository, NotificationDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

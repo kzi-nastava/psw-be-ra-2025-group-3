@@ -141,4 +141,13 @@ public class TourController : ControllerBase
         }
         return authorId;
     }
+
+    // Metoda za azuriranje duzine ture (u km)
+    [HttpPut("{id:long}/distance")]
+    public ActionResult<TourDto> UpdateDistance(long id, [FromBody] TourDistanceUpdateDto dto)
+    {
+        var authorId = GetAuthorId();
+        var result = _tourService.UpdateDistance(id, dto.DistanceInKm, authorId);
+        return Ok(result);
+    }
 }

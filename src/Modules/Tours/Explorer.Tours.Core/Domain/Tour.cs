@@ -14,6 +14,7 @@ public class Tour : AggregateRoot
     public TourDifficulty Difficulty { get; private set; }
     public TourStatus Status { get; private set; }
     public decimal Price { get; private set; }
+    public double DistanceInKm { get; private set; }
     public long AuthorId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
@@ -46,6 +47,7 @@ public class Tour : AggregateRoot
         Difficulty = difficulty;
         Status = TourStatus.Draft; // Default Draft
         Price = 0; // Default 0
+        DistanceInKm = 0; // Inicijalizacija duzine ture na 0
         AuthorId = authorId;
         CreatedAt = DateTime.UtcNow;
         Tags = tags ?? new List<string>(); // Inicijalizacija prazne liste ako nije prosleđena
@@ -160,5 +162,13 @@ public class Tour : AggregateRoot
             Equipment.Remove(equipment);
             UpdatedAt = DateTime.UtcNow;
         }
+    }
+    public void UpdateDistance(double distanceInKm)
+    {
+        if (distanceInKm < 0)
+            throw new ArgumentException("Distance cannot be negative.");
+
+        DistanceInKm = distanceInKm;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -23,11 +23,23 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _dbSet = DbContext.Set<KeyPoint>();
         }
 
-        public PagedResult<KeyPoint> GetPaged(int page, int pageSize)
+        public PagedResult<KeyPoint> GetPaged(long tourId, int page, int pageSize)
         {
-            var task = _dbSet.GetPagedById(page, pageSize);
-            task.Wait();
-            return task.Result;
+            // filtriramo po turi
+            var query = _dbSet
+                .Where(kp => kp.TourId == tourId)
+                .OrderBy(kp => kp.Id);
+
+            // ukupno elemenata za tu turu
+            var totalCount = query.Count();
+
+            // stranica
+            var items = query
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<KeyPoint>(items, totalCount);
         }
 
         public KeyPoint Get(long id)

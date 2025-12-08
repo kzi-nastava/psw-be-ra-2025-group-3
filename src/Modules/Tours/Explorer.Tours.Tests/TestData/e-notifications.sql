@@ -1,4 +1,6 @@
-﻿INSERT INTO tours."Notifications" 
+﻿DELETE FROM tours."Notifications";
+
+INSERT INTO tours."Notifications" 
 ("Id", "RecipientId", "Type", "RelatedEntityId", "Message", "IsRead", "CreatedAt", "ReadAt")
 VALUES 
 (-1, -11, 0, -99, 'Tourist sent a new message on problem: Bus was 30 minutes late at pickup point', false, '2024-12-06 10:30:00', NULL),

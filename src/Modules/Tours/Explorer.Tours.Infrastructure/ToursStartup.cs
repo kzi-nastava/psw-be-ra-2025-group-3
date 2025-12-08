@@ -41,7 +41,7 @@ public static class ToursStartup
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<IFacilityService, FacilityService>();
-        services.AddScoped<IPositionService,PositionService>();
+        services.AddScoped<IPositionService, PositionService>();
         services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IAwardEventService, AwardEventService>();
@@ -52,7 +52,8 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionService, TourExecutionService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<INotificationService, NotificationService>();
-        
+
+        services.AddScoped<ITouristTourService, TouristTourService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -70,7 +71,6 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<INotificationRepository, NotificationDbRepository>();
-
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();

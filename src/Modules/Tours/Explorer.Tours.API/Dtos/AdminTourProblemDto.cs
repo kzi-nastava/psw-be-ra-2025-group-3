@@ -24,4 +24,7 @@ public class AdminTourProblemDto
     public int DaysOpen { get; set; }
     
     public List<MessageDto> Messages { get; set; } = new();
+
+    public DateTime? AdminDeadline { get; set; }
+    public bool IsDeadlineExpired { get; set; }
 }

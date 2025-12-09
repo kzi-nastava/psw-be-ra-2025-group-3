@@ -59,7 +59,10 @@ public class AdminTourProblemService : IAdminTourProblemService
         
         dto.IsOverdue = problem.IsOverdue();
         dto.DaysOpen = problem.GetDaysOpen();
-        
+
+        dto.AdminDeadline = problem.AdminDeadline;
+        dto.IsDeadlineExpired = problem.IsDeadlineExpired();
+
         return dto;
     }
 

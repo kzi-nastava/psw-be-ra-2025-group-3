@@ -41,8 +41,15 @@ public class AdminTourProblemController : ControllerBase
     [HttpPost("{id}/deadline")]
     public IActionResult SetDeadline(long id, [FromBody] AdminDeadlineDto dto)
     {
-        _adminTourProblemService.SetDeadline(id, dto.Deadline);
-        return Ok();
+        try
+        {
+            _adminTourProblemService.SetDeadline(id, dto.Deadline);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("{id}/close")]

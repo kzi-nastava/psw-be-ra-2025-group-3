@@ -22,8 +22,10 @@ public class TourProblemProfile : Profile
             .ForMember(dest => dest.AuthorType, opt => opt.MapFrom(src => (int)src.AuthorType));
 
         CreateMap<TourProblem, AdminTourProblemDto>()
-            .ForMember(dest => dest.TourName, opt => opt.Ignore()) 
+            .ForMember(dest => dest.TourName, opt => opt.Ignore())
             .ForMember(dest => dest.IsOverdue, opt => opt.Ignore())
-            .ForMember(dest => dest.DaysOpen, opt => opt.Ignore());
+            .ForMember(dest => dest.DaysOpen, opt => opt.Ignore())
+            .ForMember(dest => dest.AdminDeadline, opt => opt.MapFrom(src => src.AdminDeadline))
+            .ForMember(dest => dest.IsDeadlineExpired, opt => opt.MapFrom(src => src.IsDeadlineExpired()));
     }
 }

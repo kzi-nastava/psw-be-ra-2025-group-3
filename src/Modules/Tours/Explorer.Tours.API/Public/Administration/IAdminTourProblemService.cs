@@ -1,0 +1,11 @@
+﻿using System.Collections.Generic;
+using Explorer.Tours.API.Dtos;
+
+namespace Explorer.Tours.API.Public.Administration;
+
+public interface IAdminTourProblemService
+{
+    List<AdminTourProblemDto> GetAll();
+    AdminTourProblemDto GetById(long id);
+    List<AdminTourProblemDto> GetOverdue(int daysThreshold = 5);
+}

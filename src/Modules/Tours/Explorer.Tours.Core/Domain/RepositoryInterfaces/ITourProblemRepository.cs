@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.Core.Domain;
+﻿using System.Collections.Generic;
+using Explorer.Tours.Core.Domain;
 
 namespace Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
@@ -12,4 +13,8 @@ public interface ITourProblemRepository
 
     //Podtask 1
     List<TourProblem> GetByAuthorId(long authorId);
+
+    // Podtask 4 - za admina:
+    List<TourProblem> GetAll(); 
+    List<TourProblem> GetOverdue(int daysThreshold);
 }

@@ -65,5 +65,22 @@ public class TourProblemDbRepository : ITourProblemRepository
             .ToList();
     }
 
+    public List<TourProblem> GetAll()
+    {
+        return _context.TourProblems
+            .Include(tp => tp.Messages)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
 
+    public List<TourProblem> GetOverdue(int daysThreshold)
+    {
+        var cutoffDate = DateTime.UtcNow.AddDays(-daysThreshold);
+        
+        return _context.TourProblems
+            .Include(tp => tp.Messages)
+            .Where(p => p.Status == TourProblemStatus.Open && p.CreatedAt <= cutoffDate) 
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
 }

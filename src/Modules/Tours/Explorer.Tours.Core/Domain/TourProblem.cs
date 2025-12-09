@@ -3,6 +3,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.Core.Domain;
 
@@ -124,7 +125,17 @@ public class TourProblem : AggregateRoot
 
         var message = new Message(authorId, content.Trim(), authorType);
         Messages.Add(message);
+    }
 
+    //metode za admina:
+    public bool IsOverdue(int daysThreshold = 5)
+    {
+        return Status == TourProblemStatus.Open 
+            && (DateTime.UtcNow - CreatedAt).TotalDays > daysThreshold;
+    }
 
+    public int GetDaysOpen()
+    {
+        return (int)(DateTime.UtcNow - CreatedAt).TotalDays;
     }
 }

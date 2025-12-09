@@ -75,11 +75,11 @@ public class TourProblemDbRepository : ITourProblemRepository
 
     public List<TourProblem> GetOverdue(int daysThreshold)
     {
-        var cutoffDate = DateTime.UtcNow.AddDays(-daysThreshold);
+        var cutoffDate = DateTime.UtcNow.Date.AddDays(-daysThreshold);
         
         return _context.TourProblems
             .Include(tp => tp.Messages)
-            .Where(p => p.Status == TourProblemStatus.Open && p.CreatedAt <= cutoffDate) 
+            .Where(p => p.Status == TourProblemStatus.Open && p.CreatedAt.Date < cutoffDate)
             .OrderByDescending(p => p.CreatedAt)
             .ToList();
     }

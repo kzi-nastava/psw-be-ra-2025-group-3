@@ -14,4 +14,5 @@ public interface ITourReviewRepository
     TourReview? GetByTouristAndTour(long touristId, long tourId);
     List<TourReview> GetAllForTour(long tourId);
     bool HasReview(long touristId, long tourId);
+    TourReview? GetByIdWithImages(long id);
 }

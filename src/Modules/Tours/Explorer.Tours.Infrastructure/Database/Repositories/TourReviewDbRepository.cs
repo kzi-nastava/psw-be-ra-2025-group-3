@@ -2,6 +2,7 @@
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories;
 
@@ -36,6 +37,7 @@ public class TourReviewDbRepository : ITourReviewRepository
     public TourReview? GetByTouristAndTour(long touristId, long tourId)
     {
         return _context.TourReviews
+            .Include(r => r.Images)
             .FirstOrDefault(r => r.TouristId == touristId && r.TourId == tourId);
     }
 
@@ -43,6 +45,7 @@ public class TourReviewDbRepository : ITourReviewRepository
     {
         return _context.TourReviews
             .Where(r => r.TourId == tourId)
+            .Include(r => r.Images)
             .OrderByDescending(r => r.CreatedAt)
             .ToList();
     }
@@ -51,5 +54,11 @@ public class TourReviewDbRepository : ITourReviewRepository
     {
         return _context.TourReviews
             .Any(r => r.TouristId == touristId && r.TourId == tourId);
+    }
+    public TourReview? GetByIdWithImages(long id)
+    {
+        return _context.TourReviews
+            .Include(r => r.Images)  
+            .FirstOrDefault(r => r.Id == id);
     }
 }

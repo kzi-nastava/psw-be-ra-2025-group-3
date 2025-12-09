@@ -22,6 +22,8 @@ public class ToursContext : DbContext
     public DbSet<TourReview> TourReviews { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
+    public DbSet<ReviewImage> ReviewImages { get; set; }
+
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
@@ -209,5 +211,11 @@ public class ToursContext : DbContext
             builder.HasIndex(r => new { r.TourId, r.TouristId }).IsUnique();
             builder.HasIndex(r => r.TourId);
         });
+
+        modelBuilder.Entity<ReviewImage>()
+          .HasOne(ri => ri.TourReview)
+          .WithMany(tr => tr.Images)
+          .HasForeignKey(ri => ri.TourReviewId)
+          .OnDelete(DeleteBehavior.Cascade);  // Kad se obriše recenzija, brišu se i slike
     }
 }

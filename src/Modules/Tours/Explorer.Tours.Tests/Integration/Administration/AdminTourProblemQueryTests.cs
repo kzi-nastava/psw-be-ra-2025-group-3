@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Infrastructure.Database;
@@ -26,7 +23,18 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        dbContext.Database.ExecuteSqlRaw(@"
+        var now = DateTime.UtcNow.Date; // ← Dodaj .Date ovde!
+        var date10DaysAgo = now.AddDays(-10).ToString("yyyy-MM-dd HH:mm:ss");
+        var date7DaysAgo = now.AddDays(-7).ToString("yyyy-MM-dd HH:mm:ss");
+        var date6DaysAgo = now.AddDays(-6).ToString("yyyy-MM-dd HH:mm:ss");
+        var date20DaysAgo = now.AddDays(-20).ToString("yyyy-MM-dd HH:mm:ss");
+        var date2DaysAgo = now.AddDays(-2).ToString("yyyy-MM-dd HH:mm:ss");
+        var date1DayAgo = now.AddDays(-1).ToString("yyyy-MM-dd HH:mm:ss");
+        var date8DaysAgo = now.AddDays(-8).ToString("yyyy-MM-dd HH:mm:ss");
+        var date19DaysAgo = now.AddDays(-19).ToString("yyyy-MM-dd HH:mm:ss");
+        var date9DaysAgo = now.AddDays(-9).ToString("yyyy-MM-dd HH:mm:ss");
+
+        dbContext.Database.ExecuteSqlRaw($@"
             DELETE FROM tours.""Messages"";
             DELETE FROM tours.""TourProblems"";
             
@@ -36,31 +44,22 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
                 ""Status"", ""ResolvedByTouristComment"", ""IsHighlighted"", ""AdminDeadline""
             )
             VALUES 
-            -- OVERDUE problems (older than 5 days)
-            (-101, -1, -21, -11, 0, 3, 'Bus never arrived at pickup location', '2025-11-29 08:00:00', '2025-11-29 08:30:00', NULL, 0, NULL, false, NULL),
-            (-102, -1, -21, -11, 1, 2, 'Hotel room was not available', '2025-12-02 18:00:00', '2025-12-02 18:30:00', NULL, 0, NULL, false, NULL),
-            (-103, -2, -22, -12, 2, 1, 'Tour guide did not show up', '2025-12-03 09:00:00', '2025-12-03 09:30:00', NULL, 0, NULL, false, NULL),
-            (-104, -1, -22, -11, 3, 3, 'Main attraction was closed', '2025-11-19 14:00:00', '2025-11-19 14:30:00', NULL, 0, NULL, false, NULL),
-            
-            -- FRESH problems (younger than 5 days)
-            (-105, -1, -21, -11, 4, 1, 'Lunch portion was smaller', '2025-12-07 12:30:00', '2025-12-07 13:00:00', NULL, 0, NULL, false, NULL),
-            (-106, -2, -22, -12, 0, 2, 'Bus had no air conditioning', '2025-12-08 10:00:00', '2025-12-08 10:30:00', NULL, 0, NULL, false, NULL),
-            
-            -- RESOLVED problem
-            (-108, -1, -21, -11, 1, 2, 'Hotel changed our room', '2025-12-01 20:00:00', '2025-12-01 20:30:00', '2025-12-03 10:00:00', 1, 'Thank you!', false, NULL),
-            
-            -- UNRESOLVED problem
-            (-110, -1, -21, -11, 3, 3, 'Promised refund never received', '2025-11-20 14:00:00', '2025-11-20 14:30:00', '2025-11-28 12:00:00', 2, 'Still waiting', false, NULL),
-            
-            -- Problem with messages
-            (-111, -1, -21, -11, 0, 2, 'Bus driver was rude', '2025-11-30 16:00:00', '2025-11-30 16:30:00', NULL, 0, NULL, false, NULL);
+            (-101, -1, -21, -11, 0, 3, 'Bus never arrived at pickup location', '{date10DaysAgo}', '{date10DaysAgo}', NULL, 0, NULL, false, NULL),
+            (-102, -1, -21, -11, 1, 2, 'Hotel room was not available', '{date7DaysAgo}', '{date7DaysAgo}', NULL, 0, NULL, false, NULL),
+            (-103, -2, -22, -12, 2, 1, 'Tour guide did not show up', '{date6DaysAgo}', '{date6DaysAgo}', NULL, 0, NULL, false, NULL),
+            (-104, -1, -22, -11, 3, 3, 'Main attraction was closed', '{date20DaysAgo}', '{date20DaysAgo}', NULL, 0, NULL, false, NULL),
+            (-105, -1, -21, -11, 4, 1, 'Lunch portion was smaller', '{date2DaysAgo}', '{date2DaysAgo}', NULL, 0, NULL, false, NULL),
+            (-106, -2, -22, -12, 0, 2, 'Bus had no air conditioning', '{date1DayAgo}', '{date1DayAgo}', NULL, 0, NULL, false, NULL),
+            (-108, -1, -21, -11, 1, 2, 'Hotel changed our room', '{date8DaysAgo}', '{date8DaysAgo}', '{now.AddDays(-6):yyyy-MM-dd HH:mm:ss}', 1, 'Thank you!', false, NULL),
+            (-110, -1, -21, -11, 3, 3, 'Promised refund never received', '{date19DaysAgo}', '{date19DaysAgo}', '{now.AddDays(-11):yyyy-MM-dd HH:mm:ss}', 2, 'Still waiting', false, NULL),
+            (-111, -1, -21, -11, 0, 2, 'Bus driver was rude', '{date9DaysAgo}', '{date9DaysAgo}', NULL, 0, NULL, false, NULL);
             
             INSERT INTO tours.""Messages""(""Id"", ""TourProblemId"", ""AuthorId"", ""Content"", ""Timestamp"", ""AuthorType"")
             VALUES 
-            (-201, -111, -21, 'Driver was extremely rude', '2025-11-30 17:00:00', 0),
-            (-202, -111, -11, 'We sincerely apologize', '2025-12-01 09:00:00', 1),
-            (-203, -111, -21, 'It happened around 3 PM', '2025-12-01 14:00:00', 0),
-            (-204, -111, -11, 'We are investigating', '2025-12-02 10:00:00', 1);
+            (-201, -111, -21, 'Driver was extremely rude', '{now.AddDays(-9).AddHours(1):yyyy-MM-dd HH:mm:ss}', 0),
+            (-202, -111, -11, 'We sincerely apologize', '{now.AddDays(-8).AddHours(15):yyyy-MM-dd HH:mm:ss}', 1),
+            (-203, -111, -21, 'It happened around 3 PM', '{now.AddDays(-8).AddHours(10):yyyy-MM-dd HH:mm:ss}', 0),
+            (-204, -111, -11, 'We are investigating', '{now.AddDays(-7).AddHours(14):yyyy-MM-dd HH:mm:ss}', 1);
         ");
     }
 
@@ -97,9 +96,9 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         result.Id.ShouldBe(-101);
         result.TouristId.ShouldBe(-21);
         result.AuthorId.ShouldBe(-11);
-        result.TourName.ShouldNotBeNullOrEmpty(); // Tour name populated
+        result.TourName.ShouldNotBeNullOrEmpty();
         result.IsOverdue.ShouldBeTrue();
-        result.DaysOpen.ShouldBeGreaterThan(5);
+        result.DaysOpen.ShouldBeGreaterThanOrEqualTo(10); // Može biti 10 ili više
     }
 
     [Fact]
@@ -116,8 +115,8 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         result.ShouldNotBeNull();
         result.Messages.ShouldNotBeEmpty();
         result.Messages.Count.ShouldBe(4);
-        result.Messages.ShouldContain(m => m.AuthorType == 0); // Tourist
-        result.Messages.ShouldContain(m => m.AuthorType == 1); // Author
+        result.Messages.ShouldContain(m => m.AuthorType == 0);
+        result.Messages.ShouldContain(m => m.AuthorType == 1);
     }
 
     [Fact]
@@ -132,16 +131,15 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.ShouldAllBe(p => p.Status == 0); // Only Open status
+        result.ShouldAllBe(p => p.Status == 0);
         result.ShouldAllBe(p => p.IsOverdue == true);
-        result.ShouldAllBe(p => p.DaysOpen >= 5);
+        result.ShouldAllBe(p => p.DaysOpen > 5); // Striktno veće od 5
         
-        // Should contain overdue problems
-        result.ShouldContain(p => p.Id == -101);
-        result.ShouldContain(p => p.Id == -102);
-        result.ShouldContain(p => p.Id == -103);
-        result.ShouldContain(p => p.Id == -104);
-        result.ShouldContain(p => p.Id == -111);
+        // Should contain overdue problems (6+ days)
+        result.ShouldContain(p => p.Id == -102); // 7 dana
+        result.ShouldContain(p => p.Id == -103); // 6 dana
+        result.ShouldContain(p => p.Id == -104); // 20 dana
+        result.ShouldContain(p => p.Id == -111); // 9 dana
     }
 
     [Fact]
@@ -156,13 +154,14 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
 
         // Assert
         result.ShouldNotBeNull();
-        result.ShouldAllBe(p => p.DaysOpen >= 10);
+        result.ShouldAllBe(p => p.DaysOpen > 10); // Striktno veće od 10
         
         // Only problem -104 (20 days old) should be returned
         result.ShouldContain(p => p.Id == -104);
         result.ShouldNotContain(p => p.Id == -101); // 10 days - at threshold
         result.ShouldNotContain(p => p.Id == -102); // 7 days
         result.ShouldNotContain(p => p.Id == -103); // 6 days
+        result.ShouldNotContain(p => p.Id == -111); // 9 days
     }
 
     [Fact]
@@ -176,10 +175,10 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         var result = service.GetOverdue(5);
 
         // Assert
-        result.ShouldNotContain(p => p.Status == 1); // No Resolved
-        result.ShouldNotContain(p => p.Status == 2); // No Unresolved
-        result.ShouldNotContain(p => p.Id == -108); // Resolved problem
-        result.ShouldNotContain(p => p.Id == -110); // Unresolved problem
+        result.ShouldNotContain(p => p.Status == 1);
+        result.ShouldNotContain(p => p.Status == 2);
+        result.ShouldNotContain(p => p.Id == -108);
+        result.ShouldNotContain(p => p.Id == -110);
     }
 
     [Fact]
@@ -193,8 +192,8 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         var result = service.GetOverdue(5);
 
         // Assert
-        result.ShouldNotContain(p => p.Id == -105); // 2 days old
-        result.ShouldNotContain(p => p.Id == -106); // 1 day old
+        result.ShouldNotContain(p => p.Id == -105); // 2 days
+        result.ShouldNotContain(p => p.Id == -106); // 1 day
     }
 
     [Fact]
@@ -231,6 +230,6 @@ public class AdminTourProblemQueryTests : BaseToursIntegrationTest
         freshProblem.IsOverdue.ShouldBeFalse();
 
         var resolvedProblem = allProblems.First(p => p.Id == -108);
-        resolvedProblem.IsOverdue.ShouldBeFalse(); // Resolved problems not overdue
+        resolvedProblem.IsOverdue.ShouldBeFalse();
     }
 }

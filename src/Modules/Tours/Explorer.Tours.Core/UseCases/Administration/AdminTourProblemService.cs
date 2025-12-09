@@ -14,15 +14,18 @@ public class AdminTourProblemService : IAdminTourProblemService
 {
     private readonly ITourProblemRepository _tourProblemRepository;
     private readonly ITourRepository _tourRepository;
+    private readonly INotificationRepository _notificationRepository;
     private readonly IMapper _mapper;
 
     public AdminTourProblemService(
         ITourProblemRepository problemRepo, 
-        ITourRepository tourRepo, 
+        ITourRepository tourRepo,
+        INotificationRepository notificationRepo,
         IMapper mapper)
     {
         _tourProblemRepository = problemRepo;
         _tourRepository = tourRepo;
+        _notificationRepository = notificationRepo;
         _mapper = mapper;
     }
 
@@ -58,5 +61,48 @@ public class AdminTourProblemService : IAdminTourProblemService
         dto.DaysOpen = problem.GetDaysOpen();
         
         return dto;
+    }
+
+    public void SetDeadline(long problemId, DateTime deadline)
+    {
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException("Problem not found.");
+
+        problem.SetAdminDeadline(deadline);
+        _tourProblemRepository.Update(problem);
+
+        var notification = new Notification(
+            recipientId: problem.AuthorId,
+            type: NotificationType.DeadlineSet,
+            relatedEntityId: problem.Id,
+            message: $"Admin set a deadline for solving your tour problem until {deadline:dd.MM.yyyy}."
+        );
+
+        _notificationRepository.Create(notification);
+    }
+
+    public void CloseProblem(long problemId)
+    {
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException("Problem not found.");
+
+        problem.CloseByAdmin();
+        _tourProblemRepository.Update(problem);
+    }
+
+    public void PenalizeAuthor(long problemId)
+    {
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException("Problem not found.");
+
+        var tour = _tourRepository.GetById(problem.TourId);
+        if (tour == null)
+            throw new NotFoundException("Tour not found.");
+
+        tour.Archive(); 
+        _tourRepository.Update(tour);
     }
 }

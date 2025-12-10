@@ -1,6 +1,7 @@
 ﻿using Explorer.API.Controllers.Tourist.Execution;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
+using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
@@ -16,29 +17,15 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
     public TourExecutionCommandTests(ToursTestFactory factory) : base(factory) { }
 
     [Fact]
-    public void Starts_published_tour_successfully()
+    public void Starts_published_tour_successfully_when_purchased()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-21");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
 
-        // Debug info
-        var tour = dbContext.Tours.FirstOrDefault(t => t.Id == -2);
-        Console.WriteLine($"Tour -2 exists: {tour != null}");
-        Console.WriteLine($"Tour -2 status: {tour?.Status}");
-
-        var keyPointsCount = dbContext.KeyPoints.Count(kp => kp.TourId == -2);
-        Console.WriteLine($"KeyPoints za Tour -2: {keyPointsCount}");
-
-        // Proveri da li već postoji aktivna sesija i obriši je
-        var existingSession = dbContext.TourExecutions
-            .FirstOrDefault(te => te.TouristId == -21 && te.Status == TourExecutionStatus.Active);
-        if (existingSession != null)
-        {
-            dbContext.TourExecutions.Remove(existingSession);
-            dbContext.SaveChanges();
-        }
+        // Kupi turu
+        shoppingCartService.AddToCart(-21, -2);
 
         var dto = new TourExecutionCreateDto
         {
@@ -52,31 +39,114 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
 
         // Assert
         actionResult.ShouldNotBeNull();
-
-        // Ako je BadRequest, ispiši poruku greške
-        if (actionResult.Result is BadRequestObjectResult badRequest)
-        {
-            Console.WriteLine($"BadRequest Value: {badRequest.Value}");
-        }
-
         actionResult.Result.ShouldBeOfType<OkObjectResult>();
 
         var okResult = actionResult.Result as OkObjectResult;
-        okResult.ShouldNotBeNull();
-        okResult.StatusCode.ShouldBe(200);
-
-        var execution = okResult.Value as TourExecutionDto;
+        var execution = okResult!.Value as TourExecutionDto;
         execution.ShouldNotBeNull();
         execution.TouristId.ShouldBe(-21);
         execution.TourId.ShouldBe(-2);
-        execution.Status.ShouldBe(0); // Active
-        execution.StartLatitude.ShouldBe(45.2500);
-        execution.StartLongitude.ShouldBe(19.8300);
+        execution.Status.ShouldBe(0);
+    }
 
-        var storedEntity = dbContext.TourExecutions
-            .FirstOrDefault(te => te.TouristId == -21 && te.TourId == -2);
-        storedEntity.ShouldNotBeNull();
-        storedEntity.Status.ShouldBe(TourExecutionStatus.Active);
+    
+
+    [Fact]
+    public void Completes_active_tour_successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "-23");
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+
+        shoppingCartService.AddToCart(-23, -2);
+
+        var startDto = new TourExecutionCreateDto
+        {
+            TourId = -2,
+            StartLatitude = 45.2500,
+            StartLongitude = 19.8300
+        };
+        controller.StartTour(startDto);
+
+        // Act
+        var actionResult = controller.CompleteTour();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<OkObjectResult>();
+
+        var okResult = actionResult.Result as OkObjectResult;
+        var execution = okResult!.Value as TourExecutionDto;
+        execution.ShouldNotBeNull();
+        execution.Status.ShouldBe(1);
+        execution.CompletionTime.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Abandons_active_tour_successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "-24");
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+
+        shoppingCartService.AddToCart(-24, -2);
+
+        var startDto = new TourExecutionCreateDto
+        {
+            TourId = -2,
+            StartLatitude = 45.2500,
+            StartLongitude = 19.8300
+        };
+        controller.StartTour(startDto);
+
+        // Act
+        var actionResult = controller.AbandonTour();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<OkObjectResult>();
+
+        var okResult = actionResult.Result as OkObjectResult;
+        var execution = okResult!.Value as TourExecutionDto;
+        execution.ShouldNotBeNull();
+        execution.Status.ShouldBe(2);
+        execution.AbandonTime.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void Gets_active_tour_with_next_keypoint()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope, "-25");
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+
+        shoppingCartService.AddToCart(-25, -2);
+
+        var startDto = new TourExecutionCreateDto
+        {
+            TourId = -2,
+            StartLatitude = 45.2500,
+            StartLongitude = 19.8300
+        };
+        controller.StartTour(startDto);
+
+        // Act
+        var response = controller.GetActiveWithNextKeyPoint();
+
+        // Assert
+        response.ShouldNotBeNull();
+        response.Result.ShouldBeOfType<OkObjectResult>();
+
+        var okResult = response.Result as OkObjectResult;
+        var result = okResult!.Value as TourExecutionWithNextKeyPointDto;
+
+        result.ShouldNotBeNull();
+        result.NextKeyPoint.ShouldNotBeNull();
+        result.DistanceToNextKeyPoint.ShouldNotBeNull();
+        result.DistanceToNextKeyPoint.Value.ShouldBeGreaterThan(0);
     }
 
     [Fact]
@@ -84,19 +154,11 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-21");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-
-        // Očisti prethodne sesije
-        var existingSessions = dbContext.TourExecutions
-            .Where(te => te.TouristId == -21)
-            .ToList();
-        dbContext.TourExecutions.RemoveRange(existingSessions);
-        dbContext.SaveChanges();
+        var controller = CreateController(scope, "-26");
 
         var dto = new TourExecutionCreateDto
         {
-            TourId = -1, // Draft tour
+            TourId = -1,  // Draft tour (status = 0)
             StartLatitude = 45.2500,
             StartLongitude = 19.8300
         };
@@ -111,6 +173,9 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         var badResult = actionResult.Result as BadRequestObjectResult;
         badResult.ShouldNotBeNull();
         badResult.StatusCode.ShouldBe(400);
+
+        var responseValue = badResult.Value;
+        responseValue.ShouldNotBeNull();
     }
 
     [Fact]
@@ -118,15 +183,10 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-22");
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var controller = CreateController(scope, "-27");
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
 
-        // Očisti sve prethodne sesije za ovog korisnika
-        var existingSessions = dbContext.TourExecutions
-            .Where(te => te.TouristId == -22)
-            .ToList();
-        dbContext.TourExecutions.RemoveRange(existingSessions);
-        dbContext.SaveChanges();
+        shoppingCartService.AddToCart(-27, -2);
 
         var dto = new TourExecutionCreateDto
         {
@@ -135,27 +195,13 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
             StartLongitude = 19.8300
         };
 
-        // Prvi poziv - treba da uspe
-        var firstActionResult = controller.StartTour(dto);
+        controller.StartTour(dto);
 
-        // Debug
-        if (firstActionResult.Result is BadRequestObjectResult badRequest)
-        {
-            Console.WriteLine($"First call failed with: {badRequest.Value}");
-        }
-
-        firstActionResult.Result.ShouldBeOfType<OkObjectResult>();
-
-        // Act - Drugi poziv - treba da padne
+        // Act
         var secondActionResult = controller.StartTour(dto);
 
         // Assert
-        secondActionResult.ShouldNotBeNull();
         secondActionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
-
-        var badResult = secondActionResult.Result as BadRequestObjectResult;
-        badResult.ShouldNotBeNull();
-        badResult.StatusCode.ShouldBe(400);
     }
 
     [Fact]

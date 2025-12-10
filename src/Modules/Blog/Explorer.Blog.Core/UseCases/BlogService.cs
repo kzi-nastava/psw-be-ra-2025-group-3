@@ -37,7 +37,7 @@ namespace Explorer.Blog.Core.UseCases
         /// <summary>
         /// ✅ AŽURIRANA METODA - Koristi UpdateStatus umesto Modify
         /// </summary>
-        public BlogDto ChangeStatus(long blogId, int userId, BlogStatus newStatus)
+        public BlogDto ChangeStatus(long blogId, int userId, int newStatus)
         {
             var blog = _repository.GetById(blogId);
 
@@ -57,7 +57,7 @@ namespace Explorer.Blog.Core.UseCases
         public List<BlogDto> GetAllBlogs()
         {
             var blogs = _repository.GetAll()
-                .Where(b => b.Status == BlogStatus.Published || b.Status == BlogStatus.Archived)
+                .Where(b => b.Status == 1 || b.Status == 2)
                 .ToList();
 
             return _mapper.Map<List<BlogDto>>(blogs);

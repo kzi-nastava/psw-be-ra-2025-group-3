@@ -92,12 +92,14 @@ namespace Explorer.API.Controllers.Author_Tourist
                 return BadRequest(ex.Message);
             }
         }
-
+        
         [HttpPatch("{id:long}/status")]
-        public ActionResult<BlogDto> ChangeStatus(long id, [FromBody] BlogStatus newStatus)
+        public ActionResult<BlogDto> ChangeStatus(long id, [FromBody] int newStatus)
         {
-            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
+            if (newStatus < 0 || newStatus > 2)
+                return BadRequest("Status mora biti 0, 1 ili 2");
 
+            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
             try
             {
                 var result = _blogService.ChangeStatus(id, userId, newStatus);

@@ -58,8 +58,11 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         /// <summary>
         /// ✅ NOVA METODA - Samo za promenu statusa
         /// </summary>
-        public BlogEntity UpdateStatus(long blogId, Explorer.Blog.API.Dtos.BlogStatus newStatus)
+        public BlogEntity UpdateStatus(long blogId, int newStatus)
         {
+            if (newStatus < 0 || newStatus > 2)
+                throw new ArgumentException("Status mora biti 0, 1 ili 2");
+
             var blog = _context.Blogs
                 .Include(b => b.Images)
                 .FirstOrDefault(b => b.Id == blogId);

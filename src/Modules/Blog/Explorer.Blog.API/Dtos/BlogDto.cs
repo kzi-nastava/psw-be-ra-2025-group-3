@@ -19,7 +19,9 @@ namespace Explorer.Blog.API.Dtos
         public DateTime CreationDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public int AuthorId { get; set; }
-        public BlogStatus Status { get; set; } 
+        
+        //[Range(0, 2, ErrorMessage = "Status mora biti 0 (Draft), 1 (Published) ili 2 (Archived)")]
+        public int Status { get; set; }
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
     }
 }

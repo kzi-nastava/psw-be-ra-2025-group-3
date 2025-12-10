@@ -48,6 +48,25 @@ public class TourExecution : AggregateRoot
         ProgressPercentage = 0; //task3
     }
 
+
+    public void Complete()
+    {
+        if (Status != TourExecutionStatus.Active)
+            throw new InvalidOperationException("Cannot complete: Tour session is not active.");
+
+        Status = TourExecutionStatus.Completed;
+        CompletionTime = DateTime.UtcNow;
+    }
+
+    public void Abandon()
+    {
+        if (Status != TourExecutionStatus.Active)
+            throw new InvalidOperationException("Cannot abandon: Tour session is not active.");
+
+        Status = TourExecutionStatus.Abandoned;
+        AbandonTime = DateTime.UtcNow;
+    }
+
     //metode za task2
     public bool CheckLocationProgress(double currentLatitude, double currentLongitude, List<KeyPoint> tourKeyPoints)
     {

@@ -10,4 +10,7 @@ public interface ITourReviewService
     TourReviewDto UpdateReview(TourReviewUpdateDto dto, long touristId);
     List<TourReviewDto> GetReviewsForTour(long tourId);
     TourReviewDto? GetMyReview(long tourId, long touristId);
+    ReviewImageDto AddImageToReview(long reviewId, long touristId, string imageUrl);
+    void DeleteImageFromReview(long reviewId, long imageId, long touristId);
+    ReviewImageDto? GetImageById(long reviewId, long imageId);
 }

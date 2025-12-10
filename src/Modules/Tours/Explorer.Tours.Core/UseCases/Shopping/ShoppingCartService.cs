@@ -63,5 +63,11 @@ namespace Explorer.Tours.Core.UseCases.Shopping
 
             return _mapper.Map<ShoppingCartDto>(cart);
         }
+
+        //tour-execution kartica
+        public bool HasPurchasedTour(long touristId, long tourId)
+        {
+            return _shoppingCartRepository.HasPurchasedTour(touristId, tourId);
+        }
     }
 }

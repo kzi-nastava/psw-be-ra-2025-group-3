@@ -36,5 +36,17 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             _context.SaveChanges();
             return cart;
         }
+
+        //tour-execution kartica
+        public bool HasPurchasedTour(long touristId, long tourId)
+        {
+            var cart = _context.ShoppingCarts
+                .FirstOrDefault(c => c.TouristId == touristId);
+
+            if (cart == null)
+                return false;
+
+            return cart.Items.Any(item => item.TourId == tourId);
+        }
     }
 }

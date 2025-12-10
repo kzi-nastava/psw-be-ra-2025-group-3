@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Explorer.Tours.API.Dtos;
 
-public class TourExecutionDto
+public class TourExecutionWithNextKeyPointDto
 {
     public long Id { get; set; }
     public long TouristId { get; set; }
@@ -19,14 +19,6 @@ public class TourExecutionDto
     public DateTime? CompletionTime { get; set; }
     public DateTime? AbandonTime { get; set; }
 
-    //
-    public List<KeyPointCompletionDto> CompletedKeyPoints { get; set; } = new List<KeyPointCompletionDto>();
+    public KeyPointDto? NextKeyPoint { get; set; }
+    public double? DistanceToNextKeyPoint { get; set; }
 }
-
-//
-public class KeyPointCompletionDto
-{
-    public long KeyPointId { get; set; }
-    public DateTime CompletedAt { get; set; }
-}
-

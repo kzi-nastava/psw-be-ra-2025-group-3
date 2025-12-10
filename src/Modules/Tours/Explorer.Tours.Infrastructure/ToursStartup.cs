@@ -54,7 +54,11 @@ public static class ToursStartup
         services.AddScoped<INotificationService, NotificationService>();
 
         services.AddScoped<ITouristTourService, TouristTourService>();
+
         services.AddScoped<ITourAccessService, TourAccessService>();
+
+        services.AddScoped<IAdminTourProblemService, AdminTourProblemService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

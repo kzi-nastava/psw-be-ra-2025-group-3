@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
-using Explorer.Blog.Core.Domain.Blogs;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 
 namespace Explorer.Blog.Core.UseCases
@@ -20,30 +22,44 @@ namespace Explorer.Blog.Core.UseCases
 
         public BlogDto CreateBlog(BlogDto blogDto)
         {
-            var blog = _mapper.Map<BlogEntity>(blogDto);
-            var createdBlog = _repository.Add(blog);
-            return _mapper.Map<BlogDto>(createdBlog);
+            var entity = _mapper.Map<BlogEntity>(blogDto);
+            var created = _repository.Add(entity);
+            return _mapper.Map<BlogDto>(created);
         }
 
         public BlogDto UpdateBlog(BlogDto blogDto)
         {
-            // ✅ REŠENJE: Mapiraj ceo DTO u entity (uključujući slike)
-            // Ali NE pozivaj Update() metodu koja će dodavati slike u existingBlog
-            var blog = _mapper.Map<BlogEntity>(blogDto);
+            var entity = _mapper.Map<BlogEntity>(blogDto);
+            var updated = _repository.Modify(entity);
+            return _mapper.Map<BlogDto>(updated);
+        }
 
-            // Repository.Modify će sveHandlovati:
-            // 1. Dohvatiti existingBlog
-            // 2. Update-ovati Title i Description
-            // 3. Obrisati stare slike
-            // 4. Dodati nove slike iz blog.Images
-            var updatedBlog = _repository.Modify(blog);
+        /// <summary>
+        /// ✅ AŽURIRANA METODA - Koristi UpdateStatus umesto Modify
+        /// </summary>
+        public BlogDto ChangeStatus(long blogId, int userId, int newStatus)
+        {
+            var blog = _repository.GetById(blogId);
 
-            return _mapper.Map<BlogDto>(updatedBlog);
+            if (blog.AuthorId != userId)
+                throw new UnauthorizedAccessException("You are not the owner of this blog.");
+
+            var updated = _repository.UpdateStatus(blogId, newStatus); // ✅ Koristi novu metodu
+            return _mapper.Map<BlogDto>(updated);
         }
 
         public List<BlogDto> GetUserBlogs(int userId)
         {
             var blogs = _repository.GetByAuthor(userId);
+            return _mapper.Map<List<BlogDto>>(blogs);
+        }
+
+        public List<BlogDto> GetAllBlogs()
+        {
+            var blogs = _repository.GetAll()
+                .Where(b => b.Status == 1 || b.Status == 2)
+                .ToList();
+
             return _mapper.Map<List<BlogDto>>(blogs);
         }
     }

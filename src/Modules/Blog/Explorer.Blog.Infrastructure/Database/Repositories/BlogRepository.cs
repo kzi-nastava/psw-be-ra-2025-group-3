@@ -21,12 +21,8 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             return blog;
         }
 
-        /// <summary>
-        /// NAJSIGURNIJA VERZIJA - Pravilno rukuje slikama i EF Core tracking-om
-        /// </summary>
         public BlogEntity Modify(BlogEntity blog)
         {
-            // 1. Dohvati postojeći blog sa slikama
             var existingBlog = _context.Blogs
                 .Include(b => b.Images)
                 .FirstOrDefault(b => b.Id == blog.Id);
@@ -34,36 +30,47 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
             if (existingBlog == null)
                 throw new KeyNotFoundException($"Blog sa ID {blog.Id} nije pronađen.");
 
-            // 2. Ažuriraj Title i Description direktno (BEZ slika u ovom koraku)
             existingBlog.Update(blog.Title, blog.Description);
 
-            // 3. Ručno obriši stare slike iz baze
             var existingImages = _context.Set<BlogImageEntity>()
                 .Where(img => img.BlogId == blog.Id)
                 .ToList();
-
             _context.RemoveRange(existingImages);
 
-            // 4. Dodaj nove slike
             if (blog.Images != null && blog.Images.Any())
             {
                 var imagesToAdd = blog.Images.ToList();
-
                 foreach (var image in imagesToAdd)
                 {
                     _context.Set<BlogImageEntity>().Add(new BlogImageEntity(image.ImageUrl, blog.Id));
                 }
             }
 
-            // 5. Sačuvaj izmene
             _context.SaveChanges();
 
-            // 6. Ponovo dohvati blog sa novim slikama za response
             var updatedBlog = _context.Blogs
                 .Include(b => b.Images)
                 .FirstOrDefault(b => b.Id == blog.Id);
 
             return updatedBlog;
+        }
+
+        /// <summary>
+        /// ✅ NOVA METODA - Samo za promenu statusa
+        /// </summary>
+        public BlogEntity UpdateStatus(long blogId, Explorer.Blog.API.Dtos.BlogStatus newStatus)
+        {
+            var blog = _context.Blogs
+                .Include(b => b.Images)
+                .FirstOrDefault(b => b.Id == blogId);
+
+            if (blog == null)
+                throw new KeyNotFoundException($"Blog sa ID {blogId} nije pronađen.");
+
+            blog.ChangeStatus(newStatus);
+            _context.SaveChanges();
+
+            return blog;
         }
 
         public BlogEntity GetById(long id)
@@ -86,6 +93,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
                 .OrderByDescending(b => b.CreationDate)
                 .ToList();
         }
+
         public List<BlogEntity> GetAll()
         {
             return _context.Blogs

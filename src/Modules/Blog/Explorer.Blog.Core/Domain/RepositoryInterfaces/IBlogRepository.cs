@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Explorer.Blog.API.Dtos;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 
 namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
@@ -11,6 +7,7 @@ namespace Explorer.Blog.Core.Domain.RepositoryInterfaces
     {
         BlogEntity Add(BlogEntity blog);
         BlogEntity Modify(BlogEntity blog);
+        BlogEntity UpdateStatus(long blogId, BlogStatus newStatus); // ✅ Nova metoda
         BlogEntity GetById(long id);
         List<BlogEntity> GetByAuthor(int authorId);
         List<BlogEntity> GetAll();

@@ -2,6 +2,9 @@
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 
 namespace Explorer.Blog.Core.UseCases
@@ -31,6 +34,20 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogDto>(updated);
         }
 
+        /// <summary>
+        /// ✅ AŽURIRANA METODA - Koristi UpdateStatus umesto Modify
+        /// </summary>
+        public BlogDto ChangeStatus(long blogId, int userId, BlogStatus newStatus)
+        {
+            var blog = _repository.GetById(blogId);
+
+            if (blog.AuthorId != userId)
+                throw new UnauthorizedAccessException("You are not the owner of this blog.");
+
+            var updated = _repository.UpdateStatus(blogId, newStatus); // ✅ Koristi novu metodu
+            return _mapper.Map<BlogDto>(updated);
+        }
+
         public List<BlogDto> GetUserBlogs(int userId)
         {
             var blogs = _repository.GetByAuthor(userId);
@@ -39,7 +56,10 @@ namespace Explorer.Blog.Core.UseCases
 
         public List<BlogDto> GetAllBlogs()
         {
-            var blogs = _repository.GetAll();
+            var blogs = _repository.GetAll()
+                .Where(b => b.Status == BlogStatus.Published || b.Status == BlogStatus.Archived)
+                .ToList();
+
             return _mapper.Map<List<BlogDto>>(blogs);
         }
     }

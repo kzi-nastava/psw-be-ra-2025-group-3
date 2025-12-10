@@ -2,6 +2,8 @@
 using Explorer.Blog.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 
 namespace Explorer.API.Controllers.Author_Tourist
 {
@@ -17,22 +19,15 @@ namespace Explorer.API.Controllers.Author_Tourist
             _blogService = blogService;
         }
 
-        // -----------------------------
-        // CREATE
-        // -----------------------------
         [HttpPost]
         public ActionResult<BlogDto> CreateBlog([FromBody] BlogDto blogDto)
         {
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
             blogDto.AuthorId = userId;
-
             var result = _blogService.CreateBlog(blogDto);
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }
 
-        // -----------------------------
-        // GET ALL (PUBLIC)
-        // -----------------------------
         [HttpGet("all")]
         public ActionResult<List<BlogDto>> GetAllBlogs()
         {
@@ -40,9 +35,6 @@ namespace Explorer.API.Controllers.Author_Tourist
             return Ok(result);
         }
 
-        // -----------------------------
-        // GET MY BLOGS (FILTER IRREPLACEABLE)
-        // -----------------------------
         [HttpGet("my-blogs")]
         public ActionResult<List<BlogDto>> GetUserBlogs()
         {
@@ -51,28 +43,36 @@ namespace Explorer.API.Controllers.Author_Tourist
             return Ok(result);
         }
 
-        // -----------------------------
-        // GET BY ID (ONLY IF OWNER)
-        // -----------------------------
+        // src/Explorer.API/Controllers/Author-Tourist/BlogController.cs
+
         [HttpGet("{id:long}")]
         public ActionResult<BlogDto> GetBlogById(long id)
         {
-            var blog = _blogService.GetAllBlogs().FirstOrDefault(b => b.Id == id);
+            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
 
-            if (blog == null)
-                return NotFound("Blog ne postoji.");
+            // Pokušaj da nađeš blog među korisnikovim blogovima (draft može da vidi)
+            var myBlogs = _blogService.GetUserBlogs(userId);
+            var myBlog = myBlogs.FirstOrDefault(b => b.Id == id);
 
-            return Ok(blog);
+            if (myBlog != null)
+            {
+                // Korisnik je vlasnik, može da vidi sve statuse
+                return Ok(myBlog);
+            }
+
+            // Nije vlasnik, može da vidi samo Published i Archived
+            var publicBlog = _blogService.GetAllBlogs().FirstOrDefault(b => b.Id == id);
+
+            if (publicBlog == null)
+                return NotFound("Blog does not exist or is not available.");
+
+            return Ok(publicBlog);
         }
 
-        // -----------------------------
-        // UPDATE (ONLY IF OWNER)
-        // -----------------------------
         [HttpPut("{id:long}")]
         public ActionResult<BlogDto> UpdateBlog(long id, [FromBody] BlogDto blogDto)
         {
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
-
             var myBlogs = _blogService.GetUserBlogs(userId);
             var existing = myBlogs.FirstOrDefault(b => b.Id == id);
 
@@ -82,8 +82,35 @@ namespace Explorer.API.Controllers.Author_Tourist
             blogDto.Id = id;
             blogDto.AuthorId = userId;
 
-            var result = _blogService.UpdateBlog(blogDto);
-            return Ok(result);
+            try
+            {
+                var result = _blogService.UpdateBlog(blogDto);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:long}/status")]
+        public ActionResult<BlogDto> ChangeStatus(long id, [FromBody] BlogStatus newStatus)
+        {
+            var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
+
+            try
+            {
+                var result = _blogService.ChangeStatus(id, userId, newStatus);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid("Nije tvoj blog.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

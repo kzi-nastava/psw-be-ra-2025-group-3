@@ -149,7 +149,7 @@ public class TourExecutionService : ITourExecutionService
         var tokens = _tokenRepository.GetByTouristId(touristId);
 
         return tokens.Any(t => t.TourId == tourId);
-
+}
     public TourExecutionDto CompleteTour(long touristId)
     {
         var activeExecution = _executionRepository.GetActiveByTouristId(touristId);

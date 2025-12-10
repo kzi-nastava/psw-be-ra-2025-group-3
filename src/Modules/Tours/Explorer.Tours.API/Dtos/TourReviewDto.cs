@@ -13,4 +13,6 @@ public class TourReviewDto
     public DateTime? UpdatedAt { get; set; }
     public double ProgressPercentage { get; set; }
     public bool IsEdited { get; set; }
+
+    public List<ReviewImageDto> Images { get; set; } = new();
 }

@@ -2,7 +2,7 @@
 
 namespace Explorer.Tours.Core.Domain;
 
-public class TourReview : AggregateRoot
+public class TourReview : Entity
 {
     public long TourId { get; private set; }
     public long TouristId { get; private set; }
@@ -12,6 +12,8 @@ public class TourReview : AggregateRoot
     public DateTime? UpdatedAt { get; private set; }
     public double ProgressPercentage { get; private set; } // % pređene ture
     public bool IsEdited { get; private set; }
+
+    public List<ReviewImage> Images { get; private set; } = new();
 
     private TourReview() { }
 
@@ -33,6 +35,7 @@ public class TourReview : AggregateRoot
         CreatedAt = DateTime.UtcNow;
         ProgressPercentage = progressPercentage;
         IsEdited = false;
+        Images = new List<ReviewImage>();
     }
 
     public void Update(int rating, string? comment)
@@ -44,5 +47,25 @@ public class TourReview : AggregateRoot
         Comment = comment;
         UpdatedAt = DateTime.UtcNow;
         IsEdited = true;
+    }
+    public void AddImage(string imageUrl)
+    {
+        if (Images.Count >= 5)
+            throw new InvalidOperationException("Maximum 5 images allowed per review.");
+
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            throw new ArgumentException("Image URL cannot be empty.", nameof(imageUrl));
+
+        var image = new ReviewImage(Id, imageUrl);
+        Images.Add(image);
+    }
+
+    public void RemoveImage(long imageId)
+    {
+        var image = Images.FirstOrDefault(i => i.Id == imageId);
+        if (image == null)
+            throw new ArgumentException($"Image with ID {imageId} not found.");
+
+        Images.Remove(image);
     }
 }

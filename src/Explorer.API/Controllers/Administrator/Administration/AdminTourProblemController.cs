@@ -37,4 +37,32 @@ public class AdminTourProblemController : ControllerBase
         var result = _adminTourProblemService.GetOverdue(daysThreshold);
         return Ok(result);
     }
+
+    [HttpPost("{id}/deadline")]
+    public IActionResult SetDeadline(long id, [FromBody] AdminDeadlineDto dto)
+    {
+        try
+        {
+            _adminTourProblemService.SetDeadline(id, dto.Deadline);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id}/close")]
+    public IActionResult CloseProblem(long id)
+    {
+        _adminTourProblemService.CloseProblem(id);
+        return Ok();
+    }
+
+    [HttpPost("{id}/penalize")]
+    public IActionResult Penalize(long id)
+    {
+        _adminTourProblemService.PenalizeAuthor(id);
+        return Ok();
+    }
 }

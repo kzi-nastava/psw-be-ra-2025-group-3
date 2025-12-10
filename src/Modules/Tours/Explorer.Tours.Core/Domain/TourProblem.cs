@@ -138,4 +138,27 @@ public class TourProblem : AggregateRoot
     {
         return (int)(DateTime.UtcNow - CreatedAt).TotalDays;
     }
+
+    public void SetAdminDeadline(DateTime deadline)
+    {
+        if (deadline <= DateTime.UtcNow)
+            throw new ArgumentException("Deadline must be in the future.");
+
+        AdminDeadline = deadline;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public bool IsDeadlineExpired()
+    {
+        return AdminDeadline.HasValue && DateTime.UtcNow > AdminDeadline.Value;
+    }
+
+    public void CloseByAdmin()
+    {
+        if (Status == TourProblemStatus.Resolved)
+            throw new InvalidOperationException("Problem is already resolved.");
+
+        Status = TourProblemStatus.Resolved;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

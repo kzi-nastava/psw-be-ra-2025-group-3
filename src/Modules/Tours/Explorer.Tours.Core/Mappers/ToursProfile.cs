@@ -49,7 +49,9 @@ public class ToursProfile : Profile
 
         CreateMap<Tour, TourPreviewDto>()
            .ForMember(dest => dest.FirstKeyPoint, opt => opt.Ignore()) 
-           .ForMember(dest => dest.AverageRating, opt => opt.Ignore()); 
+           .ForMember(dest => dest.AverageRating, opt => opt.Ignore());
+
+        CreateMap<ReviewImage, ReviewImageDto>();
 
 
     }

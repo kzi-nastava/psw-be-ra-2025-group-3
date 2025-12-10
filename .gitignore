@@ -557,4 +557,5 @@ wwwroot/uploads/**
 # Allow these folders to exist in git
 !wwwroot/uploads/
 !wwwroot/uploads/blog-images/
+!wwwroot/uploads/review-images/
 !wwwroot/uploads/**/.gitkeep

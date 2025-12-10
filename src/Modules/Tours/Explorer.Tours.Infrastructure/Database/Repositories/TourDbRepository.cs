@@ -71,6 +71,7 @@ public class TourDbRepository : ITourRepository
 
     public IEnumerable<Tour> GetPublished()
     {
+
         return _context.Tours
                   .Where(t => t.Status == TourStatus.Published)
                   .ToList();
@@ -82,5 +83,21 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.Equipment)
             .Include(t => t.KeyPoints)
             .FirstOrDefault(t => t.Id == id);  //za tour-execution
+    }
+
+    public List<Tour> GetPublishedWithKeyPoints()
+    {
+        return _context.Tours
+            .Include(t => t.KeyPoints)
+            .Where(t => t.Status == TourStatus.Published)
+            .ToList();
+    }
+
+    public Tour? GetTourWithKeyPoints(long id)
+    {
+        return _context.Tours
+            .Include(t => t.KeyPoints)
+            .Include(t => t.Equipment)
+            .FirstOrDefault(t => t.Id == id);
     }
 }

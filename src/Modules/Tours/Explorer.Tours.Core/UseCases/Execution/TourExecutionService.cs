@@ -17,26 +17,39 @@ public class TourExecutionService : ITourExecutionService
 {
     private readonly ITourExecutionRepository _executionRepository;
     private readonly ITourRepository _tourRepository;
+
+    private readonly ITourPurchaseTokenRepository _tokenRepository;
+
     private readonly IKeyPointRepository _keyPointRepository;
     private readonly IShoppingCartService _shoppingCartService;
+
     private readonly IMapper _mapper;
 
     public TourExecutionService(
         ITourExecutionRepository executionRepository,
         ITourRepository tourRepository,
+
+        ITourPurchaseTokenRepository tokenRepository,
+
         IKeyPointRepository keyPointRepository,
         IShoppingCartService shoppingCartService,
+
         IMapper mapper)
     {
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
+
+        _tokenRepository = tokenRepository;
+
         _keyPointRepository = keyPointRepository;
         _shoppingCartService = shoppingCartService;
+
         _mapper = mapper;
     }
 
     public TourExecutionDto StartTour(TourExecutionCreateDto dto, long touristId)
     {
+        
         // Proveri da li turista već ima bilo kakvu aktivnu turu
         var existingActiveExecution = _executionRepository.GetActiveByTouristId(touristId);
         if (existingActiveExecution != null)
@@ -129,6 +142,14 @@ public class TourExecutionService : ITourExecutionService
         };
     }
 
+
+    public bool CanStartTour(long touristId, long tourId)
+    {
+        // pozivamo AccessService preko repoa
+        var tokens = _tokenRepository.GetByTouristId(touristId);
+
+        return tokens.Any(t => t.TourId == tourId);
+}
     public TourExecutionDto CompleteTour(long touristId)
     {
         var activeExecution = _executionRepository.GetActiveByTouristId(touristId);
@@ -203,5 +224,6 @@ public class TourExecutionService : ITourExecutionService
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
         return earthRadiusMeters * c;
+
     }
 }

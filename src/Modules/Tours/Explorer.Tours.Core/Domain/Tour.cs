@@ -22,6 +22,8 @@ public class Tour : AggregateRoot
     public DateTime? ArchivedAt { get; private set; }
     public List<string> Tags { get; private set; } //Lista stringova
     public List<TourDuration> TourDurations { get; private set; }
+    
+
 
     // Lista opreme potrebne za turu
     public ICollection<Equipment> Equipment { get; private set; }
@@ -54,6 +56,7 @@ public class Tour : AggregateRoot
         Equipment = new List<Equipment>(); // Inicijalizacija liste opreme
         KeyPoints = new List<KeyPoint>();  // inicijalizuje listu ključ. t
         TourDurations = new List<TourDuration>();
+       
     }
 
     // Metoda za izmenu ture

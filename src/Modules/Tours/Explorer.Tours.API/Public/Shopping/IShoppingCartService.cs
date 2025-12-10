@@ -11,5 +11,6 @@ namespace Explorer.Tours.API.Public.Shopping
         ShoppingCartDto GetMyCart(long touristId);
         ShoppingCartDto AddToCart(long touristId, long tourId);
         ShoppingCartDto RemoveFromCart(long touristId, long tourId);
+        bool HasPurchasedTour(long touristId, long tourId); //tour-execution kartica
     }
 }

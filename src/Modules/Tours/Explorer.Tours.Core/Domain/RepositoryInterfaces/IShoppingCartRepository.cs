@@ -11,5 +11,6 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         ShoppingCart? GetActiveForTourist(long touristId);
         ShoppingCart Create(ShoppingCart cart);
         ShoppingCart Update(ShoppingCart cart);
+        bool HasPurchasedTour(long touristId, long tourId); //tour-execution kartica
     }
 }

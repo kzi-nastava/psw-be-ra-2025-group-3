@@ -21,6 +21,7 @@ namespace Explorer.API.Controllers.Author.Authoring
 
         // GET api/keypoints?page=0&pageSize=10
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<PagedResult<KeyPointDto>> GetPaged(
             [FromQuery] long tourId,
             [FromQuery] int page = 0,
@@ -32,6 +33,7 @@ namespace Explorer.API.Controllers.Author.Authoring
 
         // GET api/keypoints/5
         [HttpGet("{id:long}")]
+        [AllowAnonymous]
         public ActionResult<KeyPointDto> GetById(long id)
         {
             var result = _keyPointService.GetById(id);

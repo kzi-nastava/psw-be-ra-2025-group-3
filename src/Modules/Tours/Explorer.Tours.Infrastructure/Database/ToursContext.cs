@@ -9,25 +9,20 @@ public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<Tour> Tours { get; set; }
-
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
-
     public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
-
     public DbSet<TourProblem> TourProblems { get; set; }
-
     public DbSet<Position> Positions { get; set; }
-
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
-
     public DbSet<KeyPoint> KeyPoints { get; set; }
-
     public DbSet<Message> Messages { get; set; }
     public DbSet<TourExecution> TourExecutions { get; set; }
-
     public DbSet<TourReview> TourReviews { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+
+    public DbSet<ReviewImage> ReviewImages { get; set; }
 
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
@@ -49,6 +44,20 @@ public class ToursContext : DbContext
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()
             ));
+
+        modelBuilder.Entity<Tour>()
+            .Property(t => t.TourDurations)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<TourDuration>>(v, (JsonSerializerOptions?)null) ?? new List<TourDuration>()
+            )
+            .Metadata.SetValueComparer(new ValueComparer<List<TourDuration>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+
         //mapiranje za facilities
         modelBuilder.Entity<Facility>(entity =>
         {
@@ -126,14 +135,12 @@ public class ToursContext : DbContext
                 );
         });
 
-        // Podtask 1 
         modelBuilder.Entity<TourProblem>()
             .HasMany(tp => tp.Messages)           
             .WithOne()                            
-            .HasForeignKey("TourProblemId")        // Foreign key u Message tabeli
-            .OnDelete(DeleteBehavior.Cascade);     // Brisanje TourProblem-a brise sve Messages
+            .HasForeignKey("TourProblemId")        
+            .OnDelete(DeleteBehavior.Cascade);     
 
-        // Enum konverzije
         modelBuilder.Entity<TourProblem>()
             .Property(tp => tp.Status)
             .HasConversion<int>();
@@ -141,6 +148,15 @@ public class ToursContext : DbContext
         modelBuilder.Entity<Message>()
             .Property(m => m.AuthorType)
             .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Type)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.RecipientId, n.IsRead })
+            .HasDatabaseName("IX_Notifications_RecipientId_IsRead");
+
         modelBuilder.Entity<TourExecution>(builder =>
         {
             builder.ToTable("TourExecutions", "tours");
@@ -195,5 +211,11 @@ public class ToursContext : DbContext
             builder.HasIndex(r => new { r.TourId, r.TouristId }).IsUnique();
             builder.HasIndex(r => r.TourId);
         });
+
+        modelBuilder.Entity<ReviewImage>()
+          .HasOne(ri => ri.TourReview)
+          .WithMany(tr => tr.Images)
+          .HasForeignKey(ri => ri.TourReviewId)
+          .OnDelete(DeleteBehavior.Cascade);  // Kad se obriše recenzija, brišu se i slike
     }
 }

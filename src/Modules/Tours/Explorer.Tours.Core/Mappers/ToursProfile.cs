@@ -40,11 +40,21 @@ public class ToursProfile : Profile
         CreateMap<OrderItem, ShoppingCartItemDto>();
         CreateMap<ShoppingCart, ShoppingCartDto>();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
+        CreateMap<TourDurationDto, TourDuration>().ReverseMap();
 
         CreateMap<TourExecutionDto, TourExecution>().ReverseMap();
+
+        //
+        CreateMap<KeyPointCompletion, KeyPointCompletionDto>();
         CreateMap<TourReview, TourReviewDto>()
             .ForMember(dest => dest.TouristName, opt => opt.Ignore());  
         CreateMap<TourReviewDto, TourReview>();
+
+        CreateMap<Tour, TourPreviewDto>()
+           .ForMember(dest => dest.FirstKeyPoint, opt => opt.Ignore()) 
+           .ForMember(dest => dest.AverageRating, opt => opt.Ignore());
+
+        CreateMap<ReviewImage, ReviewImageDto>();
 
 
     }

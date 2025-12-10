@@ -35,14 +35,17 @@ public class TourService : ITourService
 
     public TourDto Update(TourUpdateDto tourDto, long authorId)
     {
-        // Ovde je OK koristiti obican GetById jer Update ne dira opremu direktno
-        // (osim ako ne zelis da vratis opremu u responsu, onda stavi GetWithEquipment)
+
         var tour = _tourRepository.GetById(tourDto.Id);
 
         if (tour == null) throw new NotFoundException($"Tour with id {tourDto.Id} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only update your own tours.");
 
         tour.Update(tourDto.Name, tourDto.Description, (TourDifficulty)tourDto.Difficulty, tourDto.Price, tourDto.Tags);
+
+        var durations = _mapper.Map<List<TourDuration>>(tourDto.TourDurations);
+        tour.UpdateTourDurations(durations);
+
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
     }
@@ -57,8 +60,6 @@ public class TourService : ITourService
         _tourRepository.Delete(id);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
-    // Ovo je kljucno da bi Edit forma na frontendu dobila listu opreme
     public TourDto GetById(long id)
     {
         var tour = _tourRepository.GetWithEquipment(id);
@@ -74,7 +75,7 @@ public class TourService : ITourService
 
     public TourDto Publish(long id, long authorId)
     {
-        var tour = _tourRepository.GetById(id); // Za publish nam ne treba oprema
+        var tour = _tourRepository.GetByIdWithKeyPoints(id);
         if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only publish your own tours.");
 
@@ -83,10 +84,30 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
+    public TourDto Archive(long id, long authorId)
+    {
+        var tour = _tourRepository.GetById(id);
+        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only archive your own tours.");
+
+        tour.Archive();
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
+
+    public TourDto Reactivate(long id, long authorId)
+    {
+        var tour = _tourRepository.GetById(id);
+        if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only reactivate your own tours.");
+
+        tour.Reactivate();
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
+    }
+
     public TourDto AddEquipment(long tourId, long equipmentId, long authorId)
     {
-        // Moramo ucitati opremu da bi domenska logika (Contains) radila ispravno
         var tour = _tourRepository.GetWithEquipment(tourId);
         if (tour == null) throw new NotFoundException($"Tour with ID {tourId} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("Only the author can add equipment.");
@@ -100,10 +121,8 @@ public class TourService : ITourService
         return _mapper.Map<TourDto>(result);
     }
 
-    // === IZMENJENO: Koristimo GetWithEquipment ===
     public TourDto RemoveEquipment(long tourId, long equipmentId, long authorId)
     {
-        // Isto kao za Add, moramo znati sta je unutra
         var tour = _tourRepository.GetWithEquipment(tourId);
         if (tour == null) throw new NotFoundException($"Tour with ID {tourId} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("Only the author can remove equipment.");
@@ -121,5 +140,18 @@ public class TourService : ITourService
     {
         var tours = _tourRepository.GetPublished();
         return _mapper.Map<List<TourDto>>(tours);
+    }
+
+    // Azuriranje duzine ture (u km)
+    public TourDto UpdateDistance(long tourId, double distanceInKm, long authorId)
+    {
+        var tour = _tourRepository.GetById(tourId);
+        if (tour == null) throw new NotFoundException($"Tour with id {tourId} not found.");
+        if (tour.AuthorId != authorId) throw new ForbiddenException("You can only update your own tours.");
+
+        tour.UpdateDistance(distanceInKm);
+
+        var result = _tourRepository.Update(tour);
+        return _mapper.Map<TourDto>(result);
     }
 }

@@ -9,7 +9,7 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
 {
     public interface IKeyPointRepository
     {
-        PagedResult<KeyPoint> GetPaged(int page, int pageSize);
+        PagedResult<KeyPoint> GetPaged(long tourId, int page, int pageSize);
         KeyPoint Create(KeyPoint keyPoint);
         KeyPoint Update(KeyPoint keyPoint);
         void Delete(long id);

@@ -10,10 +10,10 @@ namespace Explorer.Tours.API.Public.Authoring
 {
     public interface IKeyPointService
     {
-        PagedResult<KeyPointDto> GetPaged(int page, int pageSize);
-        KeyPointDto Create(KeyPointDto keyPoint);
-        KeyPointDto Update(KeyPointDto keyPoint);
-        void Delete(long id);
+        PagedResult<KeyPointDto> GetPaged(long tourId, int page, int pageSize);
+        KeyPointDto Create(KeyPointDto keyPoint, long authorId);
+        KeyPointDto Update(KeyPointDto keyPoint, long authorId);
+        void Delete(long id, long authorId);
         KeyPointDto GetById(long id);
     }
 }

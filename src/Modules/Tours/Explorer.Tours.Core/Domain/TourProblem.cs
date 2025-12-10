@@ -3,6 +3,7 @@ using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using System;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.Core.Domain;
 
@@ -17,7 +18,6 @@ public class TourProblem : AggregateRoot
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
     public long AuthorId { get; private set; }
-
     public TourProblemStatus Status { get; private set; }
     public string? ResolvedByTouristComment { get; private set; }
     public List<Message> Messages { get; private set; } // Za agregaciju poruka vezanih za problem
@@ -125,7 +125,40 @@ public class TourProblem : AggregateRoot
 
         var message = new Message(authorId, content.Trim(), authorType);
         Messages.Add(message);
+    }
 
+    //metode za admina:
+    public bool IsOverdue(int daysThreshold = 5)
+    {
+        return Status == TourProblemStatus.Open 
+            && (DateTime.UtcNow - CreatedAt).TotalDays > daysThreshold;
+    }
 
+    public int GetDaysOpen()
+    {
+        return (int)(DateTime.UtcNow - CreatedAt).TotalDays;
+    }
+
+    public void SetAdminDeadline(DateTime deadline)
+    {
+        if (deadline <= DateTime.UtcNow)
+            throw new ArgumentException("Deadline must be in the future.");
+
+        AdminDeadline = deadline;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public bool IsDeadlineExpired()
+    {
+        return AdminDeadline.HasValue && DateTime.UtcNow > AdminDeadline.Value;
+    }
+
+    public void CloseByAdmin()
+    {
+        if (Status == TourProblemStatus.Resolved)
+            throw new InvalidOperationException("Problem is already resolved.");
+
+        Status = TourProblemStatus.Resolved;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

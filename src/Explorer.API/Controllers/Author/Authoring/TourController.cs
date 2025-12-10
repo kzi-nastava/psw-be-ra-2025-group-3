@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.API.Dtos;
+﻿using Explorer.Stakeholders.Infrastructure.Authentication;
+using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,9 +61,58 @@ public class TourController : ControllerBase
     [HttpPatch("{id}/publish")]
     public ActionResult<TourDto> Publish(long id)
     {
-        var authorId = GetAuthorId();
-        var result = _tourService.Publish(id, authorId);
-        return Ok(result);
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Publish(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpPatch("{id}/archive")]
+    public ActionResult<TourDto> Archive(long id)
+    {
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Archive(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpPatch("{id}/reactivate")]
+    public ActionResult<TourDto> Reactivate(long id)
+    {
+        try
+        {
+            var authorId = GetAuthorId();
+            var result = _tourService.Reactivate(id, authorId);
+            return Ok(result);
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch (ArgumentException e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut("{tourId}/equipment/{equipmentId}")]
@@ -90,5 +140,14 @@ public class TourController : ControllerBase
             throw new UnauthorizedAccessException("User is not authenticated or personId claim is missing.");
         }
         return authorId;
+    }
+
+    // Metoda za azuriranje duzine ture (u km)
+    [HttpPut("{id:long}/distance")]
+    public ActionResult<TourDto> UpdateDistance(long id, [FromBody] TourDistanceUpdateDto dto)
+    {
+        var authorId = GetAuthorId();
+        var result = _tourService.UpdateDistance(id, dto.DistanceInKm, authorId);
+        return Ok(result);
     }
 }

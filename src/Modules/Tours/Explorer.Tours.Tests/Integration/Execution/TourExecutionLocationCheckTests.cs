@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Explorer.API.Controllers.Tourist.Execution;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,8 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-21");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
+        CleanupActiveSessions(dbContext, -21);
+
         // Prvo pokreni turu
         var startDto = new TourExecutionCreateDto
         {
@@ -34,7 +37,13 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
             StartLatitude = 45.2500,
             StartLongitude = 19.8300
         };
-        controller.StartTour(startDto);
+        var startResult = controller.StartTour(startDto);
+
+        if (startResult.Result is BadRequestObjectResult badStart)
+        {
+            var errorMsg = badStart.Value?.GetType().GetProperty("message")?.GetValue(badStart.Value);
+            throw new Exception($"StartTour failed: {errorMsg}");
+        }
 
         // Proveri lokaciju blizu prve KeyPoint (Tour -2 ima KP na 45.254, 19.841)
         var checkDto = new LocationCheckDto
@@ -60,9 +69,10 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         result.TotalCompletedKeyPoints.ShouldBe(1);
         result.LastActivity.ShouldNotBe(default(DateTime));
 
-        // Proveri u bazi
         var storedExecution = dbContext.TourExecutions
-            .FirstOrDefault(te => te.TouristId == -21 && te.TourId == -2);
+            .FirstOrDefault(te => te.TouristId == -21
+                               && te.TourId == -2
+                               && te.Status == TourExecutionStatus.Active);
         storedExecution.ShouldNotBeNull();
         storedExecution.CompletedKeyPoints.Count.ShouldBe(1);
     }
@@ -73,6 +83,9 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-22");
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        CleanupActiveSessions(dbContext, -22);
 
         // Prvo pokreni turu
         var startDto = new TourExecutionCreateDto
@@ -81,7 +94,14 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
             StartLatitude = 45.2500,
             StartLongitude = 19.8300
         };
-        controller.StartTour(startDto);
+        var startResult = controller.StartTour(startDto);
+
+       
+        if (startResult.Result is BadRequestObjectResult badStart)
+        {
+            var errorMsg = badStart.Value?.GetType().GetProperty("message")?.GetValue(badStart.Value);
+            throw new Exception($"StartTour failed: {errorMsg}");
+        }
 
         // Proveri lokaciju daleko od svih KeyPoints
         var checkDto = new LocationCheckDto
@@ -116,6 +136,8 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-23");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
+        CleanupActiveSessions(dbContext, -23);
+
         // Prvo pokreni turu
         var startDto = new TourExecutionCreateDto
         {
@@ -123,10 +145,25 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
             StartLatitude = 45.2500,
             StartLongitude = 19.8300
         };
-        controller.StartTour(startDto);
+        var startResult = controller.StartTour(startDto);
 
+        if (startResult.Result is BadRequestObjectResult badStart)
+        {
+            var errorMsg = badStart.Value?.GetType().GetProperty("message")?.GetValue(badStart.Value);
+            throw new Exception($"StartTour failed: {errorMsg}");
+        }
+
+  
         var execution1 = dbContext.TourExecutions
-            .FirstOrDefault(te => te.TouristId == -23 && te.TourId == -2);
+            .FirstOrDefault(te => te.TouristId == -23
+                               && te.TourId == -2
+                               && te.Status == TourExecutionStatus.Active);
+
+        if (execution1 == null)
+        {
+            throw new Exception("Active execution not found after StartTour!");
+        }
+
         var lastActivity1 = execution1.LastActivity;
 
         Thread.Sleep(100);
@@ -163,7 +200,10 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-24");
+        var controller = CreateController(scope, "-21");  
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        CleanupActiveSessions(dbContext, -21);
 
         var checkDto = new LocationCheckDto
         {
@@ -177,6 +217,23 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
 
         // Assert
         actionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
+    }
+
+   
+    // Briše SAMO Active sesije, ostavlja Completed/Abandoned za Shopping proveru.
+   
+    private static void CleanupActiveSessions(ToursContext dbContext, long touristId)
+    {
+        var activeSessions = dbContext.TourExecutions
+            .Where(te => te.TouristId == touristId
+                      && te.Status == TourExecutionStatus.Active)
+            .ToList();
+
+        if (activeSessions.Any())
+        {
+            dbContext.TourExecutions.RemoveRange(activeSessions);
+            dbContext.SaveChanges();
+        }
     }
 
     private static TourExecutionController CreateController(IServiceScope scope, string touristId)

@@ -42,6 +42,8 @@ namespace Explorer.Tours.Core.UseCases.Shopping
 
             var tour = _tourRepository.GetById(tourId)
                    ?? throw new InvalidOperationException("Tour not found.");
+            if (tour.ArchivedAt != null)
+                throw new InvalidOperationException("Cannot purchase archived tour.");
 
             cart.AddItem(tour);
 

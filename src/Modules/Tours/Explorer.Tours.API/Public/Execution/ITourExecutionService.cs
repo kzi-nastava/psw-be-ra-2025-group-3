@@ -12,4 +12,5 @@ public interface ITourExecutionService
     TourExecutionDto StartTour(TourExecutionCreateDto dto, long touristId);
     TourExecutionDto? GetActiveTourExecution(long touristId);
     LocationCheckResultDto CheckLocationProgress(LocationCheckDto dto, long touristId); //task2
+    bool CanStartTour(long touristId, long tourId);
 }

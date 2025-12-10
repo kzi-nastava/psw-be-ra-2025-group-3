@@ -16,20 +16,24 @@ public class TourExecutionService : ITourExecutionService
 {
     private readonly ITourExecutionRepository _executionRepository;
     private readonly ITourRepository _tourRepository;
+    private readonly ITourPurchaseTokenRepository _tokenRepository;
     private readonly IMapper _mapper;
 
     public TourExecutionService(
         ITourExecutionRepository executionRepository,
         ITourRepository tourRepository,
+        ITourPurchaseTokenRepository tokenRepository,
         IMapper mapper)
     {
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
+        _tokenRepository = tokenRepository;
         _mapper = mapper;
     }
 
     public TourExecutionDto StartTour(TourExecutionCreateDto dto, long touristId)
     {
+        
         // Proveri da li turista već ima bilo kakvu aktivnu turu
         var existingActiveExecution = _executionRepository.GetActiveByTouristId(touristId);
         if (existingActiveExecution != null)
@@ -114,5 +118,13 @@ public class TourExecutionService : ITourExecutionService
             LastActivity = execution.LastActivity,
             TotalCompletedKeyPoints = execution.CompletedKeyPoints.Count
         };
+    }
+
+    public bool CanStartTour(long touristId, long tourId)
+    {
+        // pozivamo AccessService preko repoa
+        var tokens = _tokenRepository.GetByTouristId(touristId);
+
+        return tokens.Any(t => t.TourId == tourId);
     }
 }

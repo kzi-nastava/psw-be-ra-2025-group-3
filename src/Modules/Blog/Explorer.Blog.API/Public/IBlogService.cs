@@ -11,6 +11,8 @@ namespace Explorer.Blog.API.Public
     {
         BlogDto CreateBlog(BlogDto blog);
         BlogDto UpdateBlog(BlogDto blog);
+        BlogDto ChangeStatus(long blogId, int userId, int newStatus);
         List<BlogDto> GetUserBlogs(int userId);
+        List<BlogDto> GetAllBlogs();
     }
 }

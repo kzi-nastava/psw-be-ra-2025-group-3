@@ -216,6 +216,26 @@ namespace Explorer.Blog.Tests.Integration
             blogs.ShouldContain(b => b.Title == "Kulinarsko putovanje kroz Italiju");
         }
 
+        [Fact]
+        public void UpdateBlog_allows_full_update_for_draft()
+        {
+            using var scope = Factory.Services.CreateScope();
+            var controller = CreateController(scope);
+            AttachUser(controller, -11);
+
+            var updateDto = new BlogDto
+            {
+                Id = -1,
+                Title = "Novi naslov",
+                Description = "Novi opis",
+                Images = new List<BlogImageDto> { new BlogImageDto { ImageUrl = "img.jpg" } }
+            };
+
+            var result = controller.UpdateBlog(-1, updateDto);
+
+            result.Result.ShouldBeOfType<OkObjectResult>();
+        }
+
         private static BlogController CreateController(IServiceScope scope)
         {
             return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>());

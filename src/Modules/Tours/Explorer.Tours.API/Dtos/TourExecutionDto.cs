@@ -18,4 +18,15 @@ public class TourExecutionDto
     public double StartLongitude { get; set; }
     public DateTime? CompletionTime { get; set; }
     public DateTime? AbandonTime { get; set; }
+
+    //
+    public List<KeyPointCompletionDto> CompletedKeyPoints { get; set; } = new List<KeyPointCompletionDto>();
 }
+
+//
+public class KeyPointCompletionDto
+{
+    public long KeyPointId { get; set; }
+    public DateTime CompletedAt { get; set; }
+}
+

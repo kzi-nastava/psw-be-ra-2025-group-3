@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
+using Explorer.Blog.Core.Domain.Blogs;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 using BlogImageEntity = Explorer.Blog.Core.Domain.Blogs.BlogImage;
 
@@ -23,6 +24,10 @@ namespace Explorer.Blog.Core.Mappers
                 .ForMember(dest => dest.Id, opt => opt.Ignore());  // Id se generiše u bazi
 
             CreateMap<BlogImageEntity, BlogImageDto>();
+
+            //za komentare
+            CreateMap<Comment, CommentDto>();
+            CreateMap<CommentDto, Comment>();
         }
     }
 }

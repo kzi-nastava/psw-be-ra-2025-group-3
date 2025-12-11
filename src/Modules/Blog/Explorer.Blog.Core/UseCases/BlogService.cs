@@ -62,5 +62,33 @@ namespace Explorer.Blog.Core.UseCases
 
             return _mapper.Map<List<BlogDto>>(blogs);
         }
+
+        public CommentDto AddComment(long blogId, int userId, string text)
+        {
+            var blog = _repository.GetById(blogId);
+            blog.AddComment(userId, text);
+            _repository.Modify(blog);
+
+            var created = blog.Comments.Last();
+            return _mapper.Map<CommentDto>(created);
+        }
+
+        public CommentDto EditComment(long blogId, long commentId, int userId, string text)
+        {
+            var blog = _repository.GetById(blogId);
+            blog.EditComment(commentId, userId, text);
+            _repository.Modify(blog);
+
+            var updated = blog.Comments.First(c => c.Id == commentId);
+            return _mapper.Map<CommentDto>(updated);
+        }
+
+        public void DeleteComment(long blogId, long commentId, int userId)
+        {
+            var blog = _repository.GetById(blogId);
+            blog.DeleteComment(commentId, userId);
+            _repository.Modify(blog);
+        }
+
     }
 }

@@ -80,6 +80,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         {
             var blog = _context.Blogs
                 .Include(b => b.Images)
+                .Include(b => b.Comments)
                 .FirstOrDefault(b => b.Id == id);
 
             if (blog == null)
@@ -92,6 +93,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         {
             return _context.Blogs
                 .Include(b => b.Images)
+                .Include(b => b.Comments)
                 .Where(b => b.AuthorId == authorId)
                 .OrderByDescending(b => b.CreationDate)
                 .ToList();
@@ -101,6 +103,7 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         {
             return _context.Blogs
                 .Include(b => b.Images)
+                .Include(b => b.Comments)
                 .OrderByDescending(b => b.CreationDate)
                 .ToList();
         }

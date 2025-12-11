@@ -15,6 +15,7 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public int AuthorId { get; private set; }
         public int Status { get; private set; }
         public List<BlogImage> Images { get; private set; }
+        public List<Comment> Comments { get; private set; } = new();
 
         public Blog()
         {
@@ -101,5 +102,46 @@ namespace Explorer.Blog.Core.Domain.Blogs
             if (image != null)
                 Images.Remove(image);
         }
+
+
+        //metode za komentare 
+
+        public void AddComment(int authorId, string text)
+        {
+            if (Status != 1)   // 1 = published
+                throw new InvalidOperationException("Cannot comment on an unpublished blog.");
+
+            var comment = new Comment(this.Id, authorId, text);
+            Comments.Add(comment);
+        }
+
+        public void EditComment(long commentId, int authorId, string newText)
+        {
+            var comment = Comments.FirstOrDefault(c => c.Id == commentId)
+                ?? throw new InvalidOperationException("Comment not found.");
+
+            if (comment.AuthorId != authorId)
+                throw new InvalidOperationException("Not your comment.");
+
+            if (!comment.CanModify())
+                throw new InvalidOperationException("Editing period expired.");
+
+            comment.Edit(newText);
+        }
+
+        public void DeleteComment(long commentId, int authorId)
+        {
+            var comment = Comments.FirstOrDefault(c => c.Id == commentId)
+                ?? throw new InvalidOperationException("Comment not found.");
+
+            if (comment.AuthorId != authorId)
+                throw new InvalidOperationException("Not your comment.");
+
+            if (!comment.CanModify())
+                throw new InvalidOperationException("Deleting period expired.");
+
+            Comments.Remove(comment);
+        }
+
     }
 }

@@ -57,10 +57,11 @@ namespace Explorer.Blog.Core.UseCases
             var blog = _repository.GetById(blogId);
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
-
-            // Defensive: ograniči glasanje na objavljene blogove
-            if (blog.Status != 1)
-                throw new InvalidOperationException("Voting is allowed only on published blogs.");
+            
+            if (blog.Status == 2 || blog.Status == 3)
+                throw new InvalidOperationException("Voting is not allowed on archived or read-only blogs.");
+            if (blog.Status != 1 && blog.Status != 4 && blog.Status != 5)
+                throw new InvalidOperationException("Voting is allowed only on published/active/famous blogs.");
 
             var voteType = isUpvote ? VoteType.Upvote : VoteType.Downvote;
 
@@ -102,7 +103,7 @@ namespace Explorer.Blog.Core.UseCases
         public List<BlogDto> GetAllBlogs()
         {
             var blogs = _repository.GetAll()
-                .Where(b => b.Status == 1 || b.Status == 2)
+                .Where(b => b.Status == 1 || b.Status == 2 || b.Status == 3 || b.Status == 4 || b.Status == 5)
                 .ToList();
 
             return _mapper.Map<List<BlogDto>>(blogs);

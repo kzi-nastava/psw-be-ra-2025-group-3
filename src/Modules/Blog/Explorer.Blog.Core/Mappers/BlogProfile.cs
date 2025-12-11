@@ -12,12 +12,13 @@ namespace Explorer.Blog.Core.Mappers
             CreateMap<BlogDto, BlogEntity>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // ✅ Uvek mapiraj Id
                 .ForMember(dest => dest.CreationDate, opt => opt.Ignore())
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
-            
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.CommentsCount));
 
 
             CreateMap<BlogEntity, BlogDto>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.CommentsCount));
 
             CreateMap<BlogImageDto, BlogImageEntity>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());  // Id se generiše u bazi

@@ -19,9 +19,13 @@ namespace Explorer.Blog.API.Dtos
         public DateTime CreationDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public int AuthorId { get; set; }
-        
-        //[Range(0, 2, ErrorMessage = "Status mora biti 0 (Draft), 1 (Published) ili 2 (Archived)")]
+
+        // Status: 0 Draft, 1 Published, 2 Archived, 3 ReadOnly, 4 Active, 5 Famous
         public int Status { get; set; }
+
+        // Placeholder za broj komentara (dok se komentari ne implementiraju)
+        public int CommentsCount { get; set; }
+
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
         public List<BlogVoteDto> Ratings { get; set; } = new List<BlogVoteDto>();
     }

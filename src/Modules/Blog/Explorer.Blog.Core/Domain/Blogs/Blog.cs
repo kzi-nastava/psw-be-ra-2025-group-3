@@ -107,7 +107,8 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void Rate(int userId, VoteType voteType, DateTime now)
         {
-            // TODO: provera za status bloga (samo objavljeni)
+            if (Status != 1)
+                throw new InvalidOperationException("Only published blogs can be rated.");
             var existingVote = Ratings.FirstOrDefault(r => r.UserId == userId);
 
             if (existingVote == null)

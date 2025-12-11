@@ -35,9 +35,6 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<BlogDto>(updated);
         }
 
-        /// <summary>
-        /// ✅ AŽURIRANA METODA - Koristi UpdateStatus umesto Modify
-        /// </summary>
         public BlogDto ChangeStatus(long blogId, int userId, int newStatus)
         {
             var blog = _repository.GetById(blogId);
@@ -45,7 +42,7 @@ namespace Explorer.Blog.Core.UseCases
             if (blog.AuthorId != userId)
                 throw new UnauthorizedAccessException("You are not the owner of this blog.");
 
-            var updated = _repository.UpdateStatus(blogId, newStatus); // ✅ Koristi novu metodu
+            var updated = _repository.UpdateStatus(blogId, newStatus);
             return _mapper.Map<BlogDto>(updated);
         }
 
@@ -55,12 +52,15 @@ namespace Explorer.Blog.Core.UseCases
             return _mapper.Map<List<BlogDto>>(blogs);
         }
 
-
         public BlogVoteStateDto Vote(long blogId, int userId, bool isUpvote)
         {
             var blog = _repository.GetById(blogId);
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
+
+            // Defensive: ograniči glasanje na objavljene blogove
+            if (blog.Status != 1)
+                throw new InvalidOperationException("Voting is allowed only on published blogs.");
 
             var voteType = isUpvote ? VoteType.Upvote : VoteType.Downvote;
 

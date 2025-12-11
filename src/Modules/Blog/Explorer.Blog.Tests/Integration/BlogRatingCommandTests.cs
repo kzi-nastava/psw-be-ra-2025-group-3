@@ -66,6 +66,9 @@ namespace Explorer.Blog.Tests.Integration
             createdBlog.ShouldNotBeNull();
             var blogId = createdBlog.Id;
 
+            var publishResult = controller.ChangeStatus(blogId, newStatus: 1);
+            publishResult.Result.ShouldBeOfType<OkObjectResult>();
+
             // Act - korisnik daje upvote
             var voteDto = new BlogVoteDto
             {
@@ -109,6 +112,9 @@ namespace Explorer.Blog.Tests.Integration
             createdBlog.ShouldNotBeNull();
             var blogId = createdBlog.Id;
 
+            var publishResult = controller.ChangeStatus(blogId, newStatus: 1); // Objavi blog
+            publishResult.Result.ShouldBeOfType<OkObjectResult>();
+
             // Prvi put: upvote
             var voteDto = new BlogVoteDto { BlogId = blogId, IsUpvote = true };
             controller.Vote(blogId, voteDto);
@@ -148,6 +154,9 @@ namespace Explorer.Blog.Tests.Integration
             var createdBlog = (createResult.Result as CreatedAtActionResult)!.Value as BlogDto;
             createdBlog.ShouldNotBeNull();
             var blogId = createdBlog.Id;
+
+            var publishResult = controller.ChangeStatus(blogId, newStatus: 1);
+            publishResult.Result.ShouldBeOfType<OkObjectResult>();
 
             // Prvo: upvote
             var upvoteDto = new BlogVoteDto { BlogId = blogId, IsUpvote = true };
@@ -189,6 +198,9 @@ namespace Explorer.Blog.Tests.Integration
             var createdBlog = (createResult.Result as CreatedAtActionResult)!.Value as BlogDto;
             createdBlog.ShouldNotBeNull();
             var blogId = createdBlog.Id;
+
+            var publishResult = controller.ChangeStatus(blogId, newStatus: 1);
+            publishResult.Result.ShouldBeOfType<OkObjectResult>();
 
             // User -11: upvote
             AttachUser(controller, -11);

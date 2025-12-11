@@ -1,4 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.Exceptions;
+﻿using System.Collections.Generic;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,8 @@ namespace Explorer.Tours.Tests.Integration.Authoring;
 [Collection("Sequential")]
 public class KeyPointCommandTests : BaseToursIntegrationTest
 {
+    private const long AuthorId = -11;   // isti author kao u test podacima
+
     public KeyPointCommandTests(ToursTestFactory factory) : base(factory) { }
 
     private (IKeyPointService keyPointService, ITourService tourService) GetServices()
@@ -30,7 +33,7 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
             Tags = new List<string> { "kp-test" }
         };
 
-        var created = tourService.Create(tourDto, -11); // isti author kao u tvojim testovima
+        var created = tourService.Create(tourDto, AuthorId);
         created.Id.ShouldNotBe(0);
         return created.Id;
     }
@@ -56,7 +59,7 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var result = keyPointService.Create(dto);
+        var result = keyPointService.Create(dto, AuthorId);
 
         // Assert
         result.ShouldNotBeNull();
@@ -93,12 +96,12 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
                 Secret = "Stara tajna",
                 Latitude = 45.1,
                 Longitude = 19.9
-            });
+            }, AuthorId);
 
             keyPointId = created.Id;
         }
 
-        // 2. scope – radimo update (novi DbContext, nema konflikta)
+        // 2. scope – radimo update (novi DbContext)
         using var scope2 = Factory.Services.CreateScope();
         var keyPointService2 = scope2.ServiceProvider.GetRequiredService<IKeyPointService>();
 
@@ -115,7 +118,7 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
         };
 
         // Act
-        var updated = keyPointService2.Update(updateDto);
+        var updated = keyPointService2.Update(updateDto, AuthorId);
 
         // Assert
         updated.ShouldNotBeNull();
@@ -126,7 +129,6 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
         updated.ImageUrl.ShouldBe("http://example.com/new.jpg");
         updated.Secret.ShouldBe("Nova tajna");
     }
-
 
     [Fact]
     public void Deletes_key_point()
@@ -146,15 +148,14 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
             Secret = "Tajna",
             Latitude = 45.2,
             Longitude = 19.7
-        });
+        }, AuthorId);
 
         // Act
-        keyPointService.Delete(created.Id);
+        keyPointService.Delete(created.Id, AuthorId);
 
         // Assert
         Should.Throw<NotFoundException>(() => keyPointService.GetById(created.Id));
     }
-
 
     [Fact]
     public void Gets_paged_key_points()
@@ -175,10 +176,10 @@ public class KeyPointCommandTests : BaseToursIntegrationTest
             Secret = "Tajna",
             Latitude = 45.3,
             Longitude = 19.6
-        });
+        }, AuthorId);
 
         // Act
-        var page = keyPointService.GetPaged(0, 10);
+        var page = keyPointService.GetPaged(tourId, 0, 10);
 
         // Assert
         page.ShouldNotBeNull();

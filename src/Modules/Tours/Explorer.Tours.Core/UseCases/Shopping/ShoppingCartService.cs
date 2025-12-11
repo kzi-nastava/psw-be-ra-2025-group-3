@@ -42,6 +42,8 @@ namespace Explorer.Tours.Core.UseCases.Shopping
 
             var tour = _tourRepository.GetById(tourId)
                    ?? throw new InvalidOperationException("Tour not found.");
+            if (tour.ArchivedAt != null)
+                throw new InvalidOperationException("Cannot purchase archived tour.");
 
             cart.AddItem(tour);
 
@@ -60,6 +62,12 @@ namespace Explorer.Tours.Core.UseCases.Shopping
             _shoppingCartRepository.Update(cart);
 
             return _mapper.Map<ShoppingCartDto>(cart);
+        }
+
+        //tour-execution kartica
+        public bool HasPurchasedTour(long touristId, long tourId)
+        {
+            return _shoppingCartRepository.HasPurchasedTour(touristId, tourId);
         }
     }
 }

@@ -12,13 +12,12 @@ namespace Explorer.API.Controllers.Tourist.Authoring;
 public class TourProblemController : ControllerBase
 {
     private readonly ITourProblemService _tourProblemService;
-    private readonly ITourRepository _tourRepository; // DODAJ OVO
+    private readonly ITourRepository _tourRepository; 
 
-    // IZMENI KONSTRUKTOR
     public TourProblemController(ITourProblemService tourProblemService, ITourRepository tourRepository)
     {
         _tourProblemService = tourProblemService;
-        _tourRepository = tourRepository; // DODAJ OVO
+        _tourRepository = tourRepository;
     }
 
     [HttpPost]

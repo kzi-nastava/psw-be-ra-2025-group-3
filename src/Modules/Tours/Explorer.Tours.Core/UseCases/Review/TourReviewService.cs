@@ -1,7 +1,6 @@
 ﻿// Explorer.Tours.Core/UseCases/Review/TourReviewService.cs
 using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.Domain;
@@ -27,7 +26,6 @@ public class TourReviewService : ITourReviewService
 
     public TourReviewEligibilityDto CheckEligibility(long tourId, long touristId)
     {
-        // Proveri da li postoji TourExecution
         var latestExecution = _executionRepository.GetLatestForTouristAndTour(touristId, tourId);
 
         if (latestExecution == null)
@@ -41,7 +39,6 @@ public class TourReviewService : ITourReviewService
             };
         }
 
-        // Proveri procenat (>35%)
         if (latestExecution.ProgressPercentage <= 35)
         {
             return new TourReviewEligibilityDto
@@ -53,7 +50,6 @@ public class TourReviewService : ITourReviewService
             };
         }
 
-        // Proveri 7 dana od LastActivity
         var daysSinceLastActivity = (DateTime.UtcNow - latestExecution.LastActivity).TotalDays;
         if (daysSinceLastActivity > 7)
         {
@@ -66,7 +62,6 @@ public class TourReviewService : ITourReviewService
             };
         }
 
-        
         return new TourReviewEligibilityDto
         {
             CanReview = true,
@@ -78,19 +73,15 @@ public class TourReviewService : ITourReviewService
 
     public TourReviewDto CreateReview(TourReviewCreateDto dto, long touristId)
     {
-        // Proveri eligibility
         var eligibility = CheckEligibility(dto.TourId, touristId);
         if (!eligibility.CanReview)
             throw new InvalidOperationException(eligibility.ReasonIfNot);
 
-        // Proveri da li već postoji recenzija
         if (_reviewRepository.HasReview(touristId, dto.TourId))
             throw new InvalidOperationException("You have already reviewed this tour. Use update instead.");
 
-        // Uzmi najnoviji TourExecution za procenat
         var latestExecution = _executionRepository.GetLatestForTouristAndTour(touristId, dto.TourId);
 
-        // Kreiraj recenziju
         var review = new TourReview(
             dto.TourId,
             touristId,
@@ -105,7 +96,6 @@ public class TourReviewService : ITourReviewService
 
     public TourReviewDto UpdateReview(TourReviewUpdateDto dto, long touristId)
     {
-        // Učitaj postojeću recenziju
         var review = _reviewRepository.GetById(dto.ReviewId);
 
         if (review == null)
@@ -114,12 +104,10 @@ public class TourReviewService : ITourReviewService
         if (review.TouristId != touristId)
             throw new InvalidOperationException("You can only update your own reviews.");
 
-        // Proveri eligibility
         var eligibility = CheckEligibility(review.TourId, touristId);
         if (!eligibility.CanReview)
             throw new InvalidOperationException(eligibility.ReasonIfNot);
 
-        // Ažuriraj recenziju
         review.Update(dto.Rating, dto.Comment);
         var updated = _reviewRepository.Update(review);
 
@@ -136,5 +124,51 @@ public class TourReviewService : ITourReviewService
     {
         var review = _reviewRepository.GetByTouristAndTour(touristId, tourId);
         return review != null ? _mapper.Map<TourReviewDto>(review) : null;
+    }
+
+    public ReviewImageDto AddImageToReview(long reviewId, long touristId, string imageUrl)
+    {
+        var review = _reviewRepository.GetByIdWithImages(reviewId);
+
+        if (review == null)
+            throw new NotFoundException($"Review with id {reviewId} not found.");
+
+        if (review.TouristId != touristId)
+            throw new InvalidOperationException("You can only add images to your own reviews.");
+
+        var eligibility = CheckEligibility(review.TourId, touristId);
+        if (!eligibility.CanReview)
+            throw new InvalidOperationException(eligibility.ReasonIfNot);
+
+        review.AddImage(imageUrl);
+        var updated = _reviewRepository.Update(review);
+
+        var addedImage = updated.Images.Last();
+        return _mapper.Map<ReviewImageDto>(addedImage);
+    }
+
+    public void DeleteImageFromReview(long reviewId, long imageId, long touristId)
+    {
+        var review = _reviewRepository.GetByIdWithImages(reviewId);
+
+        if (review == null)
+            throw new NotFoundException($"Review with id {reviewId} not found.");
+
+        if (review.TouristId != touristId)
+            throw new InvalidOperationException("You can only delete images from your own reviews.");
+
+        var image = review.Images.FirstOrDefault(i => i.Id == imageId);
+        if (image == null)
+            throw new NotFoundException($"Image with id {imageId} not found.");
+
+        review.RemoveImage(imageId);
+        _reviewRepository.Update(review);
+    }
+
+    public ReviewImageDto? GetImageById(long reviewId, long imageId)
+    {
+        var review = _reviewRepository.GetByIdWithImages(reviewId);
+        var image = review?.Images.FirstOrDefault(i => i.Id == imageId);
+        return image != null ? _mapper.Map<ReviewImageDto>(image) : null;
     }
 }

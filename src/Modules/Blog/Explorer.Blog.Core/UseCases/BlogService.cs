@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
+using Explorer.Blog.Core.Domain.Blogs;
 
 namespace Explorer.Blog.Core.UseCases
 {

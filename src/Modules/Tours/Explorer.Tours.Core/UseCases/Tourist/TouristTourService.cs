@@ -14,13 +14,15 @@ public class TouristTourService : ITouristTourService
     private readonly ITourRepository _tourRepository;
     private readonly ITourReviewRepository _reviewRepository;
     private readonly ITourAccessService _access;
+    private readonly ITourPurchaseTokenRepository _tokenRepository; //tour execution
     private readonly IMapper _mapper;
 
-    public TouristTourService(ITourRepository tourRepository, ITourReviewRepository reviewRepository, ITourAccessService access, IMapper mapper)
+    public TouristTourService(ITourRepository tourRepository, ITourReviewRepository reviewRepository, ITourAccessService access, ITourPurchaseTokenRepository tokenRepository, IMapper mapper)
     {
         _tourRepository = tourRepository;
         _reviewRepository = reviewRepository;
         _access = access;
+        _tokenRepository = tokenRepository; // tour execution
         _mapper = mapper;
     }
 
@@ -147,4 +149,53 @@ public class TouristTourService : ITouristTourService
         return preview;
     }
 
+    //tour execution
+    public List<TourPreviewDto> GetMyPurchasedTours(long touristId)
+    {
+        var tokens = _tokenRepository.GetByTouristId(touristId);
+        var tourIds = tokens.Select(t => t.TourId).Distinct().ToList();
+
+        if (!tourIds.Any())
+            return new List<TourPreviewDto>();
+
+        var result = new List<TourPreviewDto>();
+
+        foreach (var tourId in tourIds)
+        {
+            var tour = _tourRepository.GetByIdWithKeyPoints(tourId);
+            if (tour == null) continue;
+
+            var dto = _mapper.Map<TourPreviewDto>(tour);
+
+            dto.Length = tour.DistanceInKm;
+
+            if (tour.TourDurations != null && tour.TourDurations.Any())
+                dto.AverageDuration = tour.TourDurations.Average(td => td.TimeInMinutes);
+            else
+                dto.AverageDuration = 0;
+
+            if (tour.KeyPoints != null && tour.KeyPoints.Any())
+            {
+                var first = tour.KeyPoints.OrderBy(k => k.Id).First();
+                dto.StartPoint = first.Name;
+                dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+            }
+
+            var reviews = _reviewRepository.GetAllForTour(tour.Id);
+            if (reviews.Any())
+            {
+                dto.AverageRating = reviews.Average(r => r.Rating);
+                dto.Reviews = reviews.Select(r => _mapper.Map<TourReviewDto>(r)).ToList();
+            }
+            else
+            {
+                dto.AverageRating = 0;
+                dto.Reviews = new List<TourReviewDto>();
+            }
+
+            result.Add(dto);
+        }
+
+        return result;
+    }
 }

@@ -109,4 +109,35 @@ public class AdminTourProblemService : IAdminTourProblemService
         tour.Archive(); 
         _tourRepository.Update(tour);
     }
+
+    public AdminTourProblemDto AddAdminMessage(long problemId, long adminId, string content)
+    {
+        var problem = _tourProblemRepository.GetById(problemId);
+        if (problem == null)
+            throw new NotFoundException($"Tour problem with id {problemId} not found.");
+
+        // Admin može slati poruke
+        problem.AddMessage(adminId, content, AuthorType.Admin);
+        _tourProblemRepository.Update(problem);
+
+        // Notifikuj turista
+        var notificationForTourist = new Notification(
+            recipientId: problem.TouristId,
+            type: NotificationType.NewMessage,
+            relatedEntityId: problemId,
+            message: "Administrator has responded to your problem report."
+        );
+        _notificationRepository.Create(notificationForTourist);
+
+        // Notifikuj autora
+        var notificationForAuthor = new Notification(
+            recipientId: problem.AuthorId,
+            type: NotificationType.NewMessage,
+            relatedEntityId: problemId,
+            message: "Administrator has sent a message regarding the reported problem."
+        );
+        _notificationRepository.Create(notificationForAuthor);
+
+        return MapToAdminDto(problem);
+    }
 }

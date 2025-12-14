@@ -101,7 +101,7 @@ public class AdminTourProblemCommandTests : BaseToursIntegrationTest
         result.StatusCode.ShouldBe(200);
 
         var stored = dbContext.TourProblems.First(p => p.Id == problem.Id);
-        stored.Status.ShouldBe(TourProblemStatus.Resolved);
+        stored.Status.ShouldBe(TourProblemStatus.Closed);
     }
 
 

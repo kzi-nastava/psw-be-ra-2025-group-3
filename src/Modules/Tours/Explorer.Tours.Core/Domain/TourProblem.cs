@@ -155,10 +155,10 @@ public class TourProblem : AggregateRoot
 
     public void CloseByAdmin()
     {
-        if (Status == TourProblemStatus.Resolved)
-            throw new InvalidOperationException("Problem is already resolved.");
+        if (Status == TourProblemStatus.Closed)
+            throw new InvalidOperationException("Problem is already closed.");
 
-        Status = TourProblemStatus.Resolved;
+        Status = TourProblemStatus.Closed;
         UpdatedAt = DateTime.UtcNow;
     }
 }

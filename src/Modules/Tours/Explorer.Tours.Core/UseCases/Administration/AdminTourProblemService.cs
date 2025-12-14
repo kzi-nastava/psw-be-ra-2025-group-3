@@ -79,7 +79,8 @@ public class AdminTourProblemService : IAdminTourProblemService
             recipientId: problem.AuthorId,
             type: NotificationType.DeadlineSet,
             relatedEntityId: problem.Id,
-            message: $"Admin set a deadline for solving your tour problem until {deadline:dd.MM.yyyy}."
+            message: $"An administrator has set a deadline for resolving your tour problem. " +
+            $"The deadline is {deadline:dd.MM.yyyy} at {deadline:HH:mm}."
         );
 
         _notificationRepository.Create(notification);

@@ -49,7 +49,6 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         execution.Status.ShouldBe(0);
     }
 
-    
 
     [Fact]
     public void Completes_active_tour_successfully()
@@ -58,6 +57,8 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-23");
         var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+        var tourExecutionService = scope.ServiceProvider.GetRequiredService<ITourExecutionService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         shoppingCartService.AddToCart(-23, -2);
 
@@ -68,6 +69,24 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
             StartLongitude = 19.8300
         };
         controller.StartTour(startDto);
+
+        // Uzmi sve KeyPoint-ove za turu -2
+        var keyPoints = dbContext.KeyPoints
+            .Where(kp => kp.TourId == -2)
+            .OrderBy(kp => kp.Id)
+            .ToList();
+
+        // Komplеtiraj svaki KeyPoint
+        foreach (var keyPoint in keyPoints)
+        {
+            var locationDto = new LocationCheckDto
+            {
+                TourId = -2,
+                CurrentLatitude = keyPoint.Latitude,
+                CurrentLongitude = keyPoint.Longitude
+            };
+            tourExecutionService.CheckLocationProgress(locationDto, -23);
+        }
 
         // Act
         var actionResult = controller.CompleteTour();
@@ -82,7 +101,6 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         execution.Status.ShouldBe(1);
         execution.CompletionTime.ShouldNotBeNull();
     }
-
     [Fact]
     public void Abandons_active_tour_successfully()
     {

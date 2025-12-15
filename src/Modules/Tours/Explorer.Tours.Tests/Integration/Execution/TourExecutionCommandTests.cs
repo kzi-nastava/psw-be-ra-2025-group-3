@@ -57,9 +57,16 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-23");
         var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
-        var tourExecutionService = scope.ServiceProvider.GetRequiredService<ITourExecutionService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
+        // 1. OČISTI PRETHODNE SESIJE ZA OVOG TURISTA
+        var existingSessions = dbContext.TourExecutions
+            .Where(te => te.TouristId == -23)
+            .ToList();
+        dbContext.TourExecutions.RemoveRange(existingSessions);
+        dbContext.SaveChanges();
+
+        // 2. KUPI TURU
         shoppingCartService.AddToCart(-23, -2);
 
         var startDto = new TourExecutionCreateDto
@@ -68,25 +75,49 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
             StartLatitude = 45.2500,
             StartLongitude = 19.8300
         };
-        controller.StartTour(startDto);
 
-        // Uzmi sve KeyPoint-ove za turu -2
+        // 3. POKRENI TURU
+        var startResult = controller.StartTour(startDto);
+        startResult.Result.ShouldBeOfType<OkObjectResult>();
+
+        // 4. UČITAJ EXECUTION IZ BAZE
+        var execution = dbContext.TourExecutions
+            .FirstOrDefault(te => te.TouristId == -23 && te.TourId == -2 && te.Status == TourExecutionStatus.Active);
+
+        execution.ShouldNotBeNull();
+
+        // 5. UZMI SVE KEYPOINTS ZA OVU TURU
         var keyPoints = dbContext.KeyPoints
             .Where(kp => kp.TourId == -2)
             .OrderBy(kp => kp.Id)
             .ToList();
 
-        // Komplеtiraj svaki KeyPoint
+        keyPoints.Count.ShouldBeGreaterThan(0);
+
+        // 6. RUČNO KOMPLЕTIRAJ SVE KEYPOINTS (direktno pozivom agregat metode)
         foreach (var keyPoint in keyPoints)
         {
-            var locationDto = new LocationCheckDto
-            {
-                TourId = -2,
-                CurrentLatitude = keyPoint.Latitude,
-                CurrentLongitude = keyPoint.Longitude
-            };
-            tourExecutionService.CheckLocationProgress(locationDto, -23);
+            // Pozovi CheckLocationProgress sa TAČNIM koordinatama KeyPointa
+            // Ovo će automatski dodati KeyPoint u CompletedKeyPoints listu
+            execution.CheckLocationProgress(
+                keyPoint.Latitude,
+                keyPoint.Longitude,
+                keyPoints
+            );
         }
+
+        // 7. SAČUVAJ PROMENE U BAZI
+        dbContext.SaveChanges();
+
+        // 8. OSVJEŽI CONTEXT DA BISMO VIDELI NAJNOVIJE PROMENE
+        dbContext.ChangeTracker.Clear();
+
+        // 9. PONOVO UČITAJ EXECUTION DA PROVERIŠ DA SU KEYPOINTS KOMPLETTIRANI
+        execution = dbContext.TourExecutions
+            .FirstOrDefault(te => te.Id == execution.Id);
+
+        execution.ShouldNotBeNull();
+        execution.CompletedKeyPoints.Count.ShouldBe(keyPoints.Count); // Proveri da su SVI komplettirani
 
         // Act
         var actionResult = controller.CompleteTour();
@@ -96,11 +127,12 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         actionResult.Result.ShouldBeOfType<OkObjectResult>();
 
         var okResult = actionResult.Result as OkObjectResult;
-        var execution = okResult!.Value as TourExecutionDto;
-        execution.ShouldNotBeNull();
-        execution.Status.ShouldBe(1);
-        execution.CompletionTime.ShouldNotBeNull();
+        var completedExecution = okResult!.Value as TourExecutionDto;
+        completedExecution.ShouldNotBeNull();
+        completedExecution.Status.ShouldBe(1); // Completed
+        completedExecution.CompletionTime.ShouldNotBeNull();
     }
+
     [Fact]
     public void Abandons_active_tour_successfully()
     {

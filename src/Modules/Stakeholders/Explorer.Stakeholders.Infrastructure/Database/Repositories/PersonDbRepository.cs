@@ -42,6 +42,10 @@ public class PersonDbRepository : IPersonRepository
         return _dbSet.Any(p => p.Email.ToLower() == normalized);
     }
 
+    public Person? GetByUserId(long userId)
+    {
+        return _dbSet.FirstOrDefault(p => p.UserId == userId);
+    }
 
 
 

@@ -61,4 +61,12 @@ public class TourReviewDbRepository : ITourReviewRepository
             .Include(r => r.Images)  
             .FirstOrDefault(r => r.Id == id);
     }
+    public List<TourReview> GetAllForTourist(long touristId)
+    {
+        return _context.TourReviews
+            .Include(r => r.Images)
+            .Where(r => r.TouristId == touristId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
+    }
 }

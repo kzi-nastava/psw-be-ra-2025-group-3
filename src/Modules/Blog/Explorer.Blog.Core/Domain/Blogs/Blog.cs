@@ -15,7 +15,7 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public int AuthorId { get; private set; }
         public int Status { get; private set; }
         public List<BlogImage> Images { get; private set; }
-        public List<Comment> Comments { get; private set; } = new();
+        public List<Comment> Comments { get; private set; }
 
         public Blog()
         {
@@ -106,42 +106,32 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         //metode za komentare 
 
-        public void AddComment(int authorId, string text)
+        public void AddComment(int userId, string text)
         {
-            if (Status != 1)   // 1 = published
-                throw new InvalidOperationException("Cannot comment on an unpublished blog.");
+            if (Status != 1)
+                throw new InvalidOperationException("Comments can be added only to published blogs.");
 
-            var comment = new Comment(this.Id, authorId, text);
+            var comment = new Comment(Id, userId, text);
             Comments.Add(comment);
         }
 
-        public void EditComment(long commentId, int authorId, string newText)
+        public void EditComment(long commentId, int userId, string newText)
         {
             var comment = Comments.FirstOrDefault(c => c.Id == commentId)
                 ?? throw new InvalidOperationException("Comment not found.");
 
-            if (comment.AuthorId != authorId)
-                throw new InvalidOperationException("Not your comment.");
-
-            if (!comment.CanModify())
-                throw new InvalidOperationException("Editing period expired.");
-
-            comment.Edit(newText);
+            comment.Edit(userId, newText);
         }
 
-        public void DeleteComment(long commentId, int authorId)
+        public void DeleteComment(long commentId, int userId)
         {
             var comment = Comments.FirstOrDefault(c => c.Id == commentId)
                 ?? throw new InvalidOperationException("Comment not found.");
 
-            if (comment.AuthorId != authorId)
-                throw new InvalidOperationException("Not your comment.");
-
-            if (!comment.CanModify())
-                throw new InvalidOperationException("Deleting period expired.");
-
+            comment.EnsureCanDelete(userId);
             Comments.Remove(comment);
         }
+
 
     }
 }

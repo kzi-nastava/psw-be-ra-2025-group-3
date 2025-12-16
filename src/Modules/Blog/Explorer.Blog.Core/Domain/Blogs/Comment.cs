@@ -11,12 +11,12 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public DateTime CreatedAt { get; private set; }
         public DateTime? EditedAt { get; private set; }
 
-        private Comment() { } 
+        private Comment() { } // EF
 
         public Comment(long blogId, int authorId, string text)
         {
             if (string.IsNullOrWhiteSpace(text))
-                throw new ArgumentException("Comment cannot be empty.");
+                throw new ArgumentException("Comment text cannot be empty.");
 
             BlogId = blogId;
             AuthorId = authorId;
@@ -24,18 +24,25 @@ namespace Explorer.Blog.Core.Domain.Blogs
             CreatedAt = DateTime.UtcNow;
         }
 
-        public void Edit(string newText)
+        public void Edit(int userId, string newText)
         {
-            if (string.IsNullOrWhiteSpace(newText))
-                throw new ArgumentException("Comment cannot be empty.");
+            if (userId != AuthorId)
+                throw new InvalidOperationException("You can edit only your own comment.");
+
+            if (DateTime.UtcNow > CreatedAt.AddMinutes(15))
+                throw new InvalidOperationException("Comment can be edited only within 15 minutes.");
 
             Text = newText;
             EditedAt = DateTime.UtcNow;
         }
 
-        public bool CanModify()
+        public void EnsureCanDelete(int userId)
         {
-            return DateTime.UtcNow - CreatedAt <= TimeSpan.FromMinutes(15);
+            if (userId != AuthorId)
+                throw new InvalidOperationException("You can delete only your own comment.");
+
+            if (DateTime.UtcNow > CreatedAt.AddMinutes(15))
+                throw new InvalidOperationException("Comment can be deleted only within 15 minutes.");
         }
     }
 }

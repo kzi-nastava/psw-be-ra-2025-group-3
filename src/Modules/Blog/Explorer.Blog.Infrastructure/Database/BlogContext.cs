@@ -36,6 +36,8 @@ namespace Explorer.Blog.Infrastructure.Database
                 .WithOne()
                 .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+     
         }
     }
 }

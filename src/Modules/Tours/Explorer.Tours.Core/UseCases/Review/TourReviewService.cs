@@ -186,6 +186,11 @@ public class TourReviewService : ITourReviewService
         var dto = _mapper.Map<TourReviewDto>(review);
         var tour = _tourRepository.GetById(review.TourId); 
         dto.TourName = tour?.Name ?? $"Tour #{review.TourId}";
+        var latestExecution = _executionRepository.GetLatestForTouristAndTour(review.TouristId, review.TourId);
+        if (latestExecution != null)
+        {
+            dto.ProgressPercentage = latestExecution.ProgressPercentage;
+        }
 
         return dto;
     }

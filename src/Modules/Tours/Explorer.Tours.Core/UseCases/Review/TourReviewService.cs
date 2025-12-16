@@ -1,4 +1,4 @@
-﻿// Explorer.Tours.Core/UseCases/Review/TourReviewService.cs
+﻿using System.Linq;
 using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
@@ -13,14 +13,17 @@ public class TourReviewService : ITourReviewService
     private readonly ITourReviewRepository _reviewRepository;
     private readonly ITourExecutionRepository _executionRepository;
     private readonly IMapper _mapper;
+    private readonly ITourRepository _tourRepository;
 
     public TourReviewService(
         ITourReviewRepository reviewRepository,
         ITourExecutionRepository executionRepository,
+        ITourRepository tourRepository,
         IMapper mapper)
     {
         _reviewRepository = reviewRepository;
         _executionRepository = executionRepository;
+        _tourRepository = tourRepository;
         _mapper = mapper;
     }
 
@@ -91,7 +94,7 @@ public class TourReviewService : ITourReviewService
         );
 
         var created = _reviewRepository.Create(review);
-        return _mapper.Map<TourReviewDto>(created);
+        return MapReviewToDto(created);
     }
 
     public TourReviewDto UpdateReview(TourReviewUpdateDto dto, long touristId)
@@ -111,19 +114,25 @@ public class TourReviewService : ITourReviewService
         review.Update(dto.Rating, dto.Comment);
         var updated = _reviewRepository.Update(review);
 
-        return _mapper.Map<TourReviewDto>(updated);
+        return MapReviewToDto(updated);
     }
 
     public List<TourReviewDto> GetReviewsForTour(long tourId)
     {
         var reviews = _reviewRepository.GetAllForTour(tourId);
-        return _mapper.Map<List<TourReviewDto>>(reviews);
+        return reviews.Select(r => MapReviewToDto(r)).ToList();
     }
 
     public TourReviewDto? GetMyReview(long tourId, long touristId)
     {
         var review = _reviewRepository.GetByTouristAndTour(touristId, tourId);
-        return review != null ? _mapper.Map<TourReviewDto>(review) : null;
+        return review != null ? MapReviewToDto(review) : null;
+    }
+
+    public List<TourReviewDto> GetAllReviewsForTourist(long touristId)
+    {
+        var reviews = _reviewRepository.GetAllForTourist(touristId);
+        return reviews.Select(r => MapReviewToDto(r)).ToList();
     }
 
     public ReviewImageDto AddImageToReview(long reviewId, long touristId, string imageUrl)
@@ -170,5 +179,14 @@ public class TourReviewService : ITourReviewService
         var review = _reviewRepository.GetByIdWithImages(reviewId);
         var image = review?.Images.FirstOrDefault(i => i.Id == imageId);
         return image != null ? _mapper.Map<ReviewImageDto>(image) : null;
+    }
+
+    private TourReviewDto MapReviewToDto(TourReview review)
+    {
+        var dto = _mapper.Map<TourReviewDto>(review);
+        var tour = _tourRepository.GetById(review.TourId); 
+        dto.TourName = tour?.Name ?? $"Tour #{review.TourId}";
+
+        return dto;
     }
 }

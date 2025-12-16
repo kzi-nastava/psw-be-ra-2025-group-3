@@ -49,6 +49,15 @@ namespace Explorer.API.Controllers.Tourist
             var result = _touristTourService.GetDetails(touristId, id);
             return Ok(result);
         }
+        //tour execution
+        [HttpGet("my-tours")]
+        public ActionResult<List<TourPreviewDto>> GetMyPurchasedTours()
+        {
+            long touristId = GetTouristId();
+            var result = _touristTourService.GetMyPurchasedTours(touristId);
+            return Ok(result);
+        }
+
         [HttpGet("{id}/can-start")]
         public ActionResult CanStart(long id)
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Explorer.Tours.API.Dtos;
 
 namespace Explorer.Tours.API.Public.Administration;
@@ -11,4 +12,5 @@ public interface IAdminTourProblemService
     void SetDeadline(long problemId, DateTime deadline);
     void CloseProblem(long problemId);
     void PenalizeAuthor(long problemId);
+    AdminTourProblemDto AddAdminMessage(long problemId, long adminId, string content);
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 using BlogImageEntity = Explorer.Blog.Core.Domain.Blogs.BlogImage;
+using BlogRating = Explorer.Blog.Core.Domain.Blogs.BlogRating;
 
 namespace Explorer.Blog.Infrastructure.Database
 {
@@ -15,7 +16,11 @@ namespace Explorer.Blog.Infrastructure.Database
       
         public DbSet<BlogEntity> Blogs { get; set; }
         public DbSet<BlogImageEntity> BlogImages { get; set; }
+
         public DbSet<Comment> Comments { get; set; }
+
+
+        public DbSet<BlogRating> BlogRatings { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,12 +37,14 @@ namespace Explorer.Blog.Infrastructure.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BlogEntity>()
+
                 .HasMany(b => b.Comments)
                 .WithOne()
                 .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
 
      
+
         }
     }
 }

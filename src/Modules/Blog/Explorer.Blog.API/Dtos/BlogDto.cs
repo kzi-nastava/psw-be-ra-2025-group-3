@@ -23,5 +23,6 @@ namespace Explorer.Blog.API.Dtos
         //[Range(0, 2, ErrorMessage = "Status mora biti 0 (Draft), 1 (Published) ili 2 (Archived)")]
         public int Status { get; set; }
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
+        public List<BlogVoteDto> Ratings { get; set; } = new List<BlogVoteDto>();
     }
 }

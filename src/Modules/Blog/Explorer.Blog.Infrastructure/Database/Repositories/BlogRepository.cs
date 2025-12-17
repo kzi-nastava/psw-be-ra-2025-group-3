@@ -80,7 +80,11 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         {
             var blog = _context.Blogs
                 .Include(b => b.Images)
+
                 .Include(b => b.Comments)
+
+                .Include(b => b.Ratings)
+
                 .FirstOrDefault(b => b.Id == id);
 
             if (blog == null)

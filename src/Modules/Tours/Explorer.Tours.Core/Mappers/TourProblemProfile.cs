@@ -8,8 +8,24 @@ public class TourProblemProfile : Profile
 {
     public TourProblemProfile()
     {
-        CreateMap<TourProblem, TourProblemDto>().ReverseMap();
+        CreateMap<TourProblem, TourProblemDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status))
+            .ForMember(dest => dest.Messages, opt => opt.MapFrom(src => src.Messages));
+
+        CreateMap<TourProblemDto, TourProblem>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (TourProblemStatus)src.Status));
+
         CreateMap<TourProblemCreateDto, TourProblem>();
         CreateMap<TourProblemUpdateDto, TourProblem>();
+
+        CreateMap<Message, MessageDto>()
+            .ForMember(dest => dest.AuthorType, opt => opt.MapFrom(src => (int)src.AuthorType));
+
+        CreateMap<TourProblem, AdminTourProblemDto>()
+            .ForMember(dest => dest.TourName, opt => opt.Ignore())
+            .ForMember(dest => dest.IsOverdue, opt => opt.Ignore())
+            .ForMember(dest => dest.DaysOpen, opt => opt.Ignore())
+            .ForMember(dest => dest.AdminDeadline, opt => opt.MapFrom(src => src.AdminDeadline))
+            .ForMember(dest => dest.IsDeadlineExpired, opt => opt.MapFrom(src => src.IsDeadlineExpired()));
     }
 }

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Explorer.Blog.API\Explorer.Blog.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="UseCases\Administration\" />
+  </ItemGroup>
+
 </Project>

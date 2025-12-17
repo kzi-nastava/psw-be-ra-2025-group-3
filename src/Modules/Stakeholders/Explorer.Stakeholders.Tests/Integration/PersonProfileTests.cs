@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Text.Json;
 using System.Net.Http.Json;
-using System.Net.Http.Headers; // <-- VAŽNO
+using System.Net.Http.Headers;
 
 namespace Explorer.Stakeholders.Tests.Integration;
 
@@ -16,16 +16,12 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
     [Fact]
     public void Get_profile_succeeds()
     {
-        // Arrange
-        // Kreiramo klijent I ručno se logujemo da dobijemo token
         var client = Factory.CreateClient();
         var token = GetJwtToken("turista1@gmail.com", "turista1");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Act
         var response = client.GetAsync("api/stakeholders/person").Result;
 
-        // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
         var responseDto = ExtractResult<PersonDto>(response);
@@ -38,27 +34,23 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
     [Fact]
     public void Get_profile_fails_unauthorized()
     {
-        // Arrange
-        var client = Factory.CreateClient(); // Klijent koji nije ulogovan
+        var client = Factory.CreateClient();
 
-        // Act
         var response = client.GetAsync("api/stakeholders/person").Result;
 
-        // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
     }
 
     [Fact]
     public void Update_profile_succeeds()
     {
-        // Arrange
         var client = Factory.CreateClient();
-        var token = GetJwtToken("turista2@gmail.com", "turista2"); // Logujemo se kao Turista 2
+        var token = GetJwtToken("turista2@gmail.com", "turista2");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var updatedDto = new PersonDto
         {
-            UserId = -22,
+            UserId = -22, // biće ignorisano u kontroleru, koristi se ID iz tokena
             Name = "Mika",
             Surname = "Mikić",
             Email = "mika.novo@email.com",
@@ -66,10 +58,8 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
             Quote = "Moj NOVI moto."
         };
 
-        // Act
         var response = client.PutAsJsonAsync("api/stakeholders/person", updatedDto).Result;
 
-        // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
         var responseDto = ExtractResult<PersonDto>(response);
@@ -81,7 +71,6 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
     [Fact]
     public void Update_profile_fails_invalid_email()
     {
-        // Arrange
         var client = Factory.CreateClient();
         var token = GetJwtToken("turista2@gmail.com", "turista2");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -91,17 +80,13 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
             UserId = -22,
             Name = "Mika",
             Surname = "Mikić",
-            Email = "invalid-email" // Nema @
+            Email = "invalid-email"
         };
 
-        // Act
         var response = client.PutAsJsonAsync("api/stakeholders/person", invalidDto).Result;
 
-        // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
     }
-
-    // --- Helper Metodi ---
 
     // ---------------------
     // CREATE PERSON (ADMIN)
@@ -110,7 +95,7 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
     public void Create_person_succeeds()
     {
         var client = Factory.CreateClient();
-        var token = GetJwtToken("admin@gmail.com", "admin"); // admin iz tvojih podataka
+        var token = GetJwtToken("admin@gmail.com", "admin");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var dto = new AccountRegistrationDto
@@ -121,6 +106,7 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
             Name = "Test",
             Surname = "Person",
             Email = "test.person@gmail.com"
+            // NEMA Biography / Url / Quote – uklonila si ih iz AccountRegistrationDto
         };
 
         var response = client.PostAsJsonAsync("api/stakeholders/person", dto).Result;
@@ -129,7 +115,9 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
 
         var person = ExtractResult<PersonDto>(response);
         person.ShouldNotBeNull();
+        person.UserId.ShouldNotBe(0);
         person.Name.ShouldBe("Test");
+        person.Surname.ShouldBe("Person");
         person.Email.ShouldBe("test.person@gmail.com");
     }
 
@@ -152,6 +140,7 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
 
         var response = client.PostAsJsonAsync("api/stakeholders/person", dto).Result;
 
+        // Ovde se oslanjamo na validaciju iz servisa / domena – u šablonu obično ide 422
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.UnprocessableEntity);
     }
 
@@ -159,7 +148,7 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
     // GET ALL PEOPLE
     // ---------------------
     [Fact]
-    public void Get_all_people_succeeds()
+    public void Get_all_people_excludes_logged_in_admin_and_returns_others()
     {
         var client = Factory.CreateClient();
         var token = GetJwtToken("admin@gmail.com", "admin");
@@ -171,10 +160,14 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
         var people = ExtractResult<List<PersonDto>>(response);
         people.ShouldNotBeNull();
         people.Count.ShouldBeGreaterThan(0);
-        people.Any(p => p.UserId == -1).ShouldBeTrue(); // admin
-        people.Any(p => p.UserId == -21).ShouldBeTrue(); // Pera
-        people.Any(p => p.UserId == -22).ShouldBeTrue(); // Mika
-        people.Any(p => p.UserId == -23).ShouldBeTrue(); // Steva
+
+        // NOVA LOGIKA: servis vraća sve osobe OSIM trenutno ulogovane (admin je -1)
+        people.Any(p => p.UserId == -1).ShouldBeFalse();   // admin NE SME da bude u listi
+
+        // Ostali seed-ovani korisnici treba i dalje da budu u listi
+        people.Any(p => p.UserId == -21).ShouldBeTrue();   // Pera
+        people.Any(p => p.UserId == -22).ShouldBeTrue();   // Mika
+        people.Any(p => p.UserId == -23).ShouldBeTrue();   // Steva
     }
 
     // ---------------------
@@ -233,6 +226,9 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
         person.IsActive.ShouldBeTrue();
     }
 
+    // ---------------------
+    // HELPER METODI
+    // ---------------------
     private static T ExtractResult<T>(HttpResponseMessage response)
     {
         var json = response.Content.ReadAsStringAsync().Result;
@@ -249,7 +245,6 @@ public class PersonProfileTests : BaseStakeholdersIntegrationTest
         return authResponse.AccessToken;
     }
 
-    // Dodajemo DTO klase koje su nam potrebne za helper metod
     private class CredentialsDto
     {
         public string Username { get; set; }

@@ -23,14 +23,19 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         dbContext.Database.ExecuteSqlRaw(@"
+            DELETE FROM tours.""Messages"";
             DELETE FROM tours.""TourProblems"";
             
-            INSERT INTO tours.""TourProblems""(""Id"", ""TourId"", ""TouristId"", ""Category"", ""Priority"", ""Description"", ""Time"", ""CreatedAt"", ""UpdatedAt"")
+            INSERT INTO tours.""TourProblems""(
+                ""Id"", ""TourId"", ""TouristId"", ""AuthorId"", ""Category"", ""Priority"", 
+                ""Description"", ""Time"", ""CreatedAt"", ""UpdatedAt"", 
+                ""Status"", ""ResolvedByTouristComment"", ""IsHighlighted"", ""AdminDeadline""
+            )
             VALUES 
-            (-1, -1, -11, 0, 2, 'Bus was 30 minutes late at pickup point', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL),
-            (-2, -1, -11, 2, 1, 'Tour guide spoke too quietly, hard to hear explanations', '2024-11-15 10:15:00', '2024-11-15 12:00:00', NULL),
-            (-3, -2, -12, 3, 3, 'Main attraction was closed without prior notice', '2024-11-14 14:00:00', '2024-11-14 15:30:00', NULL),
-            (-4, -1, -12, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL);
+            (-1, -1, -21, -11, 0, 2, 'Bus was 30 minutes late at pickup point', '2024-11-15 08:30:00', '2024-11-15 09:00:00', NULL, 0, NULL, false, NULL),
+            (-2, -1, -21, -11, 2, 1, 'Tour guide spoke too quietly, hard to hear explanations', '2024-11-15 10:15:00', '2024-11-15 12:00:00', NULL, 0, NULL, false, NULL),
+            (-3, -2, -22, -12, 3, 3, 'Main attraction was closed without prior notice', '2024-11-14 14:00:00', '2024-11-14 15:30:00', NULL, 0, NULL, false, NULL),
+            (-4, -1, -22, -11, 4, 0, 'Lunch portion was smaller than expected', '2024-11-15 12:30:00', '2024-11-15 13:00:00', NULL, 0, NULL, false, NULL);
         ");
     }
 
@@ -41,8 +46,8 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act
-        var result = service.GetByTouristId(-11);
+        // Act - Get problems for tourist -21
+        var result = service.GetByTouristId(-21);
 
         // Assert
         result.ShouldNotBeNull();
@@ -56,13 +61,13 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act
-        var result = service.GetById(-1, -11);
+        // Act - Tourist -21 retrieves their problem
+        var result = service.GetById(-1, -21);
 
         // Assert
         result.ShouldNotBeNull();
         result.Id.ShouldBe(-1);
-        result.TouristId.ShouldBe(-11);
+        result.TouristId.ShouldBe(-21);
         result.Category.ShouldBe(0);
         result.Priority.ShouldBe(2);
     }
@@ -74,7 +79,52 @@ public class TourProblemQueryTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
-        // Act & Assert
+        // Act & Assert - Tourist -22 cannot view problem created by -21
+        Should.Throw<Exception>(() => service.GetById(-1, -22));
+    }
+
+    [Theory]
+    [InlineData(-11, 3)] // Author -11 has 3 problems on his tours (-1, -2, -4)
+    [InlineData(-12, 1)] // Author -12 has 1 problem on his tours (-3)
+    public void Retrieves_problems_by_author_id(long authorId, int expectedCount)
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act
+        var result = service.GetByAuthorId(authorId);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(expectedCount);
+        result.ShouldAllBe(p => p.AuthorId == authorId);
+    }
+
+    [Fact]
+    public void Get_by_id_succeeds_for_author()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act - Author -11 can view problem -1 on his tour
+        var result = service.GetById(-1, -11);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(-1);
+        result.AuthorId.ShouldBe(-11);
+    }
+
+    [Fact]
+    public void Get_by_id_fails_for_unauthorized_user()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
+
+        // Act & Assert - User -12 cannot view problem -1 (not tourist who reported it, not author)
         Should.Throw<Exception>(() => service.GetById(-1, -12));
     }
 }

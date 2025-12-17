@@ -9,17 +9,21 @@ public class ToursContext : DbContext
 {
     public DbSet<Equipment> Equipment { get; set; }
     public DbSet<Tour> Tours { get; set; }
-
     public DbSet<Monument> Monuments { get; set; }
+    public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
-
+    public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
-
     public DbSet<Position> Positions { get; set; }
+    public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+    public DbSet<KeyPoint> KeyPoints { get; set; }
+    public DbSet<Message> Messages { get; set; }
+    public DbSet<TourExecution> TourExecutions { get; set; }
+    public DbSet<TourReview> TourReviews { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
-    public DbSet<Preference> Preferences { get; set; }
+    public DbSet<ReviewImage> ReviewImages { get; set; }
 
-    public DbSet<TouristEquipment> TouristEquipment { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
@@ -41,6 +45,54 @@ public class ToursContext : DbContext
                 c => c.ToList()
             ));
 
+        modelBuilder.Entity<Tour>()
+            .Property(t => t.TourDurations)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<List<TourDuration>>(v, (JsonSerializerOptions?)null) ?? new List<TourDuration>()
+            )
+            .Metadata.SetValueComparer(new ValueComparer<List<TourDuration>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()
+            ));
+
+        //mapiranje za facilities
+        modelBuilder.Entity<Facility>(entity =>
+        {
+            entity.ToTable("Facilities", "tours");   // ⭐ KLJUČNA IZMJENA
+
+            entity.HasKey(f => f.Id);
+
+            entity.Property(f => f.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(f => f.Name)
+                .IsRequired();
+
+            entity.Property(f => f.Latitude)
+                .IsRequired();
+
+            entity.Property(f => f.Longitude)
+                .IsRequired();
+
+            entity.Property(f => f.Category)
+                .HasConversion<int>()
+                .IsRequired();
+        });
+
+        
+        modelBuilder.Entity<Tour>()
+            .HasMany(t => t.Equipment)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("TourEquipment"));
+
+        modelBuilder.Entity<Tour>()
+            .HasMany(t => t.KeyPoints)
+            .WithOne()
+            .HasForeignKey(kp => kp.TourId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Name).IsRequired();
         modelBuilder.Entity<AwardEvent>().Property(ae => ae.Description).IsRequired();
@@ -53,31 +105,117 @@ public class ToursContext : DbContext
             .Property(ae => ae.Status)
             .HasConversion<string>();
 
-        modelBuilder.Entity<Preference>().HasIndex(p => p.TouristId);
-        modelBuilder.Entity<Preference>()
-            .Property(p => p.Tags)
-            .HasColumnType("jsonb")
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>()
-            )
-            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                (c1, c2) => c1.SequenceEqual(c2),
-                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => c.ToList()
-            ));
-
-        // Konfiguracija za TouristEquipment odnosno many-to-many veza
-        modelBuilder.Entity<TouristEquipment>(entity =>
+        modelBuilder.Entity<ShoppingCart>(builder =>
         {
-            // Kompozitni primarni ključ (TouristId + EquipmentId)
-            entity.HasKey(te => new { te.TouristId, te.EquipmentId });
+            builder.ToTable("ShoppingCarts", "tours");
 
-            // Relacija sa Equipment tabelom
-            entity.HasOne(te => te.Equipment)
-                .WithMany()
-                .HasForeignKey(te => te.EquipmentId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasKey(c => c.Id);
+
+            builder.Property(c => c.Id)
+                   .ValueGeneratedOnAdd();
+
+            builder.Property(c => c.TouristId)
+                   .IsRequired();
+
+            builder.Property(c => c.TotalPrice)
+                   .IsRequired();
+
+            builder.Property(c => c.Items)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<OrderItem>>(v, (JsonSerializerOptions?)null) ?? new List<OrderItem>()
+                )
+                .Metadata.SetValueComparer(
+                    new ValueComparer<List<OrderItem>>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()
+                    )
+                );
         });
+
+        modelBuilder.Entity<TourProblem>()
+            .HasMany(tp => tp.Messages)           
+            .WithOne()                            
+            .HasForeignKey("TourProblemId")        
+            .OnDelete(DeleteBehavior.Cascade);     
+
+        modelBuilder.Entity<TourProblem>()
+            .Property(tp => tp.Status)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Message>()
+            .Property(m => m.AuthorType)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .Property(n => n.Type)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.RecipientId, n.IsRead })
+            .HasDatabaseName("IX_Notifications_RecipientId_IsRead");
+
+        modelBuilder.Entity<TourExecution>(builder =>
+        {
+            builder.ToTable("TourExecutions", "tours");
+            builder.HasKey(te => te.Id);
+            builder.Property(te => te.Id).ValueGeneratedOnAdd();
+
+            builder.Property(te => te.TouristId).IsRequired();
+            builder.Property(te => te.TourId).IsRequired();
+            builder.Property(te => te.StartTime).IsRequired();
+            builder.Property(te => te.Status)
+                .HasConversion<int>()
+                .IsRequired();
+            builder.Property(te => te.StartLatitude).IsRequired();
+            builder.Property(te => te.StartLongitude).IsRequired();
+            builder.Property(te => te.LastActivity).IsRequired(); // task2
+            builder.Property(te => te.ProgressPercentage).IsRequired(); // task3
+
+
+
+            //  KeyPointCompletion kao JSON
+            builder.Property(te => te.CompletedKeyPoints)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<KeyPointCompletion>>(v, (JsonSerializerOptions?)null) ?? new List<KeyPointCompletion>()
+                )
+                .Metadata.SetValueComparer(
+                    new ValueComparer<List<KeyPointCompletion>>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()
+                    )
+                );
+
+            builder.HasIndex(te => new { te.TouristId, te.TourId, te.Status });
+        });
+        // TourReview konfiguracija
+        modelBuilder.Entity<TourReview>(builder =>
+        {
+            builder.ToTable("TourReviews", "tours");
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.Id).ValueGeneratedOnAdd();
+            builder.Property(r => r.TourId).IsRequired();
+            builder.Property(r => r.TouristId).IsRequired();
+            builder.Property(r => r.Rating).IsRequired();
+            builder.Property(r => r.Comment).HasMaxLength(1000);
+            builder.Property(r => r.CreatedAt).IsRequired();
+            builder.Property(r => r.ProgressPercentage).IsRequired();
+            builder.Property(r => r.IsEdited).IsRequired();
+
+            // Indeks za brže pretraživanje
+            builder.HasIndex(r => new { r.TourId, r.TouristId }).IsUnique();
+            builder.HasIndex(r => r.TourId);
+        });
+
+        modelBuilder.Entity<ReviewImage>()
+          .HasOne(ri => ri.TourReview)
+          .WithMany(tr => tr.Images)
+          .HasForeignKey(ri => ri.TourReviewId)
+          .OnDelete(DeleteBehavior.Cascade);  // Kad se obriše recenzija, brišu se i slike
     }
 }

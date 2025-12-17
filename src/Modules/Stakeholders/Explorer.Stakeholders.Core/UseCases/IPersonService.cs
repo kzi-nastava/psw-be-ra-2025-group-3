@@ -8,7 +8,7 @@ public interface IPersonService
     PersonDto Update(PersonDto personDto);
 
     PersonDto Create(AccountRegistrationDto dto);
-    List<PersonDto> GetAll();
+    List<PersonDto> GetAll(long currentPersonId);
 
     void Block(long id);
     void Unblock(long id);

@@ -32,7 +32,7 @@ public class TourProblemDbRepository : ITourProblemRepository
 
     public void Delete(long id)
     {
-        var problem = _context.TourProblems.Find(id);
+        var problem = GetById(id);
         if (problem != null)
         {
             _context.TourProblems.Remove(problem);
@@ -42,13 +42,44 @@ public class TourProblemDbRepository : ITourProblemRepository
 
     public TourProblem? GetById(long id)
     {
-        return _context.TourProblems.Find(id);
+        return _context.TourProblems
+            .Include(tp => tp.Messages) 
+            .FirstOrDefault(tp => tp.Id == id);
     }
 
     public List<TourProblem> GetByTouristId(long touristId)
     {
         return _context.TourProblems
+            .Include(tp => tp.Messages) 
             .Where(p => p.TouristId == touristId)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
+
+    public List<TourProblem> GetByAuthorId(long authorId)
+    {
+        return _context.TourProblems
+            .Include(tp => tp.Messages) 
+            .Where(p => p.AuthorId == authorId)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
+
+    public List<TourProblem> GetAll()
+    {
+        return _context.TourProblems
+            .Include(tp => tp.Messages)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
+
+    public List<TourProblem> GetOverdue(int daysThreshold)
+    {
+        var cutoffDate = DateTime.UtcNow.Date.AddDays(-daysThreshold);
+        
+        return _context.TourProblems
+            .Include(tp => tp.Messages)
+            .Where(p => p.Status == TourProblemStatus.Open && p.CreatedAt.Date < cutoffDate)
             .OrderByDescending(p => p.CreatedAt)
             .ToList();
     }

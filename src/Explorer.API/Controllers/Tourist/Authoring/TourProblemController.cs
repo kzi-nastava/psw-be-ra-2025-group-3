@@ -12,13 +12,12 @@ namespace Explorer.API.Controllers.Tourist.Authoring;
 public class TourProblemController : ControllerBase
 {
     private readonly ITourProblemService _tourProblemService;
-    private readonly ITourRepository _tourRepository; // DODAJ OVO
+    private readonly ITourRepository _tourRepository; 
 
-    // IZMENI KONSTRUKTOR
     public TourProblemController(ITourProblemService tourProblemService, ITourRepository tourRepository)
     {
         _tourProblemService = tourProblemService;
-        _tourRepository = tourRepository; // DODAJ OVO
+        _tourRepository = tourRepository;
     }
 
     [HttpPost]
@@ -75,6 +74,31 @@ public class TourProblemController : ControllerBase
         {
             return Ok(new { exists = false });
         }
+    }
+
+    // Podtask 1
+    [HttpPut("{id}/mark-resolved")]
+    public ActionResult<TourProblemDto> MarkAsResolved(long id, [FromBody] MarkProblemResolvedDto dto)
+    {
+        var touristId = GetTouristId();
+        var result = _tourProblemService.MarkAsResolved(id, dto.TouristComment, touristId);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/mark-unresolved")]
+    public ActionResult<TourProblemDto> MarkAsUnresolved(long id, [FromBody] MarkProblemResolvedDto dto)
+    {
+        var touristId = GetTouristId();
+        var result = _tourProblemService.MarkAsUnresolved(id, dto.TouristComment, touristId);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/messages")]
+    public ActionResult<TourProblemDto> AddMessage(long id, [FromBody] AddMessageDto dto)
+    {
+        var touristId = GetTouristId();
+        var result = _tourProblemService.AddMessage(id, touristId, dto.Content, 0); // 0 = Tourist
+        return Ok(result);
     }
 
     // Helper metoda za ekstrakciju Tourist ID iz JWT tokena

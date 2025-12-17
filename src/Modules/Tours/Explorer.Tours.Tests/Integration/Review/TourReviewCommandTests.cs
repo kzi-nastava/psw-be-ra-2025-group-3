@@ -5,6 +5,7 @@ using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Shouldly;
 
 namespace Explorer.Tours.Tests.Integration.Review;
@@ -18,7 +19,7 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
     public void Creates_review_successfully()
     {
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-28"); 
+        var controller = CreateController(scope, "-28");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         var existing = dbContext.TourReviews.Where(r => r.TouristId == -28).ToList(); // ← PROMENJENO
@@ -42,7 +43,7 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
 
         review.ShouldNotBeNull();
         review.TourId.ShouldBe(-2);
-        review.TouristId.ShouldBe(-28); 
+        review.TouristId.ShouldBe(-28);
         review.Rating.ShouldBe(5);
         review.Comment.ShouldBe("Excellent tour!");
         review.ProgressPercentage.ShouldBe(40.0);
@@ -71,7 +72,7 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
     public void Fails_to_create_with_low_progress()
     {
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-26"); 
+        var controller = CreateController(scope, "-26");
 
         var dto = new TourReviewCreateDto
         {
@@ -93,7 +94,7 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         var existingReview = dbContext.TourReviews
-            .FirstOrDefault(r => r.TouristId == -25 && r.TourId == -2); 
+            .FirstOrDefault(r => r.TouristId == -25 && r.TourId == -2);
 
         existingReview.ShouldNotBeNull();
 
@@ -123,11 +124,11 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
     public void Fails_to_update_other_users_review()
     {
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-28"); 
+        var controller = CreateController(scope, "-28");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
         var reviewOfOtherUser = dbContext.TourReviews
-            .FirstOrDefault(r => r.TouristId == -25 && r.TourId == -2); 
+            .FirstOrDefault(r => r.TouristId == -25 && r.TourId == -2);
 
         reviewOfOtherUser.ShouldNotBeNull();
 
@@ -146,7 +147,8 @@ public class TourReviewCommandTests : BaseToursIntegrationTest
     private static TourReviewController CreateController(IServiceScope scope, string touristId)
     {
         return new TourReviewController(
-            scope.ServiceProvider.GetRequiredService<ITourReviewService>())
+            scope.ServiceProvider.GetRequiredService<ITourReviewService>(),
+            scope.ServiceProvider.GetRequiredService<IPersonRepository>())
         {
             ControllerContext = BuildContext(touristId)
         };

@@ -12,17 +12,20 @@ public class NotificationService : INotificationService
     private readonly ITourProblemRepository _tourProblemRepository;
     private readonly ITourRepository _tourRepository;
     private readonly IMapper _mapper;
+    private readonly INotificationPublisher _publisher;
 
     public NotificationService(
         INotificationRepository notificationRepository,
         ITourProblemRepository tourProblemRepository,
         ITourRepository tourRepository,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationPublisher publisher)
     {
         _notificationRepository = notificationRepository;
         _tourProblemRepository = tourProblemRepository;
         _tourRepository = tourRepository;
         _mapper = mapper;
+        _publisher = publisher;
     }
 
     public void CreateNewMessageNotification(long recipientId, long problemId, string senderType)
@@ -45,6 +48,8 @@ public class NotificationService : INotificationService
         );
 
         _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
     }
 
     public void CreateProblemResolvedNotification(long recipientId, long problemId)
@@ -63,6 +68,8 @@ public class NotificationService : INotificationService
         );
 
         _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
     }
 
     public void CreateProblemUnresolvedNotification(long recipientId, long problemId)
@@ -81,6 +88,8 @@ public class NotificationService : INotificationService
         );
 
         _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
     }
 
     public List<NotificationDto> GetMyNotifications(long userId)

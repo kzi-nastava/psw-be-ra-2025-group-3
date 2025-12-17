@@ -3,6 +3,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Review;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using System.IO;
 using System;
 
@@ -14,10 +15,12 @@ namespace Explorer.API.Controllers.Tourist.Review;
 public class TourReviewController : ControllerBase
 {
     private readonly ITourReviewService _tourReviewService;
+    private readonly IPersonRepository _personRepository;
 
-    public TourReviewController(ITourReviewService tourReviewService)
+    public TourReviewController(ITourReviewService tourReviewService, IPersonRepository personRepository)
     {
         _tourReviewService = tourReviewService;
+        _personRepository = personRepository;
     }
 
     [HttpGet("eligibility/{tourId}")]
@@ -76,7 +79,15 @@ public class TourReviewController : ControllerBase
         return Ok(result);
     }
 
-    // ✅ DODAJ OVO - Nedostajući endpoint!
+
+    [HttpGet("my-reviews")]
+    public ActionResult<List<TourReviewDto>> GetMyAllReviews()
+    {
+        long touristId = long.Parse(User.FindFirst("id")!.Value);
+        var result = _tourReviewService.GetAllReviewsForTourist(touristId);
+        return Ok(result);
+    }
+
     [HttpPost("{reviewId}/images")]
     public ActionResult<ReviewImageDto> AddImageToReview(long reviewId, [FromBody] AddImageRequest request)
     {
@@ -118,7 +129,19 @@ public class TourReviewController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    [HttpGet("tourist-name/{touristId}")]
+    [AllowAnonymous]
+    public ActionResult<string> GetTouristName(long touristId)
+    {
+        var person = _personRepository.GetByUserId(touristId);
+
+        if (person == null)
+            return Ok("Anonymous");
+
+        return Ok($"{person.Name} {person.Surname}");
+    }
 }
+
 
 public class AddImageRequest
 {

@@ -156,6 +156,24 @@ public class TourExecutionService : ITourExecutionService
         if (activeExecution == null)
             throw new NotFoundException("No active tour session found.");
 
+        // UČITAJ TURU SA KEY POINTS
+        var tour = _tourRepository.GetByIdWithKeyPoints(activeExecution.TourId);
+        if (tour == null || tour.KeyPoints == null || !tour.KeyPoints.Any())
+            throw new InvalidOperationException("Tour or KeyPoints not found.");
+
+        // DA LI SU SVE KEY POINTS KOMPLETIRANE
+        var totalKeyPoints = tour.KeyPoints.Count;
+        var completedKeyPoints = activeExecution.CompletedKeyPoints?.Count ?? 0;
+
+        if (completedKeyPoints < totalKeyPoints)
+        {
+            throw new InvalidOperationException(
+                $"Cannot complete tour: You have completed {completedKeyPoints}/{totalKeyPoints} key points. " +
+                "Complete all key points before finishing the tour."
+            );
+        }
+
+        //  AKO SU SVE KOMPLETIRANE, DOZVOLI COMPLETE
         activeExecution.Complete();
         var updated = _executionRepository.Update(activeExecution);
         return _mapper.Map<TourExecutionDto>(updated);

@@ -13,4 +13,5 @@ public interface ITourReviewService
     ReviewImageDto AddImageToReview(long reviewId, long touristId, string imageUrl);
     void DeleteImageFromReview(long reviewId, long imageId, long touristId);
     ReviewImageDto? GetImageById(long reviewId, long imageId);
+    List<TourReviewDto> GetAllReviewsForTourist(long touristId);
 }

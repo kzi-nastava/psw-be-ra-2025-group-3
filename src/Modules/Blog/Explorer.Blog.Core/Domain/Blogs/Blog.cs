@@ -1,5 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using Explorer.Blog.API.Dtos; 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +15,13 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public int Status { get; private set; }
         public List<BlogImage> Images { get; private set; }
 
+        public List<BlogRating> Ratings { get; private set; }
+
         public Blog()
         {
             Images = new List<BlogImage>();
             Status = 0;
+            Ratings = new List<BlogRating>();
         }
 
         public Blog(string title, string description, int authorId, List<BlogImage> images = null)
@@ -33,6 +35,7 @@ namespace Explorer.Blog.Core.Domain.Blogs
             AuthorId = authorId;
             Status = 0;
             Images = images ?? new List<BlogImage>();
+            Ratings = new List<BlogRating>();
         }
 
         public void Update(string title, string description, List<BlogImage> newImages = null)
@@ -100,6 +103,32 @@ namespace Explorer.Blog.Core.Domain.Blogs
             var image = Images.FirstOrDefault(i => i.Id == imageId);
             if (image != null)
                 Images.Remove(image);
+        }
+
+        public void Rate(int userId, VoteType voteType, DateTime now)
+        {
+            if (Status != 1)
+                throw new InvalidOperationException("Only published blogs can be rated.");
+            var existingVote = Ratings.FirstOrDefault(r => r.UserId == userId);
+
+            if (existingVote == null)
+            {
+                var rating = new BlogRating(this.Id, userId, voteType, now);
+                Ratings.Add(rating);
+                return;
+            }
+
+            if (existingVote.VoteType == voteType)
+            {
+                Ratings.Remove(existingVote);
+                return;
+            }
+            existingVote.ChangeVote(voteType, now);
+        }
+
+        public int GetScore()
+        {
+            return Ratings.Sum(r => (int)r.VoteType);
         }
     }
 }

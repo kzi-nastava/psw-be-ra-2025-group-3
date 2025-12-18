@@ -24,6 +24,7 @@ public class ToursContext : DbContext
 
     public DbSet<ReviewImage> ReviewImages { get; set; }
 
+    public DbSet<Diary> Diaries { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
@@ -217,5 +218,36 @@ public class ToursContext : DbContext
           .WithMany(tr => tr.Images)
           .HasForeignKey(ri => ri.TourReviewId)
           .OnDelete(DeleteBehavior.Cascade);  // Kad se obriše recenzija, brišu se i slike
+
+
+        modelBuilder.Entity<Diary>(builder =>
+        {
+            builder.ToTable("Diaries", "tours");
+
+            builder.HasKey(d => d.Id);
+            builder.Property(d => d.Id)
+                .ValueGeneratedOnAdd();
+
+            builder.Property(d => d.Title)
+                .IsRequired();
+
+            builder.Property(d => d.Country)
+                .IsRequired();
+
+            builder.Property(d => d.City)
+                .IsRequired(false);
+
+            builder.Property(d => d.CreatedAt)
+                .IsRequired();
+
+            builder.Property(d => d.TouristId)
+                .IsRequired();
+
+            builder.Property(d => d.Status)
+                .HasConversion<int>()
+                .IsRequired();
+
+            builder.HasIndex(d => d.TouristId);
+        });
     }
 }

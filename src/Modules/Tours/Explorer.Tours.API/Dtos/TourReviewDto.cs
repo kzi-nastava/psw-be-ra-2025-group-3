@@ -1,11 +1,11 @@
-﻿
-namespace Explorer.Tours.API.Dtos;
+﻿namespace Explorer.Tours.API.Dtos;
 
 public class TourReviewDto
 {
     public long Id { get; set; }
     public long TourId { get; set; }
     public long TouristId { get; set; }
+    public string TourName { get; set; } = string.Empty; //za prikaz
     public string TouristName { get; set; } // Za prikaz
     public int Rating { get; set; }
     public string? Comment { get; set; }

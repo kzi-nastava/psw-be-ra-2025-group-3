@@ -18,4 +18,6 @@ public class TourPreviewDto
     public double AverageDuration { get; set; }
     public string StartPoint { get; set; }
     public List<string> Images { get; set; }
+
+    public int Status { get; set; } // za tour execution
 }

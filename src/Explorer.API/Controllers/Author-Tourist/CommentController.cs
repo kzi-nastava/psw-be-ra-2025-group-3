@@ -32,6 +32,10 @@ namespace Explorer.API.Controllers.Author_Tourist
             {
                 return BadRequest(ex.Message);
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPut("{commentId:long}")]
@@ -64,5 +68,22 @@ namespace Explorer.API.Controllers.Author_Tourist
                 return BadRequest(ex.Message);
             }
         }
+
+     
+        [HttpGet]
+        public ActionResult<List<CommentDto>> GetComments(long blogId)
+        {
+            try
+            {
+                return Ok(_service.GetComments(blogId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
     }
 }

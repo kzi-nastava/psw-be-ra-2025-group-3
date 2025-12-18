@@ -25,6 +25,8 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
         {
             var existingBlog = _context.Blogs
                 .Include(b => b.Images)
+                .Include(b => b.Comments)  
+                .Include(b => b.Ratings)
                 .FirstOrDefault(b => b.Id == blog.Id);
 
             if (existingBlog == null)
@@ -32,32 +34,33 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories
 
             existingBlog.Update(blog.Title, blog.Description);
 
-            var existingImages = _context.Set<BlogImageEntity>()
+            
+            var existingImages = _context.BlogImages
                 .Where(img => img.BlogId == blog.Id)
                 .ToList();
-            _context.RemoveRange(existingImages);
 
-            if (blog.Images != null && blog.Images.Any())
+            _context.BlogImages.RemoveRange(existingImages);
+
+            if (blog.Images != null)
             {
-                var imagesToAdd = blog.Images.ToList();
-                foreach (var image in imagesToAdd)
+                foreach (var img in blog.Images)
                 {
-                    _context.Set<BlogImageEntity>().Add(new BlogImageEntity(image.ImageUrl, blog.Id));
+                    _context.BlogImages.Add(
+                        new BlogImageEntity(img.ImageUrl, blog.Id)
+                    );
                 }
             }
 
+            
+
             _context.SaveChanges();
-
-            var updatedBlog = _context.Blogs
-                .Include(b => b.Images)
-                .FirstOrDefault(b => b.Id == blog.Id);
-
-            return updatedBlog;
+            return existingBlog;
+        }
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// ✅ NOVA METODA - Samo za promenu statusa
-        /// </summary>
         public BlogEntity UpdateStatus(long blogId, int newStatus)
         {
             if (newStatus < 0 || newStatus > 2)

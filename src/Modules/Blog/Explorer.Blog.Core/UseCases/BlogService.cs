@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Blog.Core.Domain.Blogs;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
-using Explorer.Blog.Core.Domain.Blogs;
 
 namespace Explorer.Blog.Core.UseCases
 {
@@ -66,7 +67,7 @@ namespace Explorer.Blog.Core.UseCases
 
             blog.Rate(userId, voteType, DateTime.Now);
 
-            _repository.Modify(blog);
+            _repository.SaveChanges();
 
             return BuildRatingStateDto(blog, userId);
         }
@@ -111,18 +112,22 @@ namespace Explorer.Blog.Core.UseCases
         public CommentDto AddComment(long blogId, int userId, string text)
         {
             var blog = _repository.GetById(blogId);
+
             blog.AddComment(userId, text);
-            _repository.Modify(blog);
+
+            // ✅ umesto Modify (koji dira Images i pravi haos), samo snimi promenu
+            _repository.SaveChanges();
 
             var created = blog.Comments.Last();
             return _mapper.Map<CommentDto>(created);
         }
 
+
         public CommentDto EditComment(long blogId, long commentId, int userId, string text)
         {
             var blog = _repository.GetById(blogId);
             blog.EditComment(commentId, userId, text);
-            _repository.Modify(blog);
+             _repository.SaveChanges();
 
             var updated = blog.Comments.First(c => c.Id == commentId);
             return _mapper.Map<CommentDto>(updated);
@@ -132,8 +137,19 @@ namespace Explorer.Blog.Core.UseCases
         {
             var blog = _repository.GetById(blogId);
             blog.DeleteComment(commentId, userId);
-            _repository.Modify(blog);
+            _repository.SaveChanges();
         }
+
+        public List<CommentDto> GetComments(long blogId)
+        {
+            var blog = _repository.GetById(blogId);
+
+            return blog.Comments
+                .OrderBy(c => c.CreatedAt)
+                .Select(c => _mapper.Map<CommentDto>(c))
+                .ToList();
+        }
+
 
     }
 }

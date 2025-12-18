@@ -13,14 +13,16 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public DateTime? LastModifiedDate { get; private set; }
         public int AuthorId { get; private set; }
         public int Status { get; private set; }
-        public List<BlogImage> Images { get; private set; }
 
+        public List<BlogImage> Images { get; private set; }
+        public List<Comment> Comments { get; private set; }
         public List<BlogRating> Ratings { get; private set; }
 
         public Blog()
         {
             Images = new List<BlogImage>();
-            Status = 0;
+            Status = (int)BlogStatus.Draft;
+            Comments = new List<Comment>();
             Ratings = new List<BlogRating>();
         }
 
@@ -33,17 +35,20 @@ namespace Explorer.Blog.Core.Domain.Blogs
             Description = description;
             CreationDate = DateTime.UtcNow;
             AuthorId = authorId;
-            Status = 0;
+
             Images = images ?? new List<BlogImage>();
+            Comments = new List<Comment>();     // ✅ bitno
             Ratings = new List<BlogRating>();
+            Status = (int)BlogStatus.Draft;
         }
 
         public void Update(string title, string description, List<BlogImage> newImages = null)
         {
-            if (Status == 2)
-                throw new InvalidOperationException("Cannot modify an archived blog.");
+            if (Status == (int)BlogStatus.Archived || Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot modify an archived/read-only blog.");
 
-            if (Status == 1)
+            // Published (i Active/Famous) – ne dozvoli promenu title i slika (kao što već radiš)
+            if (Status == (int)BlogStatus.Published || Status == (int)BlogStatus.Active || Status == (int)BlogStatus.Famous)
             {
                 if (title != Title)
                     throw new InvalidOperationException("Cannot change title of a published blog.");
@@ -72,18 +77,30 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void ChangeStatus(int newStatus)
         {
+            // Ovo je ručna promena Draft/Published/Archived (postojeća logika)
             if (newStatus < 0 || newStatus > 2)
                 throw new ArgumentException("Status mora biti 0, 1 ili 2");
+
+            // Ne dozvoli ručno menjanje ako je ReadOnly
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot change status of a read-only blog.");
+
             Status = newStatus;
             LastModifiedDate = DateTime.UtcNow;
+
+            // ✅ posle ručne promene, samo osveži “automatske” statuse ako je published
+            if (Status == (int)BlogStatus.Published)
+            {
+                RecalculateStatus();
+            }
         }
 
         public void AddImage(BlogImage image)
         {
-            if (Status == 2)
-                throw new InvalidOperationException("Cannot add images to an archived blog.");
+            if (Status == (int)BlogStatus.Archived || Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot add images to an archived/read-only blog.");
 
-            if (Status == 1)
+            if (Status == (int)BlogStatus.Published || Status == (int)BlogStatus.Active || Status == (int)BlogStatus.Famous)
                 throw new InvalidOperationException("Cannot add images to a published blog.");
 
             if (image == null)
@@ -94,10 +111,10 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void RemoveImage(long imageId)
         {
-            if (Status == 2)
-                throw new InvalidOperationException("Cannot remove images from an archived blog.");
+            if (Status == (int)BlogStatus.Archived || Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot remove images from an archived/read-only blog.");
 
-            if (Status == 1)
+            if (Status == (int)BlogStatus.Published || Status == (int)BlogStatus.Active || Status == (int)BlogStatus.Famous)
                 throw new InvalidOperationException("Cannot remove images from a published blog.");
 
             var image = Images.FirstOrDefault(i => i.Id == imageId);
@@ -105,30 +122,103 @@ namespace Explorer.Blog.Core.Domain.Blogs
                 Images.Remove(image);
         }
 
+        // ================== COMMENTS ==================
+        public void AddComment(int userId, string text)
+        {
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Blog is read-only.");
+
+            Comments ??= new List<Comment>();
+
+            // nema LINQ nad Comments pre Add
+            Comments.Add(new Comment(Id, userId, text));
+
+            RecalculateStatus();
+        }
+
+        public void EditComment(long commentId, int userId, string newText)
+        {
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Blog is read-only.");
+
+            var comment = Comments.FirstOrDefault(c => c.Id == commentId)
+                ?? throw new InvalidOperationException("Comment not found.");
+
+            comment.Edit(userId, newText);
+        }
+
+        public void DeleteComment(long commentId, int userId)
+        {
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Blog is read-only.");
+
+            if (Comments == null)
+                throw new InvalidOperationException("Comments not loaded.");
+
+            var commentsSnapshot = Comments.ToList();
+            var comment = commentsSnapshot.FirstOrDefault(c => c.Id == commentId)
+                ?? throw new InvalidOperationException("Comment not found.");
+
+            comment.EnsureCanDelete(userId);
+            Comments.Remove(comment);
+
+            RecalculateStatus();
+        }
+
+        // ================== RATING ==================
+
         public void Rate(int userId, VoteType voteType, DateTime now)
         {
-            if (Status != 1)
-                throw new InvalidOperationException("Only published blogs can be rated.");
-            var existingVote = Ratings.FirstOrDefault(r => r.UserId == userId);
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Blog is read-only.");
+
+            Ratings ??= new List<BlogRating>();
+
+            // 🔒 RADIMO NAD KOPIJOM
+            var ratingsSnapshot = Ratings.ToList();
+            var existingVote = ratingsSnapshot.FirstOrDefault(r => r.UserId == userId);
 
             if (existingVote == null)
             {
-                var rating = new BlogRating(this.Id, userId, voteType, now);
-                Ratings.Add(rating);
+                Ratings.Add(new BlogRating(this.Id, userId, voteType, now));
+                RecalculateStatus();
                 return;
             }
 
             if (existingVote.VoteType == voteType)
             {
                 Ratings.Remove(existingVote);
+                RecalculateStatus();
                 return;
             }
+
             existingVote.ChangeVote(voteType, now);
+            RecalculateStatus();
         }
+
+
 
         public int GetScore()
         {
             return Ratings.Sum(r => (int)r.VoteType);
         }
+
+        // ================== AUTO STATUS ==================
+
+        public void RecalculateStatus()
+        {
+            var ratings = Ratings?.ToList() ?? new List<BlogRating>();
+            var comments = Comments?.ToList() ?? new List<Comment>();
+
+            var score = ratings.Sum(r => (int)r.VoteType);
+
+            if (score < -10)
+            {
+                Status = (int)BlogStatus.ReadOnly;
+                LastModifiedDate = DateTime.UtcNow;
+            }
+        }
+
+
     }
 }

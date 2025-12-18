@@ -15,7 +15,14 @@ namespace Explorer.Blog.API.Public
         List<BlogDto> GetUserBlogs(int userId);
         List<BlogDto> GetAllBlogs();
 
+        List<CommentDto> GetComments(long blogId);
+        CommentDto AddComment(long blogId, int userId, string text);
+        CommentDto EditComment(long blogId, long commentId, int userId, string text);
+        void DeleteComment(long blogId, long commentId, int userId);
+
+
         BlogVoteStateDto Vote(long blogId, int userId, bool isUpvote);
         BlogVoteStateDto GetUserVoteState(long blogId, int userId);
+
     }
 }

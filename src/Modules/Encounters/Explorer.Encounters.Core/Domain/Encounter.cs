@@ -11,6 +11,7 @@ public class Encounter : AggregateRoot
     public EncounterStatus Status { get; private set; }
     public EncounterType Type { get; private set; }
 
+    private Encounter() { }
     public Encounter(string name, string description, GeoPoint location, int xp, EncounterType type)
     {
         Name = name;

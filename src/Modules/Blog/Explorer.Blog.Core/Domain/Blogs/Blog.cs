@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Explorer.Blog.Core.Domain.Blogs
 {
+    // Status:
+    // 0 = Draft, 1 = Published, 2 = Archived, 3 = ReadOnly, 4 = Active, 5 = Famous
     public class Blog : AggregateRoot
     {
         public string Title { get; private set; }
@@ -97,8 +99,10 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void AddImage(BlogImage image)
         {
-            if (Status == (int)BlogStatus.Archived || Status == (int)BlogStatus.ReadOnly)
-                throw new InvalidOperationException("Cannot add images to an archived/read-only blog.");
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot add images to a read-only blog.");
+            if (Status == (int)BlogStatus.Archived)
+                throw new InvalidOperationException("Cannot add images to an archived blog.");
 
             if (Status == (int)BlogStatus.Published || Status == (int)BlogStatus.Active || Status == (int)BlogStatus.Famous)
                 throw new InvalidOperationException("Cannot add images to a published blog.");
@@ -111,8 +115,10 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void RemoveImage(long imageId)
         {
-            if (Status == (int)BlogStatus.Archived || Status == (int)BlogStatus.ReadOnly)
-                throw new InvalidOperationException("Cannot remove images from an archived/read-only blog.");
+            if (Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Cannot remove images from a read-only blog.");
+            if (Status == (int)BlogStatus.Archived)
+                throw new InvalidOperationException("Cannot remove images from an archived blog.");
 
             if (Status == (int)BlogStatus.Published || Status == (int)BlogStatus.Active || Status == (int)BlogStatus.Famous)
                 throw new InvalidOperationException("Cannot remove images from a published blog.");
@@ -169,56 +175,64 @@ namespace Explorer.Blog.Core.Domain.Blogs
 
         public void Rate(int userId, VoteType voteType, DateTime now)
         {
+            if (Status != (int)BlogStatus.Published && Status != (int)BlogStatus.Active && Status != (int)BlogStatus.Famous)
+                throw new InvalidOperationException("Only published blogs can be rated.");
+            var existingVote = Ratings.FirstOrDefault(r => r.UserId == userId);
+
             if (Status == (int)BlogStatus.ReadOnly)
-                throw new InvalidOperationException("Blog is read-only.");
-
-            Ratings ??= new List<BlogRating>();
-
-            // 🔒 RADIMO NAD KOPIJOM
-            var ratingsSnapshot = Ratings.ToList();
-            var existingVote = ratingsSnapshot.FirstOrDefault(r => r.UserId == userId);
+                throw new InvalidOperationException("Voting is not allowed on read-only blogs.");
 
             if (existingVote == null)
             {
-                Ratings.Add(new BlogRating(this.Id, userId, voteType, now));
-                RecalculateStatus();
-                return;
+                var rating = new BlogRating(this.Id, userId, voteType, now);
+                Ratings.Add(rating);
             }
 
-            if (existingVote.VoteType == voteType)
+            else if (existingVote.VoteType == voteType)
             {
                 Ratings.Remove(existingVote);
-                RecalculateStatus();
-                return;
+            }
+            else
+            {
+                existingVote.ChangeVote(voteType, now);
             }
 
-            existingVote.ChangeVote(voteType, now);
+
+
             RecalculateStatus();
         }
-
-
 
         public int GetScore()
         {
             return Ratings.Sum(r => (int)r.VoteType);
         }
 
-        // ================== AUTO STATUS ==================
-
-        public void RecalculateStatus()
+        private void RecalculateStatus()
         {
-            var ratings = Ratings?.ToList() ?? new List<BlogRating>();
-            var comments = Comments?.ToList() ?? new List<Comment>();
-
-            var score = ratings.Sum(r => (int)r.VoteType);
-
+            var score = GetScore();
+            // Pravila:
+            // - ReadOnly: score < -10
+            // - Active: score > 100 AND comments > 10
+            // - Famous: score > 500 AND comments > 30
+            // Napomena: ReadOnly ima prioritet (zatvara blog).
             if (score < -10)
-            {
+            {                
                 Status = (int)BlogStatus.ReadOnly;
-                LastModifiedDate = DateTime.UtcNow;
             }
+            else if (score > 500 && this.Comments.Count > 30)
+            {
+                Status = (int)BlogStatus.Famous;
+            }
+            else if (score > 100 && this.Comments.Count > 10)
+            {
+                Status = (int)BlogStatus.Active;
+            }
+            else
+            {
+                Status = (int)BlogStatus.Published;
+            }
+
+            LastModifiedDate = DateTime.UtcNow;
         }
-
-
     }
 }

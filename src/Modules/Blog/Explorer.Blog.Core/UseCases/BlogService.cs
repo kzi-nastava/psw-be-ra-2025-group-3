@@ -58,10 +58,12 @@ namespace Explorer.Blog.Core.UseCases
             var blog = _repository.GetById(blogId);
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
-
-            // Defensive: ograniči glasanje na objavljene blogove
-            if (blog.Status != 1)
-                throw new InvalidOperationException("Voting is allowed only on published blogs.");
+            if (blog.Status == (int)BlogStatus.Archived)
+                throw new InvalidOperationException("Voting is not allowed on archived blogs.");
+            if (blog.Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Voting is not allowed on read-only blogs.");
+            if (blog.Status != (int)BlogStatus.Active && blog.Status != (int)BlogStatus.Famous && blog.Status != (int)BlogStatus.Published)
+                throw new InvalidOperationException("Voting is allowed only on published/active/famous blogs.");
 
             var voteType = isUpvote ? VoteType.Upvote : VoteType.Downvote;
 
@@ -69,10 +71,10 @@ namespace Explorer.Blog.Core.UseCases
 
             _repository.SaveChanges();
 
-            return BuildRatingStateDto(blog, userId);
+            return BuildRatingStateDto(blog, userId, blog.Status);
         }
 
-        private static BlogVoteStateDto BuildRatingStateDto(BlogEntity blog, int userId)
+        private static BlogVoteStateDto BuildRatingStateDto(BlogEntity blog, int userId, int status)
         {
             var userVote = blog.Ratings.FirstOrDefault(r => r.UserId == userId);
 
@@ -87,7 +89,8 @@ namespace Explorer.Blog.Core.UseCases
                     : userVote.VoteType == VoteType.Upvote,
                 Score = blog.GetScore(),
                 UpvoteCount = upCount,
-                DownvoteCount = downCount
+                DownvoteCount = downCount,
+                BlogStatus = status
             };
         }
 
@@ -97,13 +100,13 @@ namespace Explorer.Blog.Core.UseCases
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
 
-            return BuildRatingStateDto(blog, userId);
+            return BuildRatingStateDto(blog, userId, blog.Status);
         }
 
         public List<BlogDto> GetAllBlogs()
         {
             var blogs = _repository.GetAll()
-                .Where(b => b.Status == 1 || b.Status == 2)
+                .Where(b => b.Status != (int)BlogStatus.Draft)
                 .ToList();
 
             return _mapper.Map<List<BlogDto>>(blogs);

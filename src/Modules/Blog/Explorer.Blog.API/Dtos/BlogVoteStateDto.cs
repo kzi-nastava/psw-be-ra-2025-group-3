@@ -13,5 +13,6 @@ namespace Explorer.Blog.API.Dtos
         public int Score { get; set;}
         public int UpvoteCount { get; set; }
         public int DownvoteCount { get; set; }
+        public int BlogStatus { get; set; }
     }
 }

@@ -106,7 +106,7 @@ namespace Explorer.Blog.Core.UseCases
         public List<BlogDto> GetAllBlogs()
         {
             var blogs = _repository.GetAll()
-                .Where(b => b.Status == 1 || b.Status == 2 || b.Status == 3 || b.Status == 4 || b.Status == 5)
+                .Where(b => b.Status != (int)BlogStatus.Draft)
                 .ToList();
 
             return _mapper.Map<List<BlogDto>>(blogs);

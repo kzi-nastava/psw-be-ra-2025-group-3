@@ -1,20 +1,28 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Explorer.Encounters.Core.Mappers;
 
-namespace Explorer.Encounters.Infrastructure
+
+namespace Explorer.Encounters.Infrastructure;
+
+public static class EncountersStartup
 {
-    public static class EncountersStartup
+    public static IServiceCollection ConfigureEncountersModule(this IServiceCollection services)
     {
-        public static IServiceCollection ConfigureMODULE_NAMEModule(this IServiceCollection services)
-        {
-            services.AddAutoMapper(typeof(EncountersProfile).Assembly); 
-            SetupCore(services);
-            SetupInfrastructure(services);
-            return services;
-        }
+        services.AddAutoMapper(typeof(EncountersProfile).Assembly);
+        SetupCore(services);
+        SetupInfrastructure(services);
+        return services;
     }
+
+    private static void SetupCore(IServiceCollection services)
+    {
+        // Register core services here
+    }
+
+    private static void SetupInfrastructure(IServiceCollection services)
+    {
+        // Register infrastructure services here
+    }
+
 }

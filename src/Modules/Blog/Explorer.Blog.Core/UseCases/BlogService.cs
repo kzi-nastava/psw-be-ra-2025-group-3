@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Blog.Core.Domain.Blogs;
 using Explorer.Blog.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
-using Explorer.Blog.Core.Domain.Blogs;
 
 namespace Explorer.Blog.Core.UseCases
 {
@@ -57,21 +58,23 @@ namespace Explorer.Blog.Core.UseCases
             var blog = _repository.GetById(blogId);
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
-
-            // Defensive: ograniči glasanje na objavljene blogove
-            if (blog.Status != 1)
-                throw new InvalidOperationException("Voting is allowed only on published blogs.");
+            if (blog.Status == (int)BlogStatus.Archived)
+                throw new InvalidOperationException("Voting is not allowed on archived blogs.");
+            if (blog.Status == (int)BlogStatus.ReadOnly)
+                throw new InvalidOperationException("Voting is not allowed on read-only blogs.");
+            if (blog.Status != (int)BlogStatus.Active && blog.Status != (int)BlogStatus.Famous && blog.Status != (int)BlogStatus.Published)
+                throw new InvalidOperationException("Voting is allowed only on published/active/famous blogs.");
 
             var voteType = isUpvote ? VoteType.Upvote : VoteType.Downvote;
 
             blog.Rate(userId, voteType, DateTime.Now);
 
-            _repository.Modify(blog);
+            _repository.SaveChanges();
 
-            return BuildRatingStateDto(blog, userId);
+            return BuildRatingStateDto(blog, userId, blog.Status);
         }
 
-        private static BlogVoteStateDto BuildRatingStateDto(BlogEntity blog, int userId)
+        private static BlogVoteStateDto BuildRatingStateDto(BlogEntity blog, int userId, int status)
         {
             var userVote = blog.Ratings.FirstOrDefault(r => r.UserId == userId);
 
@@ -86,7 +89,8 @@ namespace Explorer.Blog.Core.UseCases
                     : userVote.VoteType == VoteType.Upvote,
                 Score = blog.GetScore(),
                 UpvoteCount = upCount,
-                DownvoteCount = downCount
+                DownvoteCount = downCount,
+                BlogStatus = status
             };
         }
 
@@ -96,16 +100,59 @@ namespace Explorer.Blog.Core.UseCases
             if (blog == null)
                 throw new ArgumentException($"Blog with id {blogId} not found.");
 
-            return BuildRatingStateDto(blog, userId);
+            return BuildRatingStateDto(blog, userId, blog.Status);
         }
 
         public List<BlogDto> GetAllBlogs()
         {
             var blogs = _repository.GetAll()
-                .Where(b => b.Status == 1 || b.Status == 2)
+                .Where(b => b.Status != (int)BlogStatus.Draft)
                 .ToList();
 
             return _mapper.Map<List<BlogDto>>(blogs);
         }
+
+        public CommentDto AddComment(long blogId, int userId, string text)
+        {
+            var blog = _repository.GetById(blogId);
+
+            blog.AddComment(userId, text);
+
+            // ✅ umesto Modify (koji dira Images i pravi haos), samo snimi promenu
+            _repository.SaveChanges();
+
+            var created = blog.Comments.Last();
+            return _mapper.Map<CommentDto>(created);
+        }
+
+
+        public CommentDto EditComment(long blogId, long commentId, int userId, string text)
+        {
+            var blog = _repository.GetById(blogId);
+            blog.EditComment(commentId, userId, text);
+             _repository.SaveChanges();
+
+            var updated = blog.Comments.First(c => c.Id == commentId);
+            return _mapper.Map<CommentDto>(updated);
+        }
+
+        public void DeleteComment(long blogId, long commentId, int userId)
+        {
+            var blog = _repository.GetById(blogId);
+            blog.DeleteComment(commentId, userId);
+            _repository.SaveChanges();
+        }
+
+        public List<CommentDto> GetComments(long blogId)
+        {
+            var blog = _repository.GetById(blogId);
+
+            return blog.Comments
+                .OrderBy(c => c.CreatedAt)
+                .Select(c => _mapper.Map<CommentDto>(c))
+                .ToList();
+        }
+
+
     }
 }

@@ -52,7 +52,7 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionService, TourExecutionService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
         services.AddScoped<INotificationService, NotificationService>();
-
+        services.AddScoped<IDiaryService, DiaryService>();
         services.AddScoped<ITouristTourService, TouristTourService>();
 
         services.AddScoped<ITourAccessService, TourAccessService>();
@@ -76,7 +76,7 @@ public static class ToursStartup
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();
         services.AddScoped<INotificationRepository, NotificationDbRepository>();
-
+        services.AddScoped<IDiaryRepository, DiaryDbRepository>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();

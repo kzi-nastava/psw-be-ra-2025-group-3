@@ -42,13 +42,15 @@ public class EncounterService : IEncounterService
 
         var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
         var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
+        var encounterStatus = Enum.Parse<EncounterStatus>(encounterDto.Status);
 
         encounter.Update(
             encounterDto.Name,
             encounterDto.Description,
             geoPoint,
             encounterDto.XP,
-            encounterType
+            encounterType,
+            encounterStatus
         );
 
         var result = _encounterRepository.Update(encounter);

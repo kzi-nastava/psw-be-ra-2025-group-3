@@ -24,13 +24,14 @@ public class Encounter : AggregateRoot
         Validate();
     }
 
-    public void Update(string name, string description, GeoPoint location, int xp, EncounterType type)
+    public void Update(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status)
     {
         Name = name;
         Description = description;
         Location = location;
         XP = xp;
         Type = type;
+        Status = status;
 
         Validate();
     }

@@ -196,6 +196,45 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
         Should.Throw<NotFoundException>(() => controller.Delete(-999));
     }
 
+    [Fact]
+    public void Creates_meetup_with_tour_link()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+
+        // POPRAVKA 1: Koristimo postojeću helper metodu 'CreateAuthorController'
+        var controller = CreateAuthorController(scope);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        var newMeetup = new MeetupCreateDto
+        {
+            Title = "Tura Povezivanje Test",
+            Description = "Opis",
+            DateTime = DateTime.UtcNow.AddDays(10),
+
+            // POPRAVKA 2: Dodato 'm' na kraju brojeva jer su tipa decimal
+            Latitude = 45.2m,
+            Longitude = 19.8m,
+
+            TourId = -2 // Vežemo za turu koja postoji u seed-u
+        };
+
+        // Act
+        var result = ((ObjectResult)controller.Create(newMeetup).Result)?.Value as MeetupDto;
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Id.ShouldNotBe(0);
+        result.Title.ShouldBe(newMeetup.Title);
+        result.TourId.ShouldBe(newMeetup.TourId);
+
+        // Assert - Database
+        var storedEntity = dbContext.Meetups.FirstOrDefault(i => i.Title == newMeetup.Title);
+        storedEntity.ShouldNotBeNull();
+        storedEntity.TourId.ShouldBe(newMeetup.TourId);
+    }
+
     private static AuthorMeetupController CreateAuthorController(IServiceScope scope)
     {
         return new AuthorMeetupController(scope.ServiceProvider.GetRequiredService<IMeetupService>())

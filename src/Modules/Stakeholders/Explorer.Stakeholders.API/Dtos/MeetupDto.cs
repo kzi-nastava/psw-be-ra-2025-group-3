@@ -15,6 +15,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public long CreatorId { get; set; }
+        public long? TourId { get; set; }
     }
 
     public class MeetupCreateDto
@@ -24,6 +25,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public DateTime DateTime { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+        public long? TourId { get; set; }
     }
 
     public class MeetupUpdateDto
@@ -33,5 +35,6 @@ namespace Explorer.Stakeholders.API.Dtos
         public DateTime DateTime { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+        public long? TourId { get; set; }
     }
 }

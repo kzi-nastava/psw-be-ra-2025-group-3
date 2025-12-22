@@ -1,7 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+﻿using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Encounters.Core.Mappers;
-
+using Explorer.Encounters.Core.UseCases;
+using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Encounters.Infrastructure.Database.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Explorer.Encounters.Infrastructure;
 
@@ -17,12 +23,19 @@ public static class EncountersStartup
 
     private static void SetupCore(IServiceCollection services)
     {
-        // Register core services here
+        services.AddScoped<IEncounterService, EncounterService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
-        // Register infrastructure services here
-    }
+        services.AddScoped<IEncounterRepository, EncounterRepository>();
 
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("encounters"));
+        dataSourceBuilder.EnableDynamicJson();
+        var dataSource = dataSourceBuilder.Build();
+
+        services.AddDbContext<EncountersContext>(opt =>
+            opt.UseNpgsql(dataSource,
+                x => x.MigrationsHistoryTable("__EFMigrationsHistory", "encounters")));
+    }
 }

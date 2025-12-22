@@ -32,6 +32,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
             Title = "New Author Meetup",
             Description = "Meetup created by author for testing",
             DateTime = DateTime.UtcNow.AddDays(10),
+            Address = "Test Address 123",
             Latitude = 45.5m,
             Longitude = 20.0m
         };
@@ -41,6 +42,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(newMeetup.Address);
         result.Id.ShouldNotBe(0);
         result.Title.ShouldBe(newMeetup.Title);
         result.CreatorId.ShouldBe(-11); // Author ID
@@ -63,6 +65,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
             Title = "New Tourist Meetup",
             Description = "Meetup created by tourist for testing",
             DateTime = DateTime.UtcNow.AddDays(15),
+            Address = "Tourist Street 1",
             Latitude = 44.5m,
             Longitude = 21.0m
         };
@@ -72,6 +75,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(newMeetup.Address);
         result.Id.ShouldNotBe(0);
         result.Title.ShouldBe(newMeetup.Title);
         result.CreatorId.ShouldBe(-21); // Tourist ID
@@ -111,7 +115,8 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
         {
             Title = "Updated Photography & Travel",
             Description = "Updated description for the event",
-            DateTime = new DateTime(2026, 1, 15, 18, 0, 0, DateTimeKind.Utc), 
+            DateTime = new DateTime(2026, 1, 15, 18, 0, 0, DateTimeKind.Utc),
+            Address = "New Updated Address",
             Latitude = 45.3m,
             Longitude = 19.9m
         };
@@ -121,6 +126,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(updateDto.Address);
         result.Id.ShouldBe(-3);
         result.Title.ShouldBe(updateDto.Title);
         result.Description.ShouldBe(updateDto.Description);

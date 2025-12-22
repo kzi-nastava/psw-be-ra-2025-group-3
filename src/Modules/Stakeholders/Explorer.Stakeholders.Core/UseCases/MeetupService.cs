@@ -45,6 +45,7 @@ public class MeetupService : IMeetupService
             meetupDto.Title,
             meetupDto.Description,
             meetupDto.DateTime,
+            meetupDto.Address,
             meetupDto.Latitude,
             meetupDto.Longitude,
             creatorId,
@@ -72,6 +73,7 @@ public class MeetupService : IMeetupService
             meetupDto.Title,
             meetupDto.Description,
             meetupDto.DateTime,
+            meetupDto.Address,
             meetupDto.Latitude,
             meetupDto.Longitude,
             meetupDto.TourId

@@ -12,6 +12,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateTime { get; set; }
+        public string Address { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public long CreatorId { get; set; }
@@ -23,6 +24,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateTime { get; set; }
+        public string Address { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public long? TourId { get; set; }
@@ -33,6 +35,7 @@ namespace Explorer.Stakeholders.API.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateTime { get; set; }
+        public string Address { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public long? TourId { get; set; }

@@ -15,8 +15,9 @@ namespace Explorer.Stakeholders.Core.Domain
         public decimal Latitude { get; private set; }
         public decimal Longitude { get; private set; }
         public long CreatorId { get; private set; }
+        public long? TourId { get; private set; }
 
-        public Meetup(string title, string description, DateTime dateTime, decimal latitude, decimal longitude, long creatorId)
+        public Meetup(string title, string description, DateTime dateTime, decimal latitude, decimal longitude, long creatorId, long? tourId)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title cannot be empty.", nameof(title));
@@ -42,9 +43,10 @@ namespace Explorer.Stakeholders.Core.Domain
             Latitude = latitude;
             Longitude = longitude;
             CreatorId = creatorId;
+            TourId = tourId;
         }
 
-        public void Update(string title, string description, DateTime dateTime, decimal latitude, decimal longitude)
+        public void Update(string title, string description, DateTime dateTime, decimal latitude, decimal longitude, long? tourId)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title cannot be empty.", nameof(title));
@@ -66,6 +68,7 @@ namespace Explorer.Stakeholders.Core.Domain
             DateTime = dateTime;
             Latitude = latitude;
             Longitude = longitude;
+            TourId = tourId;
         }
     }
 }

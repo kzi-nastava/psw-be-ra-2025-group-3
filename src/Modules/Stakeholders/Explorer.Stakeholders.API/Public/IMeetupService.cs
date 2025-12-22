@@ -14,5 +14,6 @@ namespace Explorer.Stakeholders.API.Public
         MeetupDto Create(MeetupCreateDto meetup, long creatorId);
         MeetupDto Update(long id, MeetupUpdateDto meetup, long creatorId);
         void Delete(long id, long creatorId);
+        List<MeetupDto> GetByTourId(long tourId);
     }
 }

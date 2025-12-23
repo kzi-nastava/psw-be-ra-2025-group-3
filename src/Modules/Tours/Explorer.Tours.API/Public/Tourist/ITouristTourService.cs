@@ -10,4 +10,5 @@ public interface ITouristTourService
     TourPreviewDto GetPreview(long tourId);
     TourDetailsDto GetDetails(long touristId, long tourId);
     List<TourPreviewDto> GetMyPurchasedTours(long touristId); // tour execution
+    List<TourPreviewDto> SearchAndFilterTours(TourFilterDto filters);
 }

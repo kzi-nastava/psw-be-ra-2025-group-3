@@ -198,4 +198,65 @@ public class TouristTourService : ITouristTourService
 
         return result;
     }
+
+    public List<TourPreviewDto> SearchAndFilterTours(TourFilterDto filters)
+    {
+        // Pozivamo repository metodu sa filterima
+        var tours = _tourRepository.SearchAndFilter(
+            filters.Name, 
+            filters.Tags, 
+            filters.MinDifficulty, 
+            filters.MaxDifficulty, 
+            filters.MinPrice, 
+            filters.MaxPrice
+        );
+
+        var result = new List<TourPreviewDto>();
+
+        foreach (var tour in tours)
+        {
+            var dto = _mapper.Map<TourPreviewDto>(tour);
+
+            // LENGTH
+            dto.Length = tour.DistanceInKm;
+
+            // AVERAGE DURATION
+            if (tour.TourDurations != null && tour.TourDurations.Any())
+                dto.AverageDuration = tour.TourDurations.Average(td => td.TimeInMinutes);
+            else
+                dto.AverageDuration = 0;
+
+            // START POINT
+            var tourWithKeyPoints = _tourRepository.GetByIdWithKeyPoints(tour.Id);
+            if (tourWithKeyPoints != null && tourWithKeyPoints.KeyPoints.Any())
+            {
+                var first = tourWithKeyPoints.KeyPoints.OrderBy(k => k.Id).First();
+                dto.StartPoint = first.Name;
+                dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+            }
+
+            // AVERAGE RATING
+            var reviews = _reviewRepository.GetAllForTour(tour.Id);
+            if (reviews.Any())
+            {
+                dto.AverageRating = reviews.Average(r => r.Rating);
+                dto.Reviews = reviews.Select(r => _mapper.Map<TourReviewDto>(r)).ToList();
+            }
+            else
+            {
+                dto.AverageRating = 0;
+                dto.Reviews = new List<TourReviewDto>();
+            }
+
+            result.Add(dto);
+        }
+
+        // MINIMUM RATING (ne može u bazi jer je agregat)
+        if (filters.MinRating.HasValue)
+        {
+            result = result.Where(t => t.AverageRating >= filters.MinRating.Value).ToList();
+        }
+
+        return result;
+    }
 }

@@ -2,6 +2,7 @@
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
 using Explorer.BuildingBlocks.Core.UseCases;
+using System.Linq;
 
 namespace Explorer.Tours.Core.Mappers;
 
@@ -41,51 +42,47 @@ public class ToursProfile : Profile
         CreateMap<ShoppingCart, ShoppingCartDto>();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
         CreateMap<TourDurationDto, TourDuration>().ReverseMap();
-
         CreateMap<TourExecutionDto, TourExecution>().ReverseMap();
 
-        //
         CreateMap<KeyPointCompletion, KeyPointCompletionDto>();
         CreateMap<TourReview, TourReviewDto>()
             .ForMember(dest => dest.TouristName, opt => opt.Ignore());  
         CreateMap<TourReviewDto, TourReview>();
 
-        CreateMap<Tour, TourPreviewDto>()
-           .ForMember(dest => dest.FirstKeyPoint, opt => opt.Ignore()) 
-           .ForMember(dest => dest.AverageRating, opt => opt.Ignore());
-
         CreateMap<ReviewImage, ReviewImageDto>();
-
-
         CreateMap<KeyPointPublicDto, KeyPoint>().ReverseMap();
+
+       
         CreateMap<Tour, TourPreviewDto>()
-     // Properties koje već imaš
-     .ForMember(dest => dest.FirstKeyPoint, opt => opt.Ignore())
-     .ForMember(dest => dest.AverageRating, opt => opt.Ignore())
+            // 1. DIFFICULTY: enum → int → string (za frontend)
+            .ForMember(dest => dest.Difficulty, 
+                opt => opt.MapFrom(src => ((int)src.Difficulty).ToString()))
+            
+            // 2. LENGTH = DistanceInKm
+            .ForMember(dest => dest.Length,
+                opt => opt.MapFrom(src => src.DistanceInKm))
 
-     // MAPPING LENGTH = DistanceInKm
-     .ForMember(dest => dest.Length,
-         opt => opt.MapFrom(src => src.DistanceInKm))
+            // 3. AVERAGE DURATION iz JSON liste TourDurations
+            .ForMember(dest => dest.AverageDuration,
+                opt => opt.MapFrom(src =>
+                    src.TourDurations != null && src.TourDurations.Any()
+                        ? src.TourDurations.Average(td => td.TimeInMinutes)
+                        : 0))
 
-     // AVERAGE DURATION iz JSON liste TourDurations
-     .ForMember(dest => dest.AverageDuration,
-         opt => opt.MapFrom(src =>
-             src.TourDurations != null && src.TourDurations.Any()
-                 ? src.TourDurations.Average(td => td.TimeInMinutes)
-                 : 0))
+            // 4. START POINT – prvi key point po ID
+            .ForMember(dest => dest.StartPoint,
+                opt => opt.MapFrom(src =>
+                    src.KeyPoints != null && src.KeyPoints.Any()
+                        ? src.KeyPoints.OrderBy(kp => kp.Id).First().Name
+                        : string.Empty))
 
-     // START POINT – prvi key point po ID
-     .ForMember(dest => dest.StartPoint,
-         opt => opt.MapFrom(src =>
-             src.KeyPoints != null && src.KeyPoints.Any()
-                 ? src.KeyPoints.OrderBy(kp => kp.Id).First().Name
-                 : string.Empty));
+            // 5. Properti-je koje popunjavamo rucno u servisu
+            .ForMember(dest => dest.FirstKeyPoint, opt => opt.Ignore())
+            .ForMember(dest => dest.AverageRating, opt => opt.Ignore())
+            .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+            .ForMember(dest => dest.Images, opt => opt.Ignore());
 
-
-
-
-
+        
         CreateMap<TourDetailsDto, Tour>().ReverseMap();
-
     }
 }

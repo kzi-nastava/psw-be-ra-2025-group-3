@@ -100,4 +100,51 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }
+    public List<Tour> SearchAndFilter(string? name, List<string>? tags, int? minDifficulty, 
+                                       int? maxDifficulty, decimal? minPrice, decimal? maxPrice)
+    {
+        var query = _context.Tours
+            .Where(t => t.Status == TourStatus.Published);
+
+        // Filtriranje po nazivu (case-insensitive)
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            query = query.Where(t => t.Name.ToLower().Contains(name.ToLower()));
+        }
+
+        // Filtriranje po težini (minimum)
+        if (minDifficulty.HasValue)
+        {
+            query = query.Where(t => (int)t.Difficulty >= minDifficulty.Value);
+        }
+
+        // Filtriranje po težini (maximum)
+        if (maxDifficulty.HasValue)
+        {
+            query = query.Where(t => (int)t.Difficulty <= maxDifficulty.Value);
+        }
+
+        // Filtriranje po ceni (minimum)
+        if (minPrice.HasValue)
+        {
+            query = query.Where(t => t.Price >= minPrice.Value);
+        }
+
+        // Filtriranje po ceni (maximum)
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(t => t.Price <= maxPrice.Value);
+        }
+
+        // Izvlačimo iz baze i filtriramo tagove u memoriji
+        var tours = query.ToList();
+
+        // Filtriranje po tagovima (u memoriji jer EF Core ne može da parsira JSON)
+        if (tags != null && tags.Any())
+        {
+            tours = tours.Where(t => t.Tags.Any(tag => tags.Contains(tag))).ToList();
+        }
+
+        return tours;
+    }
 }

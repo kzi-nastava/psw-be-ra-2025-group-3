@@ -73,26 +73,16 @@ namespace Explorer.API.Controllers.Tourist
 
         // Endpoint za pretragu i filtriranje
         [HttpGet("search")]
-        public ActionResult<List<TourPreviewDto>> SearchAndFilter(
+        [AllowAnonymous]
+        public ActionResult<List<TourPreviewDto>> SearchTours(
             [FromQuery] string? name,
             [FromQuery] List<string>? tags,
-            [FromQuery] int? minDifficulty,
-            [FromQuery] int? maxDifficulty,
+            [FromQuery] List<int>? difficulties,
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
             [FromQuery] double? minRating)
         {
-            var filters = new TourFilterDto
-            {
-                Name = name,
-                Tags = tags,
-                MinDifficulty = minDifficulty,
-                MaxDifficulty = maxDifficulty,
-                MinPrice = minPrice,
-                MaxPrice = maxPrice,
-                MinRating = minRating
-            };
-
+            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating };
             var result = _touristTourService.SearchAndFilterTours(filters);
             return Ok(result);
         }

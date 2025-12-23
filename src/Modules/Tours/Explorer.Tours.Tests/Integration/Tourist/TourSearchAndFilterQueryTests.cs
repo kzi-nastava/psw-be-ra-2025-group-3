@@ -66,8 +66,7 @@ public class TourSearchAndFilterQueryTests : BaseToursIntegrationTest
 
         var filters = new TourFilterDto
         {
-            MinDifficulty = 0, // Easy
-            MaxDifficulty = 1  // Medium
+            Difficulties = new List<int> { 0, 1 } // Easy i Medium
         };
 
         // Act
@@ -76,7 +75,7 @@ public class TourSearchAndFilterQueryTests : BaseToursIntegrationTest
         // Assert
         result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
-        result.ShouldAllBe(t => int.Parse(t.Difficulty) >= 0 && int.Parse(t.Difficulty) <= 1);
+        result.ShouldAllBe(t => t.Difficulty == 0 || t.Difficulty == 1);
     }
 
     [Fact]

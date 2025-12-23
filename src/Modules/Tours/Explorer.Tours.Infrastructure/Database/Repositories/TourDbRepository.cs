@@ -100,8 +100,8 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }
-    public List<Tour> SearchAndFilter(string? name, List<string>? tags, int? minDifficulty, 
-                                       int? maxDifficulty, decimal? minPrice, decimal? maxPrice)
+    public List<Tour> SearchAndFilter(string? name, List<string>? tags, List<int>? difficulties, 
+                                       decimal? minPrice, decimal? maxPrice)
     {
         var query = _context.Tours
             .Where(t => t.Status == TourStatus.Published);
@@ -112,16 +112,10 @@ public class TourDbRepository : ITourRepository
             query = query.Where(t => t.Name.ToLower().Contains(name.ToLower()));
         }
 
-        // Filtriranje po težini (minimum)
-        if (minDifficulty.HasValue)
+        // Filtriranje po težini (OR logika unutar difficulties)
+        if (difficulties != null && difficulties.Any())
         {
-            query = query.Where(t => (int)t.Difficulty >= minDifficulty.Value);
-        }
-
-        // Filtriranje po težini (maximum)
-        if (maxDifficulty.HasValue)
-        {
-            query = query.Where(t => (int)t.Difficulty <= maxDifficulty.Value);
+            query = query.Where(t => difficulties.Contains((int)t.Difficulty));
         }
 
         // Filtriranje po ceni (minimum)
@@ -139,7 +133,7 @@ public class TourDbRepository : ITourRepository
         // Izvlačimo iz baze i filtriramo tagove u memoriji
         var tours = query.ToList();
 
-        // Filtriranje po tagovima (u memoriji jer EF Core ne može da parsira JSON)
+        // Filtriranje po tagovima (OR logika unutar tags)
         if (tags != null && tags.Any())
         {
             tours = tours.Where(t => t.Tags.Any(tag => tags.Contains(tag))).ToList();

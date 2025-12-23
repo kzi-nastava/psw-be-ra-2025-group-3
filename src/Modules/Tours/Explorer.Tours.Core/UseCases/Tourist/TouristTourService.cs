@@ -205,8 +205,7 @@ public class TouristTourService : ITouristTourService
         var tours = _tourRepository.SearchAndFilter(
             filters.Name, 
             filters.Tags, 
-            filters.MinDifficulty, 
-            filters.MaxDifficulty, 
+            filters.Difficulties, 
             filters.MinPrice, 
             filters.MaxPrice
         );
@@ -251,9 +250,10 @@ public class TouristTourService : ITouristTourService
             result.Add(dto);
         }
 
-        // MINIMUM RATING (ne može u bazi jer je agregat)
+        // MINIMUM RATING (filtrira NULL rating-e)
         if (filters.MinRating.HasValue)
         {
+            // Eliminiše ture sa rating = 0 (bez recenzija) kada je filter aktivan
             result = result.Where(t => t.AverageRating >= filters.MinRating.Value).ToList();
         }
 

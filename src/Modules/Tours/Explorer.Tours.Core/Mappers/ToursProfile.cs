@@ -54,9 +54,9 @@ public class ToursProfile : Profile
 
        
         CreateMap<Tour, TourPreviewDto>()
-            // 1. DIFFICULTY: enum → int → string (za frontend)
+            // 1. Difficulty kao int 
             .ForMember(dest => dest.Difficulty, 
-                opt => opt.MapFrom(src => ((int)src.Difficulty).ToString()))
+                opt => opt.MapFrom(src => (int)src.Difficulty))
             
             // 2. LENGTH = DistanceInKm
             .ForMember(dest => dest.Length,

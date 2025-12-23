@@ -19,6 +19,12 @@ public interface ITourRepository
 
     List<Tour> GetPublishedWithKeyPoints();
     Tour? GetTourWithKeyPoints(long id);
-    List<Tour> SearchAndFilter(string? name, List<string>? tags, int? minDifficulty, 
-                                int? maxDifficulty, decimal? minPrice, decimal? maxPrice);
+    
+    List<Tour> SearchAndFilter(
+        string? name, 
+        List<string>? tags, 
+        List<int>? difficulties,  
+        decimal? minPrice, 
+        decimal? maxPrice
+    );
 }

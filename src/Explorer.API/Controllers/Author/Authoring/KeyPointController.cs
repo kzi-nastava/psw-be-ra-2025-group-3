@@ -53,6 +53,25 @@ namespace Explorer.API.Controllers.Author.Authoring
         [HttpPut("{id:long}")]
         public ActionResult<KeyPointDto> Update(long id, [FromBody] KeyPointDto dto)
         {
+            var existing = _keyPointService.GetById(id);
+
+            if (!string.IsNullOrWhiteSpace(existing.ImageUrl) &&
+                existing.ImageUrl != dto.ImageUrl)
+            {
+                var fileName = Path.GetFileName(existing.ImageUrl);
+                var filePath = Path.Combine(
+                    "wwwroot",
+                    "uploads",
+                    "keypoint-images",
+                    fileName
+                );
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
             dto.Id = id;
             var authorId = GetAuthorId();
             var result = _keyPointService.Update(dto, authorId);
@@ -63,6 +82,24 @@ namespace Explorer.API.Controllers.Author.Authoring
         [HttpDelete("{id:long}")]
         public IActionResult Delete(long id)
         {
+            var kp = _keyPointService.GetById(id);
+
+            if (!string.IsNullOrWhiteSpace(kp.ImageUrl))
+            {
+                var fileName = Path.GetFileName(kp.ImageUrl);
+                var filePath = Path.Combine(
+                    "wwwroot",
+                    "uploads",
+                    "keypoint-images",
+                    fileName
+                );
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+
             var authorId = GetAuthorId();
             _keyPointService.Delete(id, authorId);
             return NoContent();

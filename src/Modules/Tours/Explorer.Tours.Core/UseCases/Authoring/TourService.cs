@@ -52,10 +52,29 @@ public class TourService : ITourService
 
     public void Delete(long id, long authorId)
     {
-        var tour = _tourRepository.GetById(id);
+        var tour = _tourRepository.GetByIdWithKeyPoints(id);
         if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only delete your own tours.");
         if (tour.Status != TourStatus.Draft) throw new InvalidOperationException("Only tours in Draft status can be deleted.");
+
+        foreach (var kp in tour.KeyPoints)
+        {
+            if (string.IsNullOrWhiteSpace(kp.ImageUrl))
+                continue;
+
+            var fileName = Path.GetFileName(kp.ImageUrl);
+            var filePath = Path.Combine(
+                "wwwroot",
+                "uploads",
+                "keypoint-images",
+                fileName
+            );
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
 
         _tourRepository.Delete(id);
     }

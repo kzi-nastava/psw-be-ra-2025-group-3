@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Tours.Core.Domain
+namespace Explorer.Payments.Core.Domain
 {
     public class ShoppingCart : AggregateRoot
     {
@@ -24,7 +24,7 @@ namespace Explorer.Tours.Core.Domain
             Items = new();
             TotalPrice = 0;
         }
-
+        /*
         public void AddItem(Tour tour)
         {
             if (tour.Status != TourStatus.Published)
@@ -36,8 +36,20 @@ namespace Explorer.Tours.Core.Domain
             var item = new OrderItem(tour.Id, tour.Name, tour.Price);
             Items.Add(item);
             RecalculateTotal();
-        }
+        }*/
+        
+        
+        public void AddItem(OrderItem orderItem)
+        {
+            
 
+            if (Items.Any(i => i.TourId == orderItem.TourId))
+                throw new InvalidOperationException("Tour is already in the shopping cart.");
+            
+            Items.Add(orderItem);
+            RecalculateTotal(); 
+        }
+        
         public void RemoveItem(long tourId)
         {
             var existing = Items.SingleOrDefault(i => i.TourId == tourId);

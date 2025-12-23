@@ -1,17 +1,17 @@
-﻿using Explorer.API.Controllers.Tourist;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
-using Explorer.Tours.Infrastructure.Database;
+﻿using Explorer.API.Controllers.Shopping;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public.Shopping;
+using Explorer.Payments.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace Explorer.Tours.Tests.Integration.Tourist;
+namespace Explorer.Payments.Tests.Integration.Tourist;
 
 [Collection("Sequential")]
-public class TourPurchaseTokenCommandTests : BaseToursIntegrationTest
+public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
 {
-    public TourPurchaseTokenCommandTests(ToursTestFactory factory) : base(factory) { }
+    public TourPurchaseTokenCommandTests(PaymentsTestFactory factory) : base(factory) { }
 
     // Helper – generiše novog unikatnog turistu
     private static string NewPersonId()
@@ -49,7 +49,7 @@ public class TourPurchaseTokenCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var cartController = CreateCartController(scope, personId);
         var purchaseController = CreatePurchaseController(scope, personId);
-        var db = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
         cartController.Add(new ShoppingCartRequestDto { TourId = tourId });
 

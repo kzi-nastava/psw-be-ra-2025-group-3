@@ -1,19 +1,21 @@
-﻿using Explorer.Tours.Core.Domain;
+﻿using Explorer.Payments.Core.Domain;
+using Explorer.Tours.API.Dtos;
 using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Explorer.Tours.Core.Domain;
 
-namespace Explorer.Tours.Tests.Integration.Shopping
+namespace Explorer.Payments.Tests.Integration.Shopping
 {
     public class ShoppingCartTests
     {
         [Theory]
-        [InlineData(TourStatus.Published, true)]
-        [InlineData(TourStatus.Draft, false)]
-        public void Adds_item_only_for_published_tours(TourStatus status, bool shouldSucceed)
+        [InlineData(TourStatusDto.Published, true)]
+        [InlineData(TourStatusDto.Draft, false)]
+        public void Adds_item_only_for_published_tours(TourStatusDto status, bool shouldSucceed)
         {
             // Arrange
             var cart = new ShoppingCart(1);
@@ -22,7 +24,8 @@ namespace Explorer.Tours.Tests.Integration.Shopping
             // Act & Assert
             if (shouldSucceed)
             {
-                cart.AddItem(tour);
+                var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
+                cart.AddItem(orderItem);
 
                 cart.Items.Count.ShouldBe(1);
                 cart.Items[0].TourId.ShouldBe(tour.Id);
@@ -30,7 +33,13 @@ namespace Explorer.Tours.Tests.Integration.Shopping
             }
             else
             {
-                Should.Throw<InvalidOperationException>(() => cart.AddItem(tour));
+                var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);                
+                Should.Throw<InvalidOperationException>(() => {
+                    if (tour.Status != TourStatus.Published)
+                        throw new InvalidOperationException("Tour must be published to be added to cart.");
+                    else
+                        cart.AddItem(orderItem);
+                });
                 cart.Items.Count.ShouldBe(0);
                 cart.TotalPrice.ShouldBe(0m);
             }
@@ -41,13 +50,14 @@ namespace Explorer.Tours.Tests.Integration.Shopping
         {
             // Arrange
             var cart = new ShoppingCart(1);
-            var tour = CreateTourWithStatus(TourStatus.Published, 15m);
+            var tour = CreateTourWithStatus(TourStatusDto.Published, 15m);
 
             // Act
-            cart.AddItem(tour);
+            var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
+            cart.AddItem(orderItem);
 
             // Assert
-            Should.Throw<InvalidOperationException>(() => cart.AddItem(tour));
+            Should.Throw<InvalidOperationException>(() => cart.AddItem(orderItem));
             cart.Items.Count.ShouldBe(1);
             cart.TotalPrice.ShouldBe(15m);
         }
@@ -57,13 +67,15 @@ namespace Explorer.Tours.Tests.Integration.Shopping
         {
             // Arrange
             var cart = new ShoppingCart(1);
-            var tour1 = CreateTourWithStatus(TourStatus.Published, 10m, 1);
-            var tour2 = CreateTourWithStatus(TourStatus.Published, 25.5m, 2);
+            var tour1 = CreateTourWithStatus(TourStatusDto.Published, 10m, 1);
+            var tour2 = CreateTourWithStatus(TourStatusDto.Published, 25.5m, 2);
 
             // Act
-            cart.AddItem(tour1);
-            cart.AddItem(tour2);
-
+            var orderItem = new OrderItem(tour1.Id, tour1.Name, tour1.Price);
+            cart.AddItem(orderItem);
+            orderItem = new OrderItem(tour2.Id, tour2.Name, tour2.Price);
+            cart.AddItem(orderItem);
+            
             // Assert
             cart.Items.Count.ShouldBe(2);
             cart.TotalPrice.ShouldBe(35.5m);
@@ -74,11 +86,13 @@ namespace Explorer.Tours.Tests.Integration.Shopping
         {
             // Arrange
             var cart = new ShoppingCart(1);
-            var tour1 = CreateTourWithStatus(TourStatus.Published, 10m, 1);
-            var tour2 = CreateTourWithStatus(TourStatus.Published, 20m, 2);
+            var tour1 = CreateTourWithStatus(TourStatusDto.Published, 10m, 1);
+            var tour2 = CreateTourWithStatus(TourStatusDto.Published, 20m, 2);
 
-            cart.AddItem(tour1);
-            cart.AddItem(tour2);
+            var orderItem = new OrderItem(tour1.Id, tour1.Name, tour1.Price);
+            cart.AddItem(orderItem);
+            orderItem = new OrderItem(tour2.Id, tour2.Name, tour2.Price);
+            cart.AddItem(orderItem);
 
             // Act
             cart.RemoveItem(tour1.Id);
@@ -89,7 +103,8 @@ namespace Explorer.Tours.Tests.Integration.Shopping
             cart.TotalPrice.ShouldBe(20m);
         }
 
-        private static Tour CreateTourWithStatus(TourStatus status, decimal price, long id = 1)
+        
+        private static Tour CreateTourWithStatus(TourStatusDto status, decimal price, long id = 1)
         {
             var tags = new List<string> { "cycling", "nature" };
 
@@ -106,7 +121,7 @@ namespace Explorer.Tours.Tests.Integration.Shopping
             };
             tour.UpdateTourDurations(durations);
 
-            if (status == TourStatus.Published)
+            if (status == TourStatusDto.Published)
             {
                 tour.Publish();
             }
@@ -116,5 +131,6 @@ namespace Explorer.Tours.Tests.Integration.Shopping
 
             return tour;
         }
+        
     }
 }

@@ -9,6 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Explorer.Payments.Infrastructure.Database;
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Payments.API.Internal;
+using Explorer.Payments.Core.UseCases.Shopping;
+using Explorer.Payments.API.Public.Shopping;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
+using Explorer.Payments.Infrastructure.Database.Repositories;
 
 namespace Explorer.Payments.Infrastructure
 {
@@ -24,10 +29,17 @@ namespace Explorer.Payments.Infrastructure
 
         private static void SetupCore(IServiceCollection services)
         {
+            services.AddScoped<IInternalTokenService, TourPurchaseTokenService>();
+            services.AddScoped<IShoppingCartService, ShoppingCartService>();
+            services.AddScoped<IInternalShoppingCartService, ShoppingCartService>();
+            services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         }
 
         private static void SetupInfrastructure(IServiceCollection services)
         {
+            services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+            services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("payments"));
             dataSourceBuilder.EnableDynamicJson();
             var dataSource = dataSourceBuilder.Build();

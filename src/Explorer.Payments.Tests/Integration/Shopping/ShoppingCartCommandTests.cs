@@ -1,7 +1,7 @@
-﻿using Explorer.API.Controllers.Tourist;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
-using Explorer.Tours.Infrastructure.Database;
+﻿using Explorer.API.Controllers.Shopping;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public.Shopping;
+using Explorer.Payments.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -11,12 +11,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Tours.Tests.Integration.Tourist
+namespace Explorer.Payments.Tests.Integration.Tourist
 {
     [Collection("Sequential")]
-    public class ShoppingCartCommandTests : BaseToursIntegrationTest
+    public class ShoppingCartCommandTests : BasePaymentsIntegrationTest
     {
-        public ShoppingCartCommandTests(ToursTestFactory factory) : base(factory) { }
+        public ShoppingCartCommandTests(PaymentsTestFactory factory) : base(factory) { }
 
         [Fact]
         public void Adds_published_tour_to_cart()
@@ -28,7 +28,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             using var scope = Factory.Services.CreateScope();
             var controller = CreateController(scope, personId);
-            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
             var request = new ShoppingCartRequestDto
             {

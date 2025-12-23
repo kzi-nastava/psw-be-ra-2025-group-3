@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.Domain;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
+using Explorer.Payments.Core.Domain;
+using Explorer.Payments.Infrastructure.Database;
 
-namespace Explorer.Tours.Infrastructure.Database.Repositories
+namespace Explorer.Payments.Infrastructure.Database.Repositories
 {
     public class TourPurchaseTokenDbRepository : ITourPurchaseTokenRepository
     {
-        private readonly ToursContext _context;
+        private readonly PaymentsContext _context;
 
-        public TourPurchaseTokenDbRepository(ToursContext context)
+        public TourPurchaseTokenDbRepository(PaymentsContext context)
         {
             _context = context;
         }

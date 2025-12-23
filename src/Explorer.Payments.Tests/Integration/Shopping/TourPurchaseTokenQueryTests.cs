@@ -1,16 +1,17 @@
-﻿using Explorer.API.Controllers.Tourist;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
+﻿using Explorer.API.Controllers.Shopping;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public.Shopping;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Explorer.Payments.Tests.Integration;
 
-namespace Explorer.Tours.Tests.Integration.Tourist;
+namespace Explorer.Payments.Tests.Integration.Shopping;
 
 [Collection("Sequential")]
-public class TourPurchaseTokenQueryTests : BaseToursIntegrationTest
+public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
 {
-    public TourPurchaseTokenQueryTests(ToursTestFactory factory) : base(factory) { }
+    public TourPurchaseTokenQueryTests(PaymentsTestFactory factory) : base(factory) { }
 
     private static string NewPersonId()
     {

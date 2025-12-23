@@ -6,6 +6,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Payments.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Tourist;
 
@@ -14,15 +15,30 @@ public class TouristTourService : ITouristTourService
     private readonly ITourRepository _tourRepository;
     private readonly ITourReviewRepository _reviewRepository;
     private readonly ITourAccessService _access;
-    private readonly ITourPurchaseTokenRepository _tokenRepository; //tour execution
+
+    //private readonly ITourPurchaseTokenRepository _tokenRepository; //tour execution
+    private readonly IInternalTokenService _tokenService; //tour execution
+
     private readonly IMapper _mapper;
 
-    public TouristTourService(ITourRepository tourRepository, ITourReviewRepository reviewRepository, ITourAccessService access, ITourPurchaseTokenRepository tokenRepository, IMapper mapper)
+    /*public TouristTourService(ITourRepository tourRepository, ITourReviewRepository reviewRepository, ITourAccessService access, ITourPurchaseTokenRepository tokenRepository, IMapper mapper)
     {
         _tourRepository = tourRepository;
         _reviewRepository = reviewRepository;
         _access = access;
         _tokenRepository = tokenRepository; // tour execution
+        _mapper = mapper;
+    }*/
+
+    public TouristTourService(ITourRepository tourRepository, ITourReviewRepository reviewRepository, ITourAccessService access, IInternalTokenService tokenService, IMapper mapper)
+    {
+        _tourRepository = tourRepository;
+        _reviewRepository = reviewRepository;
+        _access = access;
+
+        //_tokenRepository = tokenRepository; // tour execution
+        _tokenService = tokenService; // tour execution
+
         _mapper = mapper;
     }
 
@@ -152,8 +168,15 @@ public class TouristTourService : ITouristTourService
     //tour execution
     public List<TourPreviewDto> GetMyPurchasedTours(long touristId)
     {
-        var tokens = _tokenRepository.GetByTouristId(touristId);
+        //var tokens = _tokenRepository.GetByTouristId(touristId);
+        //var tourIds = tokens.Select(t => t.TourId).Distinct().ToList();
+
+        var tokens = _tokenService.GetTokens(touristId);
         var tourIds = tokens.Select(t => t.TourId).Distinct().ToList();
+
+
+        //if (!tourIds.Any())
+        //  return new List<TourPreviewDto>();
 
         if (!tourIds.Any())
             return new List<TourPreviewDto>();

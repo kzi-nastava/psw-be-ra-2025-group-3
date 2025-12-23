@@ -7,9 +7,9 @@ using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
-using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Payments.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -18,10 +18,13 @@ public class TourExecutionService : ITourExecutionService
     private readonly ITourExecutionRepository _executionRepository;
     private readonly ITourRepository _tourRepository;
 
-    private readonly ITourPurchaseTokenRepository _tokenRepository;
+    //private readonly ITourPurchaseTokenRepository _tokenRepository;
+    private readonly IInternalTokenService _tokenService;
 
     private readonly IKeyPointRepository _keyPointRepository;
-    private readonly IShoppingCartService _shoppingCartService;
+
+    //private readonly IShoppingCartService _shoppingCartService;
+    private readonly IInternalShoppingCartService _shoppingCartService;
 
     private readonly IMapper _mapper;
 
@@ -29,19 +32,25 @@ public class TourExecutionService : ITourExecutionService
         ITourExecutionRepository executionRepository,
         ITourRepository tourRepository,
 
-        ITourPurchaseTokenRepository tokenRepository,
+        //ITourPurchaseTokenRepository tokenRepository,
+        IInternalTokenService tokenService,
 
         IKeyPointRepository keyPointRepository,
-        IShoppingCartService shoppingCartService,
+        
+        //IShoppingCartService shoppingCartService,
+        IInternalShoppingCartService shoppingCartService,
 
         IMapper mapper)
     {
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
 
-        _tokenRepository = tokenRepository;
+        //_tokenRepository = tokenRepository
+        _tokenService = tokenService;
 
         _keyPointRepository = keyPointRepository;
+        
+        //_shoppingCartService = shoppingCartService;
         _shoppingCartService = shoppingCartService;
 
         _mapper = mapper;
@@ -70,9 +79,9 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Cannot start: Tour is not available.");
 
         // Validacija kupovine
-        //var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
-        //if (!hasPurchased)
-        //    throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
+        var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
+        if (!hasPurchased)
+            throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
 
 
         // Provera broja ključnih tačaka
@@ -80,8 +89,8 @@ public class TourExecutionService : ITourExecutionService
         if (keyPointCount < 2)
             throw new InvalidOperationException("Cannot start: Tour must have at least 2 key points.");
 
-        //if (_executionRepository.HasActiveSession(touristId, dto.TourId))
-            //throw new InvalidOperationException("Cannot start: You already have an active session for this tour.");
+        if (_executionRepository.HasActiveSession(touristId, dto.TourId))
+            throw new InvalidOperationException("Cannot start: You already have an active session for this tour.");
 
         // Kreiranje nove sesije
         var execution = new TourExecution(
@@ -146,10 +155,14 @@ public class TourExecutionService : ITourExecutionService
     public bool CanStartTour(long touristId, long tourId)
     {
         // pozivamo AccessService preko repoa
-        var tokens = _tokenRepository.GetByTouristId(touristId);
+        //var tokens = _tokenRepository.GetByTouristId(touristId);
 
+        //return tokens.Any(t => t.TourId == tourId);
+
+        var tokens = _tokenService.GetTokens(touristId);
         return tokens.Any(t => t.TourId == tourId);
-}
+    }
+
     public TourExecutionDto CompleteTour(long touristId)
     {
         var activeExecution = _executionRepository.GetActiveByTouristId(touristId);

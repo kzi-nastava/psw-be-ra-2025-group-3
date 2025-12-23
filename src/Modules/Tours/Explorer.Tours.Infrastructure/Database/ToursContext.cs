@@ -12,10 +12,10 @@ public class ToursContext : DbContext
     public DbSet<Monument> Monuments { get; set; }
     public DbSet<Facility> Facilities { get; set; }
     public DbSet<AwardEvent> AwardEvents { get; set; }
-    public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
+    //public DbSet<TourPurchaseToken>TourPurchaseTokens { get; set; }
     public DbSet<TourProblem> TourProblems { get; set; }
     public DbSet<Position> Positions { get; set; }
-    public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+    //public DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public DbSet<KeyPoint> KeyPoints { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<TourExecution> TourExecutions { get; set; }
@@ -105,6 +105,7 @@ public class ToursContext : DbContext
             .Property(ae => ae.Status)
             .HasConversion<string>();
 
+        /*
         modelBuilder.Entity<ShoppingCart>(builder =>
         {
             builder.ToTable("ShoppingCarts", "tours");
@@ -134,6 +135,7 @@ public class ToursContext : DbContext
                     )
                 );
         });
+        */
 
         modelBuilder.Entity<TourProblem>()
             .HasMany(tp => tp.Messages)           

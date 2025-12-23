@@ -1,10 +1,10 @@
-﻿using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Shopping;
+﻿using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public.Shopping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace Explorer.API.Controllers.Tourist
+namespace Explorer.API.Controllers.Shopping
 {
     [Authorize(Policy = "touristPolicy")]
     [Route("api/tourist/purchase")]

@@ -8,10 +8,11 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
-public class TourService : ITourService
+public class TourService : ITourService, IInternalTourService
 {
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;

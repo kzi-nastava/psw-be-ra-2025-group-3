@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Explorer.Tours.API.Dtos;
+using Explorer.Payments.API.Dtos;
 
-namespace Explorer.Tours.API.Public.Shopping
+namespace Explorer.Payments.API.Public.Shopping
 {
     public interface ITourPurchaseTokenService
     {

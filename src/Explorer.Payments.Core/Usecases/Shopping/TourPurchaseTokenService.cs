@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.API.Public.Shopping;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
+using Explorer.Payments.API.Public.Shopping;
 using AutoMapper;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.Core.Domain;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.Core.Domain;
+using Explorer.Payments.API.Internal;
 
-namespace Explorer.Tours.Core.UseCases.Shopping
+namespace Explorer.Payments.Core.UseCases.Shopping
 {
-    public class TourPurchaseTokenService: ITourPurchaseTokenService
+    public class TourPurchaseTokenService: ITourPurchaseTokenService, IInternalTokenService
     {
         private readonly IShoppingCartRepository _cartRepository;
         private readonly ITourPurchaseTokenRepository _tokenRepository;

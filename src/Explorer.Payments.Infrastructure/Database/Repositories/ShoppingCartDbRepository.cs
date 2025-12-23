@@ -1,18 +1,18 @@
-﻿using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using Explorer.Payments.Core.Domain;
+using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Tours.Infrastructure.Database.Repositories
+namespace Explorer.Payments.Infrastructure.Database.Repositories
 {
     public class ShoppingCartDbRepository : IShoppingCartRepository
     {
-        private readonly ToursContext _context;
+        private readonly PaymentsContext _context;
 
-        public ShoppingCartDbRepository(ToursContext context)
+        public ShoppingCartDbRepository(PaymentsContext context)
         {
             _context = context;
         }

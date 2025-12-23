@@ -21,6 +21,13 @@ namespace Explorer.Tours.Tests.Integration.Administration
             var controller = CreateController(scope);
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
+            var existing = dbContext.AwardEvents.FirstOrDefault(e => e.Year == 2030);
+            if (existing != null)
+            {
+                dbContext.AwardEvents.Remove(existing);
+                dbContext.SaveChanges();
+            }
+
             var newEntity = new AwardEventCreateDto
             {
                 Name = "Nova Test Nagrada",

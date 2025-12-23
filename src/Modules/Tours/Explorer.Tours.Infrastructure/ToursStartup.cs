@@ -3,14 +3,12 @@ using Explorer.Tours.API.Public;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.API.Public.Authoring;
-using Explorer.Tours.API.Public.Shopping;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Core.Mappers;
 using Explorer.Tours.Core.UseCases;
 using Explorer.Tours.Core.UseCases.Administration;
 using Explorer.Tours.Core.UseCases.Authoring;
-using Explorer.Tours.Core.UseCases.Shopping;
 using Explorer.Tours.Core.UseCases.Tourist;
 using Explorer.Tours.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database.Repositories;
@@ -22,6 +20,8 @@ using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.UseCases.Execution;
 using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.UseCases.Review;
+
+using Explorer.Payments.API.Internal;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -42,12 +42,12 @@ public static class ToursStartup
         services.AddScoped<ITourService, TourService>();
         services.AddScoped<IFacilityService, FacilityService>();
         services.AddScoped<IPositionService, PositionService>();
-        services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
+        //services.AddScoped<ITourPurchaseTokenService, TourPurchaseTokenService>();
         services.AddScoped<IMonumentService, MonumentService>();
         services.AddScoped<IAwardEventService, AwardEventService>();
         services.AddScoped<ITourProblemService, TourProblemService>();
         services.AddScoped<IInternalEquipmentService, InternalEquipmentService>();
-        services.AddScoped<IShoppingCartService, ShoppingCartService>();
+        //services.AddScoped<IShoppingCartService, ShoppingCartService>();
         services.AddScoped<IKeyPointService, KeyPointService>();
         services.AddScoped<ITourExecutionService, TourExecutionService>();
         services.AddScoped<ITourReviewService, TourReviewService>();
@@ -59,6 +59,7 @@ public static class ToursStartup
 
         services.AddScoped<IAdminTourProblemService, AdminTourProblemService>();
 
+        services.AddScoped<IInternalTourService, TourService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -70,8 +71,8 @@ public static class ToursStartup
         services.AddScoped<IMonumentRepository, MonumentDbRepository>();
         services.AddScoped<IAwardEventRepository, AwardEventRepository>();
         services.AddScoped<ITourProblemRepository, TourProblemDbRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
-        services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
+        //services.AddScoped<IShoppingCartRepository, ShoppingCartDbRepository>();
+        //services.AddScoped<ITourPurchaseTokenRepository, TourPurchaseTokenDbRepository>();
         services.AddScoped<IKeyPointRepository, KeyPointDbRepository>();
         services.AddScoped<ITourExecutionRepository, TourExecutionDbRepository>();
         services.AddScoped<ITourReviewRepository, TourReviewDbRepository>();

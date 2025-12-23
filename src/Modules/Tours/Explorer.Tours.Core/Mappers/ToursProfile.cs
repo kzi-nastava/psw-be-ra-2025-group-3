@@ -16,7 +16,7 @@ public class ToursProfile : Profile
         CreateMap<TourUpdateDto, Tour>();
 
         CreateMap<MonumentDto, Monument>().ReverseMap();
-        CreateMap<TourPurchaseTokenDto, TourPurchaseToken>().ReverseMap();
+        //CreateMap<TourPurchaseTokenDto, TourPurchaseToken>().ReverseMap();
 
        
         CreateMap<PositionDto, Position>().ReverseMap();
@@ -37,8 +37,8 @@ public class ToursProfile : Profile
         CreateMap<TourProblemCreateDto, TourProblem>();
         CreateMap<TourProblemUpdateDto, TourProblem>();
 
-        CreateMap<OrderItem, ShoppingCartItemDto>();
-        CreateMap<ShoppingCart, ShoppingCartDto>();
+        //CreateMap<OrderItem, ShoppingCartItemDto>();
+        //CreateMap<ShoppingCart, ShoppingCartDto>();
         CreateMap<KeyPointDto, KeyPoint>().ReverseMap();
         CreateMap<TourDurationDto, TourDuration>().ReverseMap();
 

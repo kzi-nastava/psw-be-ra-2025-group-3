@@ -218,7 +218,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
             Title = "Tura Povezivanje Test",
             Description = "Opis",
             DateTime = DateTime.UtcNow.AddDays(10),
-
+            Address = "Tourist Street 1",
             // POPRAVKA 2: Dodato 'm' na kraju brojeva jer su tipa decimal
             Latitude = 45.2m,
             Longitude = 19.8m,

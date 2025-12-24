@@ -27,4 +27,6 @@ public interface ITourRepository
         decimal? minPrice, 
         decimal? maxPrice
     );
+
+    List<Tour> GetPublishedTours(); // za tour recommendations
 }

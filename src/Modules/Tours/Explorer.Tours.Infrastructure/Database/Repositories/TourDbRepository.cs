@@ -140,5 +140,13 @@ public class TourDbRepository : ITourRepository
         }
 
         return tours;
+
+    //tour-recommendations
+    public List<Tour> GetPublishedTours()
+    {
+        // TourDurations je automatski učitan jer je deo Tour agregata
+        return _context.Tours
+            .Where(t => t.Status == TourStatus.Published)
+            .ToList();
     }
 }

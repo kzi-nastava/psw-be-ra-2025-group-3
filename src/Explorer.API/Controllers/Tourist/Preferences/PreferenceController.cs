@@ -62,4 +62,13 @@ public class PreferenceController : ControllerBase
         _preferenceService.Delete(touristId);
         return Ok();
     }
+
+    //tour recommendations
+    [HttpGet("recommended-tours")]
+    public ActionResult<List<RecommendedTourDto>> GetRecommendedTours()
+    {
+        var touristId = User.PersonId();
+        var result = _preferenceService.GetRecommendedTours(touristId);
+        return Ok(result);
+    }
 }

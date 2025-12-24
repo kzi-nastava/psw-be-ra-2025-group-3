@@ -19,6 +19,10 @@ public class TourExecutionDto
     public DateTime? CompletionTime { get; set; }
     public DateTime? AbandonTime { get; set; }
 
+    // dodato zarad procenta 
+    public DateTime LastActivity { get; set; }
+    public double ProgressPercentage { get; set; }
+
     //
     public List<KeyPointCompletionDto> CompletedKeyPoints { get; set; } = new List<KeyPointCompletionDto>();
 }

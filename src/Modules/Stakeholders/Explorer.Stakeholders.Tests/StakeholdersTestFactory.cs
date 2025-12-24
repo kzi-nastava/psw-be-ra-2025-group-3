@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Explorer.BuildingBlocks.Tests;
 using Explorer.Stakeholders.Infrastructure.Database;
+using Explorer.Tours.Infrastructure.Database;
 
 namespace Explorer.Stakeholders.Tests;
 
@@ -12,6 +13,7 @@ public class StakeholdersTestFactory : BaseTestFactory<StakeholdersContext>
         var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
         services.Remove(descriptor!);
         services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
 
         return services;
     }

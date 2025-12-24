@@ -32,6 +32,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
             Title = "New Author Meetup",
             Description = "Meetup created by author for testing",
             DateTime = DateTime.UtcNow.AddDays(10),
+            Address = "Test Address 123",
             Latitude = 45.5m,
             Longitude = 20.0m
         };
@@ -41,6 +42,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(newMeetup.Address);
         result.Id.ShouldNotBe(0);
         result.Title.ShouldBe(newMeetup.Title);
         result.CreatorId.ShouldBe(-11); // Author ID
@@ -63,6 +65,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
             Title = "New Tourist Meetup",
             Description = "Meetup created by tourist for testing",
             DateTime = DateTime.UtcNow.AddDays(15),
+            Address = "Tourist Street 1",
             Latitude = 44.5m,
             Longitude = 21.0m
         };
@@ -72,6 +75,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(newMeetup.Address);
         result.Id.ShouldNotBe(0);
         result.Title.ShouldBe(newMeetup.Title);
         result.CreatorId.ShouldBe(-21); // Tourist ID
@@ -111,7 +115,8 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
         {
             Title = "Updated Photography & Travel",
             Description = "Updated description for the event",
-            DateTime = new DateTime(2026, 1, 15, 18, 0, 0, DateTimeKind.Utc), 
+            DateTime = new DateTime(2026, 1, 15, 18, 0, 0, DateTimeKind.Utc),
+            Address = "New Updated Address",
             Latitude = 45.3m,
             Longitude = 19.9m
         };
@@ -121,6 +126,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Assert - Response
         result.ShouldNotBeNull();
+        result.Address.ShouldBe(updateDto.Address);
         result.Id.ShouldBe(-3);
         result.Title.ShouldBe(updateDto.Title);
         result.Description.ShouldBe(updateDto.Description);
@@ -194,6 +200,45 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
 
         // Act & Assert
         Should.Throw<NotFoundException>(() => controller.Delete(-999));
+    }
+
+    [Fact]
+    public void Creates_meetup_with_tour_link()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+
+        // POPRAVKA 1: Koristimo postojeću helper metodu 'CreateAuthorController'
+        var controller = CreateAuthorController(scope);
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
+
+        var newMeetup = new MeetupCreateDto
+        {
+            Title = "Tura Povezivanje Test",
+            Description = "Opis",
+            DateTime = DateTime.UtcNow.AddDays(10),
+            Address = "Tourist Street 1",
+            // POPRAVKA 2: Dodato 'm' na kraju brojeva jer su tipa decimal
+            Latitude = 45.2m,
+            Longitude = 19.8m,
+
+            TourId = -2 // Vežemo za turu koja postoji u seed-u
+        };
+
+        // Act
+        var result = ((ObjectResult)controller.Create(newMeetup).Result)?.Value as MeetupDto;
+
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Id.ShouldNotBe(0);
+        result.Title.ShouldBe(newMeetup.Title);
+        result.TourId.ShouldBe(newMeetup.TourId);
+
+        // Assert - Database
+        var storedEntity = dbContext.Meetups.FirstOrDefault(i => i.Title == newMeetup.Title);
+        storedEntity.ShouldNotBeNull();
+        storedEntity.TourId.ShouldBe(newMeetup.TourId);
     }
 
     private static AuthorMeetupController CreateAuthorController(IServiceScope scope)

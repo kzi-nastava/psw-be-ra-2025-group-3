@@ -198,4 +198,10 @@ public class TourProblemService : ITourProblemService
 
         return _mapper.Map<TourProblemDto>(result);
     }
+    public List<TourProblemDto> GetByTourId(long tourId)
+    {
+        var problems = _tourProblemRepository.GetByTourId(tourId);
+        return problems.Select(_mapper.Map<TourProblemDto>).ToList();
+    }
+
 }

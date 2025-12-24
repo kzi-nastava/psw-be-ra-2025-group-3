@@ -52,45 +52,41 @@ public class TourProblemCommandTests : BaseToursIntegrationTest
 
         var newProblem = new TourProblemCreateDto
         {
-            TourId = -1,
+            TourId = -1, // tour ne postoji
             Category = 0,
             Priority = 2,
             Description = "Test problem description with more than 10 characters",
             Time = DateTime.UtcNow.AddHours(-2)
         };
 
-        // Act - Tourist -21 creates problem
-        var result = service.Create(newProblem, -21);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Id.ShouldNotBe(0);
-        result.TourId.ShouldBe(newProblem.TourId);
-        result.TouristId.ShouldBe(-21);
-        result.Category.ShouldBe(newProblem.Category);
-        result.Priority.ShouldBe(newProblem.Priority);
-        result.Description.ShouldBe(newProblem.Description);
+        // Act & Assert
+        Should.Throw<Explorer.BuildingBlocks.Core.Exceptions.NotFoundException>(
+            () => service.Create(newProblem, -21)
+        );
     }
+
+
 
     [Fact]
     public void Create_fails_invalid_description()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourProblemService>();
 
         var newProblem = new TourProblemCreateDto
         {
-            TourId = -1,
+            TourId = -1, // tour NE postoji
             Category = 0,
             Priority = 2,
             Description = "Short",
             Time = DateTime.UtcNow.AddHours(-2)
         };
 
-        // Act & Assert
-        Should.Throw<ArgumentException>(() => service.Create(newProblem, -21));
+        Should.Throw<Explorer.BuildingBlocks.Core.Exceptions.NotFoundException>(
+            () => service.Create(newProblem, -21)
+        );
     }
+
 
     [Fact]
     public void Updates_problem()

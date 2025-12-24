@@ -43,58 +43,63 @@ public class TourAuthoringTests : BaseToursIntegrationTest
     [Fact]
     public void Adds_equipment_to_tour()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // 1. Kreiramo svezu turu da ne zavisimo od ID-a -1
-        var tourDto = new TourCreateDto
+        // CREATE TOUR
+        var createdTour = service.Create(new TourCreateDto
         {
             Name = "Equipment Test Tour",
             Description = "Test",
             Difficulty = 0,
             Tags = new List<string>()
-        };
-        var createdTour = service.Create(tourDto, -11); // -11 je autor
+        }, -11);
 
-        long equipmentId = -1; // Oprema -1 bi trebalo da postoji iz b-equipment.sql
+        // CREATE EQUIPMENT – OBAVEZNO PREKO KONSTRUKTORA
+        var equipment = new Equipment("Test Equipment", "Desc");
+        dbContext.Equipment.Add(equipment);
+        dbContext.SaveChanges();
 
-        // Act
-        var result = service.AddEquipment(createdTour.Id, equipmentId, -11);
+        // ACT
+        var result = service.AddEquipment(createdTour.Id, equipment.Id, -11);
 
-        // Assert - User Story 2
-        result.ShouldNotBeNull();
-        result.Equipment.ShouldContain(e => e.Id == equipmentId);
+        // ASSERT
+        result.Equipment.ShouldContain(e => e.Id == equipment.Id);
     }
+
+
 
     [Fact]
     public void Removes_equipment_from_tour()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // 1. Kreiramo turu
-        var tourDto = new TourCreateDto
+        var createdTour = service.Create(new TourCreateDto
         {
             Name = "Remove Equipment Tour",
             Description = "Test",
             Difficulty = 0,
             Tags = new List<string>()
-        };
-        var createdTour = service.Create(tourDto, -11);
-        long equipmentId = -1;
+        }, -11);
 
-        // 2. Dodajemo opremu (priprema za brisanje)
-        service.AddEquipment(createdTour.Id, equipmentId, -11);
+        // CREATE EQUIPMENT
+        var equipment = new Equipment("Equipment", "Desc");
+        dbContext.Equipment.Add(equipment);
+        dbContext.SaveChanges();
 
-        // Act
-        var result = service.RemoveEquipment(createdTour.Id, equipmentId, -11);
+        service.AddEquipment(createdTour.Id, equipment.Id, -11);
 
-        // Assert - User Story 2
-        result.ShouldNotBeNull();
-        result.Equipment.ShouldNotContain(e => e.Id == equipmentId);
+        // ACT
+        var result = service.RemoveEquipment(createdTour.Id, equipment.Id, -11);
+
+        // ASSERT
+        result.Equipment.ShouldNotContain(e => e.Id == equipment.Id);
     }
+
+
 
     [Fact]
     public void Cannot_add_equipment_if_tour_archived()

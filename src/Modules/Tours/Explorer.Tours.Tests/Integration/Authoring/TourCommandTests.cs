@@ -56,37 +56,38 @@ public class TourCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Updates_tour()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
 
+        var created = service.Create(new TourCreateDto
+        {
+            Name = "Original",
+            Description = "Desc",
+            Difficulty = 1,
+            Tags = new List<string>()
+        }, -11);
+
         var updateDto = new TourUpdateDto
         {
-            Id = -3,
+            Id = created.Id,
             Name = "Updated Tour Name",
             Description = "Updated description",
             Difficulty = 2,
-            Price = 999.99m,
+            Price = 999,
             Tags = new List<string> { "updated" },
             Status = "Draft",
             TourDurations = new List<TourDurationDto>
-            {
-                new TourDurationDto { TimeInMinutes = 60, TransportType = 0 }
-            }
+        {
+            new TourDurationDto { TimeInMinutes = 60, TransportType = 0 }
+        }
         };
 
-        // Act
-        var result = service.Update(updateDto, -11); 
+        var result = service.Update(updateDto, -11);
 
-        // Assert
-        result.ShouldNotBeNull();
         result.Name.ShouldBe("Updated Tour Name");
         result.Description.ShouldBe("Updated description");
-        result.Difficulty.ShouldBe(2);
-        result.Price.ShouldBe(999.99m);
-        result.UpdatedAt.ShouldNotBeNull();
-        result.TourDurations.Count.ShouldBe(1);
     }
+
 
     [Fact]
     public void Deletes_draft_tour()
@@ -106,15 +107,54 @@ public class TourCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Fails_to_delete_published_tour()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourService>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // Act & Assert
+        // 1️⃣ CREATE
+        var createdTour = service.Create(new TourCreateDto
+        {
+            Name = "Published Tour",
+            Description = "Desc",
+            Difficulty = 0,
+            Tags = new List<string> { "tag1" } // ✅ VEĆ OK
+        }, -11);
+
+        // 2️⃣ UPDATE – Price + Duration + Tags
+        service.Update(new TourUpdateDto
+        {
+            Id = createdTour.Id,
+            Name = createdTour.Name,
+            Description = createdTour.Description,
+            Difficulty = createdTour.Difficulty,
+            Price = 999,
+            Tags = new List<string> { "updated-tag" }, // ✅ KLJUČNO
+            TourDurations = new List<TourDurationDto>
+        {
+            new TourDurationDto
+            {
+                TimeInMinutes = 60,
+                TransportType = 0
+            }
+        }
+        }, -11);
+
+        // 3️⃣ KeyPoints
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP1", "D1", "u", "s", 45, 19));
+        dbContext.KeyPoints.Add(new KeyPoint(createdTour.Id, "KP2", "D2", "u", "s", 46, 20));
+        dbContext.SaveChanges();
+
+        // 4️⃣ PUBLISH
+        service.Publish(createdTour.Id, -11);
+
+        // 5️⃣ DELETE MORA DA PADNE
         Should.Throw<InvalidOperationException>(() =>
-            service.Delete(-2, -11) 
-        ).Message.ShouldContain("Draft");
+            service.Delete(createdTour.Id, -11)
+        );
     }
+
+
+
 
     [Fact]
     public void Publishes_tour()

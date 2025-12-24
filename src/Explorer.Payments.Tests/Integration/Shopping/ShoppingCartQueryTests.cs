@@ -44,7 +44,8 @@ namespace Explorer.Payments.Tests.Integration.Shopping
             {
                 TourId = tourId
             };
-
+            dbContext.ShoppingCarts.RemoveRange(dbContext.ShoppingCarts);
+            dbContext.SaveChanges();
             controller.Add(addRequest);
 
             var result = ((ObjectResult)controller.Get().Result)?.Value as ShoppingCartDto;

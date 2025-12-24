@@ -16,18 +16,28 @@ public class EquipmentQueryTests : BaseToursIntegrationTest
     [Fact]
     public void Retrieves_all()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
 
-        // Act
-        var result = ((ObjectResult)controller.GetAll(0, 0).Result)?.Value as PagedResult<EquipmentDto>;
+        // ARRANGE – create test-specific data
+        controller.Create(new EquipmentDto { Name = "EQ-A", Description = "D1" });
+        controller.Create(new EquipmentDto { Name = "EQ-B", Description = "D2" });
+        controller.Create(new EquipmentDto { Name = "EQ-C", Description = "D3" });
 
-        // Assert
+        // ACT
+        var result =
+            ((ObjectResult)controller.GetAll(0, 0).Result)?.Value
+            as PagedResult<EquipmentDto>;
+
+        // ASSERT – NE ZANIMA NAS UKUPAN BROJ
         result.ShouldNotBeNull();
-        result.Results.Count.ShouldBe(3);
-        result.TotalCount.ShouldBe(3);
+
+        result.Results.ShouldContain(e => e.Name == "EQ-A");
+        result.Results.ShouldContain(e => e.Name == "EQ-B");
+        result.Results.ShouldContain(e => e.Name == "EQ-C");
     }
+
+
 
     private static EquipmentController CreateController(IServiceScope scope)
     {

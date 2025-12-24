@@ -9,8 +9,7 @@ public class TourPreviewDto
     public string Description { get; set; }
     public double Price { get; set; }
     public List<string> Tags { get; set; }
-    public int Difficulty { get; set; } //  promenjeno sa string na int
-
+    public string Difficulty { get; set; }
     public double AverageRating { get; set; }
     public KeyPointDto FirstKeyPoint { get; set; }
     public List<TourReviewDto> Reviews { get; set; }

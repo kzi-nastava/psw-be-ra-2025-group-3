@@ -45,11 +45,9 @@ public class MeetupService : IMeetupService
             meetupDto.Title,
             meetupDto.Description,
             meetupDto.DateTime,
-            meetupDto.Address,
             meetupDto.Latitude,
             meetupDto.Longitude,
-            creatorId,
-            meetupDto.TourId
+            creatorId
         );
 
         var createdMeetup = _meetupRepository.Create(meetup);
@@ -73,10 +71,8 @@ public class MeetupService : IMeetupService
             meetupDto.Title,
             meetupDto.Description,
             meetupDto.DateTime,
-            meetupDto.Address,
             meetupDto.Latitude,
-            meetupDto.Longitude,
-            meetupDto.TourId
+            meetupDto.Longitude
         );
 
         var updatedMeetup = _meetupRepository.Update(meetup);
@@ -97,14 +93,5 @@ public class MeetupService : IMeetupService
         }
 
         _meetupRepository.Delete(meetup);
-    }
-
-    public List<MeetupDto> GetByTourId(long tourId)
-    {
-        var meetups = _meetupRepository.GetAll()
-                        .Where(m => m.TourId == tourId)
-                        .ToList();
-
-        return meetups.Select(m => _mapper.Map<MeetupDto>(m)).ToList();
     }
 }

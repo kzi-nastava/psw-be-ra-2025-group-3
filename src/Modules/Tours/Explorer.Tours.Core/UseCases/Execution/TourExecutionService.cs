@@ -138,7 +138,8 @@ public class TourExecutionService : ITourExecutionService
                 ? execution.CompletedKeyPoints.Last().KeyPointId
                 : null,
             LastActivity = execution.LastActivity,
-            TotalCompletedKeyPoints = execution.CompletedKeyPoints.Count
+            TotalCompletedKeyPoints = execution.CompletedKeyPoints.Count,
+            ProgressPercentage = execution.ProgressPercentage // za procenat
         };
     }
 

@@ -19,6 +19,14 @@ public interface ITourRepository
 
     List<Tour> GetPublishedWithKeyPoints();
     Tour? GetTourWithKeyPoints(long id);
+    
+    List<Tour> SearchAndFilter(
+        string? name, 
+        List<string>? tags, 
+        List<int>? difficulties,  
+        decimal? minPrice, 
+        decimal? maxPrice
+    );
 
     List<Tour> GetPublishedTours(); // za tour recommendations
 }

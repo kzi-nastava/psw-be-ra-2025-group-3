@@ -19,4 +19,6 @@ public interface ITourRepository
 
     List<Tour> GetPublishedWithKeyPoints();
     Tour? GetTourWithKeyPoints(long id);
+
+    List<Tour> GetPublishedTours(); // za tour recommendations
 }

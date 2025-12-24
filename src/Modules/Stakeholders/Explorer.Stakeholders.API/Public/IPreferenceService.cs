@@ -13,4 +13,6 @@ public interface IPreferenceService
     PreferenceDto Update(PreferenceUpdateDto preferenceDto, long touristId);
     void Delete(long touristId);
     PreferenceDto? GetByTouristId(long touristId);
+
+    List<RecommendedTourDto> GetRecommendedTours(long touristId); // tour recommendations
 }

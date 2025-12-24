@@ -100,7 +100,7 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }
-    public List<Tour> SearchAndFilter(string? name, List<string>? tags, List<int>? difficulties, 
+    public List<Tour> SearchAndFilter(string? name, List<string>? tags, List<int>? difficulties,
                                        decimal? minPrice, decimal? maxPrice)
     {
         var query = _context.Tours
@@ -140,6 +140,7 @@ public class TourDbRepository : ITourRepository
         }
 
         return tours;
+    }
 
     //tour-recommendations
     public List<Tour> GetPublishedTours()

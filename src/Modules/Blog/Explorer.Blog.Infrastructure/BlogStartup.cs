@@ -25,11 +25,14 @@ namespace Explorer.Blog.Infrastructure
             return services;
         }
 
+
+
      
         private static void SetupCore(IServiceCollection services)
         {
             
             services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<NewsletterService>();
         }
 
         
@@ -38,8 +41,9 @@ namespace Explorer.Blog.Infrastructure
             
            
             services.AddScoped<IBlogRepository, BlogRepository>();
+            services.AddScoped<INewsletterRepository, NewsletterRepository>();
 
-          
+
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("blog"));
             dataSourceBuilder.EnableDynamicJson();
             var dataSource = dataSourceBuilder.Build();

@@ -1,27 +1,49 @@
 ﻿using Explorer.Blog.API.Dtos;
-using Explorer.Blog.Core.UseCases;
+using Explorer.Blog.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Explorer.API.Controllers.Public
 {
     [ApiController]
-    [Route("api/newsletter")]
+    [Route("api/blog/newsletter")]
     public class NewsletterController : ControllerBase
     {
-        private readonly NewsletterService _service;
+        private readonly INewsletterService _newsletterService;
 
-        public NewsletterController(NewsletterService service)
+        public NewsletterController(INewsletterService newsletterService)
         {
-            _service = service;
+            _newsletterService = newsletterService;
         }
 
-        [HttpPost("subscribe")]
+        /// <summary>
+        /// Subscribe to newsletter (public, no authentication required)
+        /// </summary>
+        [HttpPost]
         [AllowAnonymous]
         public IActionResult Subscribe([FromBody] NewsletterSubscriptionDto dto)
         {
-            _service.Subscribe(dto.Email);
-            return Ok();
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Email))
+            {
+                return BadRequest(new { message = "Email is required." });
+            }
+
+            try
+            {
+                _newsletterService.Subscribe(dto.Email);
+                return Ok(new { message = "Subscribed successfully." });
+            }
+            catch (ArgumentException ex)
+            {
+                // invalid email format
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // email already subscribed
+                return Conflict(new { message = ex.Message });
+            }
         }
     }
 }

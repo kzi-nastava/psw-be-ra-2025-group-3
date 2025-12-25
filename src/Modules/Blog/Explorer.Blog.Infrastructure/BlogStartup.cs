@@ -32,7 +32,7 @@ namespace Explorer.Blog.Infrastructure
         {
             
             services.AddScoped<IBlogService, BlogService>();
-            services.AddScoped<NewsletterService>();
+            services.AddScoped<INewsletterService, NewsletterService>();
         }
 
         

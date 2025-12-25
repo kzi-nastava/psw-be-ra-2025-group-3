@@ -59,7 +59,6 @@ public static class ToursStartup
 
         services.AddScoped<IAdminTourProblemService, AdminTourProblemService>();
 
-        services.AddScoped<IInternalTourService, InternalTourService>();  //tour recommendations
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

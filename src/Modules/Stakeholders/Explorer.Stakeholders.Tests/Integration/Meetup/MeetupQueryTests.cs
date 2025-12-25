@@ -79,44 +79,6 @@ public class MeetupQueryTests : BaseStakeholdersIntegrationTest
         Should.Throw<NotFoundException>(() => controller.GetById(-999));
     }
 
-    [Fact]
-    public void Retrieves_meetups_by_tour_id()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateAuthorController(scope);
-
-        // Act
-        // U SQL skripti smo povezali Meetup -1 sa Turom -2
-        var result = ((ObjectResult)controller.GetByTourId(-2).Result)?.Value as List<MeetupDto>;
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.ShouldNotBeEmpty();
-
-        // Proveravamo da li svi vraćeni meetupi zaista pripadaju toj turi
-        foreach (var meetup in result)
-        {
-            meetup.TourId.ShouldBe(-2);
-        }
-    }
-
-    [Fact]
-    public void Retrieves_empty_list_for_tour_without_meetups()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateAuthorController(scope);
-
-        // Act
-        // Tura -999 ne postoji ili nema meetupe
-        var result = ((ObjectResult)controller.GetByTourId(-999).Result)?.Value as List<MeetupDto>;
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.ShouldBeEmpty();
-    }
-
     private static AuthorMeetupController CreateAuthorController(IServiceScope scope)
     {
         return new AuthorMeetupController(scope.ServiceProvider.GetRequiredService<IMeetupService>())

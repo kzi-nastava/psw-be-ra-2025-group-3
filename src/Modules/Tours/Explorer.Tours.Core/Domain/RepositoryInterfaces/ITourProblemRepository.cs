@@ -17,6 +17,4 @@ public interface ITourProblemRepository
     // Podtask 4 - za admina:
     List<TourProblem> GetAll(); 
     List<TourProblem> GetOverdue(int daysThreshold);
-
-    List<TourProblem> GetByTourId(long tourId);
 }

@@ -71,22 +71,6 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(new { message = "OK" });
         }
 
-        // Endpoint za pretragu i filtriranje
-        [HttpGet("search")]
-        [AllowAnonymous]
-        public ActionResult<List<TourPreviewDto>> SearchTours(
-            [FromQuery] string? name,
-            [FromQuery] List<string>? tags,
-            [FromQuery] List<int>? difficulties,
-            [FromQuery] decimal? minPrice,
-            [FromQuery] decimal? maxPrice,
-            [FromQuery] double? minRating)
-        {
-            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating };
-            var result = _touristTourService.SearchAndFilterTours(filters);
-            return Ok(result);
-        }
-
         private long GetTouristId()
         {
             var claim = User.Claims.FirstOrDefault(c => c.Type == "personId");

@@ -15,6 +15,4 @@ public interface ITourProblemService
     TourProblemDto MarkAsUnresolved(long problemId, string touristComment, long touristId);
     List<TourProblemDto> GetByAuthorId(long authorId);
     TourProblemDto AddMessage(long problemId, long authorId, string content, int authorType);
-
-    List<TourProblemDto> GetByTourId(long tourId);
 }

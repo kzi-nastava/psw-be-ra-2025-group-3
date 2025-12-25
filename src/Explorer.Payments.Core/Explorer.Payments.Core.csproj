@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
+    <ProjectReference Include="..\Explorer.Payments.API\Explorer.Payments.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Domain\" />
+    <Folder Include="Usecases\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
 ﻿using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
-using Explorer.Tours.API.Public.Tourist;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,11 +13,9 @@ public class TourController : ControllerBase
 {
     private readonly ITourService _tourService;
 
-    private readonly ITourProblemService _tourProblemService;
-    public TourController(ITourService tourService, ITourProblemService tourProblemService)
+    public TourController(ITourService tourService)
     {
         _tourService = tourService;
-        _tourProblemService = tourProblemService;
     }
 
     [HttpPost]
@@ -152,21 +149,5 @@ public class TourController : ControllerBase
         var authorId = GetAuthorId();
         var result = _tourService.UpdateDistance(id, dto.DistanceInKm, authorId);
         return Ok(result);
-    }
-
-    [HttpGet("{id}/problems")]
-    public ActionResult<List<TourProblemDto>> GetTourProblems(long id)
-    {
-        var authorId = GetAuthorId();
-
-        // Proveri da li je autor vlasnik ture
-        var tour = _tourService.GetById(id);
-        if (tour.AuthorId != authorId)
-        {
-            return Forbid();
-        }
-
-        var problems = _tourProblemService.GetByTourId(id);
-        return Ok(problems);
     }
 }

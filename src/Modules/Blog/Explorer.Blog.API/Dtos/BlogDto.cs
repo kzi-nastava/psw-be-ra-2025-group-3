@@ -16,6 +16,7 @@ namespace Explorer.Blog.API.Dtos
         [StringLength(10000, MinimumLength = 1, ErrorMessage = "Opis mora biti između 1 i 10000 karaktera")]
         public string Description { get; set; }
 
+        public int EstimatedReadMinutes { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public int AuthorId { get; set; }

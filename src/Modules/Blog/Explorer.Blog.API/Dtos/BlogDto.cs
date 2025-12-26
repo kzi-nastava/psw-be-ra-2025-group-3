@@ -27,6 +27,8 @@ namespace Explorer.Blog.API.Dtos
         public bool IsActive { get; set; }
         public bool IsFamous { get; set; }
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
+        public int EstimatedReadMinutes { get; set; }
+
         public List<BlogVoteDto> Ratings { get; set; } = new List<BlogVoteDto>();
     }
 }

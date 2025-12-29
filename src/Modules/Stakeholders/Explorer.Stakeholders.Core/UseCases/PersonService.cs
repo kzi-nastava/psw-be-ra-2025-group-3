@@ -160,4 +160,45 @@ public class PersonService : IPersonService
         user.Unblock();
         _userRepository.Update(user);
     }
+
+    public List<PersonDto> GetAllTourists()
+    {
+        var people = _personRepository.GetAll();
+        var dtos = new List<PersonDto>();
+
+        foreach (var person in people)
+        {
+            var user = _userRepository.Get(person.UserId);
+
+            if (user != null && user.Role == UserRole.Tourist)
+            {
+                var dto = _mapper.Map<PersonDto>(person);
+                dto.Username = user.Username;
+                dto.Role = user.Role.ToString();
+                dto.IsActive = user.IsActive;
+                dtos.Add(dto);
+            }
+        }
+
+        return dtos;
+    }
+
+    public PersonDto GetPersonByUserId(long userId)
+    {
+        var person = _personRepository.GetByUserId(userId);
+        if (person == null)
+            throw new KeyNotFoundException($"Person with userId {userId} not found.");
+
+        var dto = _mapper.Map<PersonDto>(person);
+
+        var user = _userRepository.Get(person.UserId);
+        if (user != null)
+        {
+            dto.Username = user.Username;
+            dto.Role = user.Role.ToString();
+            dto.IsActive = user.IsActive;
+        }
+
+        return dto;
+    }
 }

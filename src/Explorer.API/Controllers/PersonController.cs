@@ -93,7 +93,7 @@ public class PersonController : ControllerBase
     }
 
     // POST: api/stakeholders/person
-    [Authorize(Policy = "administratorPolicy")]
+    [Authorize(Policy = "administratorPolicy")] 
     [HttpPost]
     public ActionResult<PersonDto> Create([FromBody] AccountRegistrationDto dto)
     {

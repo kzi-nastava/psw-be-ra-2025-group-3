@@ -32,6 +32,13 @@ public class TouristMeetupController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("by-tour/{tourId}")]
+    public ActionResult<List<MeetupDto>> GetByTourId(long tourId)
+    {
+        var result = _meetupService.GetByTourId(tourId);
+        return Ok(result);
+    }
+
     [HttpPost]
     public ActionResult<MeetupDto> Create([FromBody] MeetupCreateDto meetupDto)
     {

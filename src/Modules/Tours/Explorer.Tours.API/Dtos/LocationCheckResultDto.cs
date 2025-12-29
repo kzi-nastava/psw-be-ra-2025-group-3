@@ -12,4 +12,5 @@ public class LocationCheckResultDto
     public long? CompletedKeyPointId { get; set; }
     public DateTime LastActivity { get; set; }
     public int TotalCompletedKeyPoints { get; set; }
+    public double ProgressPercentage { get; set; }
 }

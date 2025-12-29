@@ -21,14 +21,12 @@
     <ProjectReference Include="..\Modules\Blog\Explorer.Blog.API\Explorer.Blog.API.csproj" />
     <ProjectReference Include="..\Modules\Blog\Explorer.Blog.Core\Explorer.Blog.Core.csproj" />
     <ProjectReference Include="..\Modules\Blog\Explorer.Blog.Infrastructure\Explorer.Blog.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.API\Explorer.Encounters.API.csproj" />
+    <ProjectReference Include="..\Modules\Encounters\Explorer.Encounters.Infrastructure\Explorer.Encounters.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.API\Explorer.Stakeholders.API.csproj" />
     <ProjectReference Include="..\Modules\Stakeholders\Explorer.Stakeholders.Infrastructure\Explorer.Stakeholders.Infrastructure.csproj" />
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
     <ProjectReference Include="..\Modules\Tours\Explorer.Tours.Infrastructure\Explorer.Tours.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

@@ -98,6 +98,10 @@ public class ModulesTests : BaseArchitecturalTests
             "Tours"
         },
         new object[]
+        {
+            "Encounters"
+        },
+        new object[]
         { 
             "Payments"
         }

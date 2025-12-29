@@ -100,4 +100,54 @@ public class TourDbRepository : ITourRepository
             .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }
+    public List<Tour> SearchAndFilter(string? name, List<string>? tags, List<int>? difficulties,
+                                       decimal? minPrice, decimal? maxPrice)
+    {
+        var query = _context.Tours
+            .Where(t => t.Status == TourStatus.Published);
+
+        // Filtriranje po nazivu (case-insensitive)
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            query = query.Where(t => t.Name.ToLower().Contains(name.ToLower()));
+        }
+
+        // Filtriranje po težini (OR logika unutar difficulties)
+        if (difficulties != null && difficulties.Any())
+        {
+            query = query.Where(t => difficulties.Contains((int)t.Difficulty));
+        }
+
+        // Filtriranje po ceni (minimum)
+        if (minPrice.HasValue)
+        {
+            query = query.Where(t => t.Price >= minPrice.Value);
+        }
+
+        // Filtriranje po ceni (maximum)
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(t => t.Price <= maxPrice.Value);
+        }
+
+        // Izvlačimo iz baze i filtriramo tagove u memoriji
+        var tours = query.ToList();
+
+        // Filtriranje po tagovima (OR logika unutar tags)
+        if (tags != null && tags.Any())
+        {
+            tours = tours.Where(t => t.Tags.Any(tag => tags.Contains(tag))).ToList();
+        }
+
+        return tours;
+    }
+
+    //tour-recommendations
+    public List<Tour> GetPublishedTours()
+    {
+        // TourDurations je automatski učitan jer je deo Tour agregata
+        return _context.Tours
+            .Where(t => t.Status == TourStatus.Published)
+            .ToList();
+    }
 }

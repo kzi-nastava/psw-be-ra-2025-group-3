@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Explorer.Tours.API.Internal
+namespace Explorer.Tours.API.Internal;
+
+public interface IInternalTourService
 {
-    public interface IInternalTourService
-    {
-        TourDto GetById(long tourId);
-    }
+    List<TourForRecommendationDto> GetPublishedToursForRecommendation();
+    TourDto GetById(long tourId);
 }

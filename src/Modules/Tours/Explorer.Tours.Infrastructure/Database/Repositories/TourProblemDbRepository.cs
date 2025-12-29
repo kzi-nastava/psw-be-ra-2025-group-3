@@ -83,4 +83,12 @@ public class TourProblemDbRepository : ITourProblemRepository
             .OrderByDescending(p => p.CreatedAt)
             .ToList();
     }
+    public List<TourProblem> GetByTourId(long tourId)
+    {
+        return _context.TourProblems
+            .Where(p => p.TourId == tourId)
+            .Include(p => p.Messages)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
+    }
 }

@@ -45,6 +45,26 @@ public class StakeholdersContext : DbContext
             .HasForeignKey(c => c.FeaturedImageId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Club>()
+            .Property(c => c.Status)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Club>()
+            .Property(c => c.MemberIds)
+            .HasConversion(
+                v => v == null || v.Count == 0 ? "" : string.Join(',', v),
+                v => string.IsNullOrWhiteSpace(v)
+                    ? new List<long>()
+                    : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(long.Parse)
+                         .ToList()
+            )
+            .Metadata.SetValueComparer(new ValueComparer<List<long>>(
+                (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? new List<long>() : c.ToList()
+            ));
+
 
         // Konfiguracija za Preferences
         modelBuilder.Entity<Preference>().HasIndex(p => p.TouristId);

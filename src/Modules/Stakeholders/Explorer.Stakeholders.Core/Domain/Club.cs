@@ -7,7 +7,7 @@ using Explorer.BuildingBlocks.Core.Domain;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
-    public class Club : Entity
+    public class Club : AggregateRoot
     {
         public string Name { get; private set; }
         public string Description { get; private set; }
@@ -15,6 +15,8 @@ namespace Explorer.Stakeholders.Core.Domain
         public long? FeaturedImageId { get; private set; }
         public virtual ClubImage? FeaturedImage { get; private set; }
         public virtual List<ClubImage> Images { get; private set; }
+        public ClubStatus Status { get; private set; }
+        public virtual List<long> MemberIds { get; private set; }
 
         public Club()
         {
@@ -26,7 +28,9 @@ namespace Explorer.Stakeholders.Core.Domain
             Name = name;
             Description = description;
             OwnerId = ownerId;
-            Images = new List<ClubImage>();
+            Status = ClubStatus.Active;
+            Images = new List<ClubImage>();         
+            MemberIds = new List<long>();
             Validate();
         }
 
@@ -75,6 +79,29 @@ namespace Explorer.Stakeholders.Core.Domain
                 throw new ArgumentException("Image not found in gallery.");
             
             FeaturedImageId = image.Id;
+        }
+
+        public void ChangeStatus(ClubStatus newStatus)
+        {
+            Status = newStatus;
+        }
+
+        public void AddMember(long touristId)
+        {
+            if (Status == ClubStatus.Closed)
+                throw new InvalidOperationException("Cannot add members to a closed club.");
+
+            if (!MemberIds.Contains(touristId))
+                MemberIds.Add(touristId);
+        }
+
+        public void RemoveMember(long memberId)
+        {
+            if (Status == ClubStatus.Closed)
+                throw new InvalidOperationException("Cannot remove members from a closed club.");
+
+            if (MemberIds.Contains(memberId))
+                MemberIds.Remove(memberId);
         }
 
         public void DemoteFeaturedToGallery()

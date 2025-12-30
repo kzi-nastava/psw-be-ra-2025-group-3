@@ -8,10 +8,11 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
-public class TourService : ITourService
+public class TourService : ITourService, IInternalTourService
 {
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;
@@ -172,5 +173,25 @@ public class TourService : ITourService
 
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
+    }
+
+    public List<TourForRecommendationDto> GetPublishedToursForRecommendation()
+    {
+        var tours = _tourRepository.GetPublishedTours();
+
+        return tours.Select(t => new TourForRecommendationDto
+        {
+            Id = t.Id,
+            Name = t.Name,
+            Description = t.Description,
+            Difficulty = (int)t.Difficulty,
+            Price = t.Price,
+            DistanceInKm = t.DistanceInKm,
+            Tags = t.Tags ?? new List<string>(),
+            TransportationTypes = t.TourDurations?
+                .Select(td => (int)td.TransportType)
+                .Distinct()
+                .ToList() ?? new List<int>()
+        }).ToList();
     }
 }

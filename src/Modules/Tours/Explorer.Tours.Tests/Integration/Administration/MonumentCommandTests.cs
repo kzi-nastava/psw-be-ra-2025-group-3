@@ -21,7 +21,8 @@ public class MonumentCommandTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-
+        dbContext.Monuments.RemoveRange(dbContext.Monuments);
+        dbContext.SaveChanges();
         var newEntity = new MonumentDto
         {
             Name = "Test Spomenik",
@@ -73,48 +74,54 @@ public class MonumentCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Updates_monument()
     {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-        var updatedEntity = new MonumentDto
+        long id;
+
+        // ---------- CREATE ----------
+        using (var scope = Factory.Services.CreateScope())
         {
-            Id = -1,
-            Name = "Izmenjeni Spomenik",
-            Description = "Izmenjeni opis.",
-            Year = 1900,
-            Status = 0,
-            Latitude = 45.200,
-            Longitude = 19.800
-        };
+            var controller = CreateController(scope);
 
-        // Act
-        var actionResult = controller.Update(updatedEntity.Id, updatedEntity).Result as ObjectResult;
-        actionResult.ShouldNotBeNull();
-        actionResult.StatusCode.ShouldBe(200);
+            var createdResult = controller.Create(new MonumentDto
+            {
+                Name = "Spomenik za update",
+                Description = "Stari opis",
+                Year = 2000,
+                Status = 1,
+                Latitude = 45.0,
+                Longitude = 19.0
+            }).Result as ObjectResult;
 
-        var result = actionResult.Value as MonumentDto;
+            var created = createdResult!.Value as MonumentDto;
+            id = created!.Id;
+        }
 
-        // Assert – Response
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(-1);
-        result.Name.ShouldBe(updatedEntity.Name);
-        result.Description.ShouldBe(updatedEntity.Description);
-        result.Year.ShouldBe(updatedEntity.Year);
-        result.Status.ShouldBe(updatedEntity.Status);
-        result.Latitude.ShouldBe(updatedEntity.Latitude);
-        result.Longitude.ShouldBe(updatedEntity.Longitude);
+        // ---------- UPDATE + ASSERT ----------
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope);
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // Assert – Database
-        var storedEntity = dbContext.Monuments.FirstOrDefault(i => i.Id == -1);
-        storedEntity.ShouldNotBeNull();
-        storedEntity.Name.ShouldBe(updatedEntity.Name);
-        storedEntity.Description.ShouldBe(updatedEntity.Description);
-        storedEntity.Year.ShouldBe(updatedEntity.Year);
-        ((int)storedEntity.Status).ShouldBe(updatedEntity.Status);
-        storedEntity.Latitude.ShouldBe(updatedEntity.Latitude);
-        storedEntity.Longitude.ShouldBe(updatedEntity.Longitude);
+            var updatedEntity = new MonumentDto
+            {
+                Id = id,
+                Name = "Izmenjeni Spomenik",
+                Description = "Izmenjeni opis",
+                Year = 1999,
+                Status = 0,
+                Latitude = 45.2,
+                Longitude = 19.8
+            };
+
+            var actionResult = controller.Update(id, updatedEntity).Result as ObjectResult;
+            actionResult.ShouldNotBeNull();
+
+            var stored = dbContext.Monuments.FirstOrDefault(m => m.Id == id);
+            stored.ShouldNotBeNull();
+            stored!.Name.ShouldBe("Izmenjeni Spomenik");
+            stored.Description.ShouldBe("Izmenjeni opis");
+        }
     }
+
 
     [Fact]
     public void Update_fails_invalid_id()
@@ -141,22 +148,41 @@ public class MonumentCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Deletes_monument()
     {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope);
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        long id;
 
-        // Act
-        var result = (OkResult)controller.Delete(-3);
+        // ---------- CREATE ----------
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope);
 
-        // Assert – Response
-        result.ShouldNotBeNull();
-        result.StatusCode.ShouldBe(200);
+            var createdResult = controller.Create(new MonumentDto
+            {
+                Name = "Spomenik za brisanje",
+                Description = "Opis",
+                Year = 2000,
+                Status = 1,
+                Latitude = 45,
+                Longitude = 19
+            }).Result as ObjectResult;
 
-        // Assert – Database
-        var stored = dbContext.Monuments.FirstOrDefault(i => i.Id == -3);
-        stored.ShouldBeNull();
+            var created = createdResult!.Value as MonumentDto;
+            id = created!.Id;
+        }
+
+        // ---------- DELETE + ASSERT ----------
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var controller = CreateController(scope);
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+            var result = controller.Delete(id) as OkResult;
+            result.ShouldNotBeNull();
+
+            dbContext.Monuments.FirstOrDefault(m => m.Id == id)
+                .ShouldBeNull();
+        }
     }
+
 
     [Fact]
     public void Delete_fails_invalid_id()

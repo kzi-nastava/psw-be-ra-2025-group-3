@@ -177,7 +177,7 @@ public class ClubCommandTests : BaseStakeholdersIntegrationTest
         service.Delete(-3, -23);
 
         // Assert
-        Should.Throw<KeyNotFoundException>(() => service.Get(-4));
+        Should.Throw<KeyNotFoundException>(() => service.Get(-3));
     }
 
     [Fact]
@@ -270,5 +270,76 @@ public class ClubCommandTests : BaseStakeholdersIntegrationTest
         Should.Throw<ArgumentException>(() =>
             service.Create(clubDto, -1)
         ).Message.ShouldBe("Featured image URL is required.");
+    }
+    [Fact]
+    public void Changes_club_status()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IClubService>();
+
+        // Aktiviramo klub
+        var clubId = -4;
+        var ownerId = -21;
+
+        // Act
+        var result = service.ChangeStatus(clubId, "Closed", ownerId);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe("Closed");
+    }
+
+    [Fact]
+    public void Fails_to_invite_member_when_club_is_closed()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IClubService>();
+
+        var closedClubId = -5;
+        var ownerId = -21;
+        var touristId = -22;
+        service.ChangeStatus(closedClubId, "Closed", ownerId);
+
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() =>
+            service.InviteMember(closedClubId, touristId, ownerId)
+        ).Message.ShouldBe("Cannot add members to a closed club.");
+    }
+
+    [Fact]
+    public void Kicks_member_successfully()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IClubService>();
+
+        var clubId = -1; 
+        var ownerId = -21;
+        var memberIdToKick = -22; 
+
+        // Act
+        var result = service.KickMember(clubId, memberIdToKick, ownerId);
+
+        // Assert
+        result.MemberIds.ShouldNotContain(memberIdToKick);
+    }
+
+    [Fact]
+    public void Fails_to_kick_member_if_not_owner()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IClubService>();
+
+        var clubId = -1;
+        var nonOwnerId = -999;
+        var memberId = -22;
+
+        // Act & Assert
+        Should.Throw<UnauthorizedAccessException>(() =>
+            service.KickMember(clubId, memberId, nonOwnerId)
+        );
     }
 }

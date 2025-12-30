@@ -12,9 +12,12 @@ namespace Explorer.Stakeholders.API.Dtos
         public string Name { get; set; }
         public string Description { get; set; }
         public long OwnerId { get; set; }
+        public string Status { get; set; }
         public long? FeaturedImageId { get; set; }
         public ClubImageDto FeaturedImage { get; set; }
         public List<ClubImageDto> GalleryImages { get; set; }
+        public List<long> MemberIds { get; set; }
+
     }
 
     public class ClubImageDto

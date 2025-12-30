@@ -93,7 +93,7 @@ public class PersonController : ControllerBase
     }
 
     // POST: api/stakeholders/person
-    [Authorize(Policy = "administratorPolicy")]
+    [Authorize(Policy = "administratorPolicy")] 
     [HttpPost]
     public ActionResult<PersonDto> Create([FromBody] AccountRegistrationDto dto)
     {
@@ -143,5 +143,34 @@ public class PersonController : ControllerBase
     {
         _personService.Unblock(id);
         return NoContent();
+    }
+
+    // GET: api/stakeholders/person/tourists
+    [HttpGet("tourists")]
+    [Authorize]
+    public ActionResult<List<PersonDto>> GetAllTourists()
+    {
+        var tourists = _personService.GetAllTourists();
+        return Ok(tourists);
+    }
+
+    // GET: api/stakeholders/person/user/{userId}
+    [HttpGet("user/{userId:long}")]
+    [Authorize]
+    public ActionResult<PersonDto> GetPersonByUserId(long userId)
+    {
+        try
+        {
+            var person = _personService.GetPersonByUserId(userId);
+            return Ok(person);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred: " + ex.Message });
+        }
     }
 }

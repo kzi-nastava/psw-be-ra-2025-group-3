@@ -24,11 +24,13 @@ public static class EncountersStartup
     private static void SetupCore(IServiceCollection services)
     {
         services.AddScoped<IEncounterService, EncounterService>();
+        services.AddScoped<IEncounterActivationService, EncounterActivationService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped<IEncounterRepository, EncounterRepository>();
+        services.AddScoped<IEncounterActivationRepository, EncounterActivationRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("encounters"));
         dataSourceBuilder.EnableDynamicJson();

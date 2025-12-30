@@ -22,6 +22,7 @@ using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.UseCases.Execution;
 using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.UseCases.Review;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Infrastructure;
 
@@ -54,7 +55,7 @@ public static class ToursStartup
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDiaryService, DiaryService>();
         services.AddScoped<ITouristTourService, TouristTourService>();
-
+        services.AddScoped<IInternalPositionService, InternalPositionService>();
         services.AddScoped<ITourAccessService, TourAccessService>();
 
         services.AddScoped<IAdminTourProblemService, AdminTourProblemService>();

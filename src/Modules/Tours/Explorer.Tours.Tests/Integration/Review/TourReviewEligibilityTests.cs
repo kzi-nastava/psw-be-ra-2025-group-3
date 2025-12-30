@@ -17,8 +17,9 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
 
         var result = service.CheckEligibility(-2, -25);
 
-        result.CanReview.ShouldBeFalse(); // ❗ nema execution → false
-        result.ReasonIfNot.ShouldContain("purchase and start");
+        result.CanReview.ShouldBeTrue();
+        result.ReasonIfNot.ShouldBeNull();
+        result.CurrentProgress.ShouldBe(50.0);
     }
 
     [Fact]
@@ -30,7 +31,8 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
         var result = service.CheckEligibility(-2, -26);
 
         result.CanReview.ShouldBeFalse();
-        result.ReasonIfNot.ShouldContain("purchase and start");
+        result.ReasonIfNot.ShouldContain("35%");
+        result.CurrentProgress.ShouldBe(20.0);
     }
 
     [Fact]
@@ -42,7 +44,7 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
         var result = service.CheckEligibility(-2, -27);
 
         result.CanReview.ShouldBeFalse();
-        result.ReasonIfNot.ShouldContain("purchase and start");
+        result.ReasonIfNot.ShouldContain("7 days");
     }
 
     [Fact]

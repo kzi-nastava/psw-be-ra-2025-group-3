@@ -1,7 +1,6 @@
 ﻿using Explorer.API.Controllers;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public;
-using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,22 +21,29 @@ public class NotificationCommandTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-11");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        var notification = new Notification(
-            recipientId: -11,
-            type: NotificationType.NewMessage,
-            relatedEntityId: 123,
-            message: "Test notification"
-        );
+        var notification = dbContext.Notifications.FirstOrDefault(n => n.Id == -1);
+        notification.ShouldNotBeNull();
 
-        dbContext.Notifications.Add(notification);
+        notification.IsRead = false;
+        notification.ReadAt = null;
         dbContext.SaveChanges();
 
-        var actionResult = controller.MarkAsRead(notification.Id);
+        var actionResult = controller.MarkAsRead(-1);
 
+        actionResult.ShouldNotBeNull();
         actionResult.Result.ShouldBeOfType<OkObjectResult>();
+
+        var okResult = actionResult.Result as OkObjectResult;
+        var dto = okResult.Value as NotificationDto;
+        dto.ShouldNotBeNull();
+        dto.IsRead.ShouldBeTrue();
+        dto.ReadAt.ShouldNotBeNull();
+
+        dbContext.Entry(notification).Reload();
+
+        notification.IsRead.ShouldBeTrue();
+        notification.ReadAt.ShouldNotBeNull();
     }
-
-
 
     [Fact]
     public void Fails_to_mark_other_users_notification_as_read()
@@ -47,9 +53,12 @@ public class NotificationCommandTests : BaseToursIntegrationTest
 
         var actionResult = controller.MarkAsRead(-1);
 
-        actionResult.Result.ShouldBeOfType<NotFoundObjectResult>();
-    }
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<ObjectResult>();
 
+        var result = actionResult.Result as ObjectResult;
+        result.StatusCode.ShouldBe(403);
+    }
 
     [Fact]
     public void Marks_all_notifications_as_read_successfully()

@@ -17,33 +17,29 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Creates()
     {
+        // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-
         var newEntity = new EquipmentDto
         {
             Name = "Obuća za grub teren",
-            Description = "Patike sa tvrdim đonom i kramponima koje daju stabilnost."
+            Description = "Patike sa tvrdim đonom i kramponima koje daju stabilnost na neravnom i rastresitom terenu."
         };
 
-        // ACT
-        var result =
-            ((ObjectResult)controller.Create(newEntity).Result)?.Value as EquipmentDto;
+        // Act
+        var result = ((ObjectResult)controller.Create(newEntity).Result)?.Value as EquipmentDto;
 
-        // ASSERT – response
+        // Assert - Response
         result.ShouldNotBeNull();
-        result.Id.ShouldBeGreaterThan(0);
+        result.Id.ShouldNotBe(0);
         result.Name.ShouldBe(newEntity.Name);
 
-        // ASSERT – database
-        var storedEntity = dbContext.Equipment
-            .FirstOrDefault(e => e.Id == result.Id);
-
+        // Assert - Database
+        var storedEntity = dbContext.Equipment.FirstOrDefault(i => i.Name == newEntity.Name);
         storedEntity.ShouldNotBeNull();
-        storedEntity.Name.ShouldBe(newEntity.Name);
+        storedEntity.Id.ShouldBe(result.Id);
     }
-
 
     [Fact]
     public void Create_fails_invalid_data()
@@ -61,44 +57,35 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
     }
 
     [Fact]
-    public void Updates_without_id_does_not_change_entity()
+    public void Updates()
     {
-        // ---------- CREATE ----------
-        using (var scope = Factory.Services.CreateScope())
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var updatedEntity = new EquipmentDto
         {
-            var controller = CreateController(scope);
+            Id = -1,
+            Name = "Tečnost",
+            Description = "Voda ili druga tečnost koja hidrira. Preporuka je pola litre tečnosti na sat vremena umerene aktivnosti po umerenoj temperaturi."
+        };
 
-            controller.Create(new EquipmentDto
-            {
-                Name = "Voda",
-                Description = "Stara"
-            });
-        }
+        // Act
+        var result = ((ObjectResult)controller.Update(updatedEntity).Result)?.Value as EquipmentDto;
 
-        // ---------- UPDATE ----------
-        using (var scope = Factory.Services.CreateScope())
-        {
-            var controller = CreateController(scope);
-            var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        // Assert - Response
+        result.ShouldNotBeNull();
+        result.Id.ShouldBe(-1);
+        result.Name.ShouldBe(updatedEntity.Name);
+        result.Description.ShouldBe(updatedEntity.Description);
 
-            var updatedEntity = new EquipmentDto
-            {
-                Name = "Voda",
-                Description = "Nova"
-            };
-
-            // ACT
-            controller.Update(updatedEntity);
-
-            // ASSERT – entity is NOT changed
-            var stored = dbContext.Equipment.FirstOrDefault(e => e.Name == "Voda");
-            stored.ShouldNotBeNull();
-            stored.Description.ShouldBe("Stara"); // 👈 očekivano
-        }
+        // Assert - Database
+        var storedEntity = dbContext.Equipment.FirstOrDefault(i => i.Name == "Tečnost");
+        storedEntity.ShouldNotBeNull();
+        storedEntity.Description.ShouldBe(updatedEntity.Description);
+        var oldEntity = dbContext.Equipment.FirstOrDefault(i => i.Name == "Voda");
+        oldEntity.ShouldBeNull();
     }
-
-
-
 
     [Fact]
     public void Update_fails_invalid_id()
@@ -119,33 +106,22 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Deletes()
     {
+        // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope);
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        // ARRANGE – create
-        var createDto = new EquipmentDto
-        {
-            Name = "Delete Equipment",
-            Description = "To be deleted"
-        };
+        // Act
+        var result = (OkResult)controller.Delete(-3);
 
-        var created =
-            ((ObjectResult)controller.Create(createDto).Result)?.Value as EquipmentDto;
-
-        created.ShouldNotBeNull();
-        var id = created.Id;
-
-        // ACT
-        var result = controller.Delete(id) as OkResult;
-
-        // ASSERT
+        // Assert - Response
         result.ShouldNotBeNull();
         result.StatusCode.ShouldBe(200);
 
-        dbContext.Equipment.FirstOrDefault(e => e.Id == id).ShouldBeNull();
+        // Assert - Database
+        var storedCourse = dbContext.Equipment.FirstOrDefault(i => i.Id == -3);
+        storedCourse.ShouldBeNull();
     }
-
 
     [Fact]
     public void Delete_fails_invalid_id()
@@ -157,7 +133,7 @@ public class EquipmentCommandTests : BaseToursIntegrationTest
         // Act & Assert
         Should.Throw<NotFoundException>(() => controller.Delete(-1000));
     }
-    
+
     private static EquipmentController CreateController(IServiceScope scope)
     {
         return new EquipmentController(scope.ServiceProvider.GetRequiredService<IEquipmentService>())

@@ -16,5 +16,8 @@ namespace Explorer.Stakeholders.API.Public
         ClubDto Update(long id, ClubUpdateDto club, long userId);
         void Delete(long id, long userId);
         PagedResult<ClubDto> GetUserClubs(long userId, int page, int pageSize);
+        ClubDto ChangeStatus(long clubId, string status, long userId);
+        ClubDto InviteMember(long clubId, long touristId, long userId);
+        ClubDto KickMember(long clubId, long memberId, long userId);
     }
 }

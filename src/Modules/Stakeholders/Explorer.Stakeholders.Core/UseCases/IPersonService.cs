@@ -12,4 +12,7 @@ public interface IPersonService
 
     void Block(long id);
     void Unblock(long id);
+    
+    List<PersonDto> GetAllTourists();
+    PersonDto GetPersonByUserId(long userId);
 }

@@ -93,4 +93,21 @@ public class ClubQueryTests : BaseStakeholdersIntegrationTest
         page2.Results.Count.ShouldBeGreaterThan(0);
         page1.Results[0].Id.ShouldNotBe(page2.Results[0].Id);
     }
+
+    [Fact]
+    public void Gets_club_with_status_and_members()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var service = scope.ServiceProvider.GetRequiredService<IClubService>();
+
+        // Act
+        var result = service.Get(-1);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Status.ShouldBe("Active"); 
+        result.MemberIds.ShouldNotBeEmpty();
+        result.MemberIds.Count.ShouldBe(2);
+    }
 }

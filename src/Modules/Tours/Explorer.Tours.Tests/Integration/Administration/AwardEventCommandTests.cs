@@ -9,9 +9,9 @@ using Shouldly;
 namespace Explorer.Tours.Tests.Integration.Administration
 {
     [Collection("Sequential")]
-    public class AwardEventCommandTests : BaseToursIntegrationTest 
+    public class AwardEventCommandTests : BaseToursIntegrationTest
     {
-        public AwardEventCommandTests(ToursTestFactory factory) : base(factory) { } 
+        public AwardEventCommandTests(ToursTestFactory factory) : base(factory) { }
 
         [Fact]
         public void Creates()

@@ -147,5 +147,39 @@ namespace Explorer.Stakeholders.Core.UseCases
             var clubDtos = _mapper.Map<List<ClubDto>>(clubs.Results);
             return new PagedResult<ClubDto>(clubDtos, clubs.TotalCount);
         }
+
+        public ClubDto ChangeStatus(long clubId, string status, long userId)
+        {
+            var club = _repository.Get(clubId);
+            if (club == null) throw new KeyNotFoundException("Club not found.");
+            if (club.OwnerId != userId) throw new UnauthorizedAccessException("Only the owner can change status.");
+
+            if (Enum.TryParse<ClubStatus>(status, true, out var newStatus))
+            {
+                club.ChangeStatus(newStatus);
+                return _mapper.Map<ClubDto>(_repository.Update(club));
+            }
+            throw new ArgumentException("Invalid status.");
+        }
+
+        public ClubDto InviteMember(long clubId, long touristId, long userId)
+        {
+            var club = _repository.Get(clubId);
+            if (club == null) throw new KeyNotFoundException("Club not found.");
+            if (club.OwnerId != userId) throw new UnauthorizedAccessException("Not the owner.");
+
+            club.AddMember(touristId);
+            return _mapper.Map<ClubDto>(_repository.Update(club));
+        }
+
+        public ClubDto KickMember(long clubId, long memberId, long userId)
+        {
+            var club = _repository.Get(clubId);
+            if (club == null) throw new KeyNotFoundException("Club not found.");
+            if (club.OwnerId != userId) throw new UnauthorizedAccessException("Not the owner.");
+
+            club.RemoveMember(memberId);
+            return _mapper.Map<ClubDto>(_repository.Update(club));
+        }
     }
 }

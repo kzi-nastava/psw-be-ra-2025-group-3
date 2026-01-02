@@ -114,4 +114,28 @@ public class ClubController : ControllerBase
             return StatusCode(403, ex.Message);
         }
     }
+
+    [HttpPut("{id:long}/status")]
+    public ActionResult<ClubDto> ChangeStatus(long id, [FromBody] string status)
+    {
+        var userId = GetUserId();
+        var result = _clubService.ChangeStatus(id, status, userId);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:long}/invite/{touristId:long}")]
+    public ActionResult<ClubDto> InviteMember(long id, long touristId)
+    {
+        var userId = GetUserId();
+        var result = _clubService.InviteMember(id, touristId, userId);
+        return Ok(result);
+    }
+
+    [HttpDelete("{id:long}/kick/{memberId:long}")]
+    public ActionResult<ClubDto> KickMember(long id, long memberId)
+    {
+        var userId = GetUserId();
+        var result = _clubService.KickMember(id, memberId, userId);
+        return Ok(result);
+    }
 }

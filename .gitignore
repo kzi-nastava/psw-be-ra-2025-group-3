@@ -560,3 +560,6 @@ wwwroot/uploads/**
 !wwwroot/uploads/review-images/
 !wwwroot/uploads/keypoint-images/
 !wwwroot/uploads/**/.gitkeep
+# Launch settings
+src/Explorer.API/Properties/launchSettings.json
+

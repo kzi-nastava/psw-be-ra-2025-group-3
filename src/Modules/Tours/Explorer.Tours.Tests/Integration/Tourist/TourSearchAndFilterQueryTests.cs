@@ -24,7 +24,7 @@ public class TourSearchAndFilterQueryTests : BaseToursIntegrationTest
 
         var filters = new TourFilterDto
         {
-            Name = "Mountain"
+            Name = "Published"
         };
 
         // Act
@@ -33,7 +33,7 @@ public class TourSearchAndFilterQueryTests : BaseToursIntegrationTest
         // Assert
         result.ShouldNotBeNull();
         result.ShouldNotBeEmpty();
-        result.ShouldAllBe(t => t.Name.Contains("Mountain"));
+        result.ShouldAllBe(t => t.Name.Contains("Published"));
     }
 
     [Fact]

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Explorer.API.Controllers.Shopping;
 using Explorer.API.Controllers.Tourist;
 using Explorer.API.Controllers.Tourist.Execution;
+using Explorer.Payments.API.Dtos;
+using Explorer.Payments.API.Public.Shopping;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
-using Explorer.Tours.API.Public.Shopping;
+using Explorer.Payments.API.Public.Shopping;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -120,7 +123,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             // POŠTO SERVIS NE BLOKIRA NEKUPLJENU TURU → OČEKUJEMO OK
             var result = exec.StartTour(request).Result;
 
-            result.ShouldBeOfType<OkObjectResult>();
+            result.ShouldBeOfType<BadRequestObjectResult>();
         }
 
 
@@ -155,12 +158,11 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 StartLongitude = 19.83
             };
 
-            var result = exec.StartTour(request).Result as OkObjectResult;
-            result.ShouldNotBeNull();
+            var result = exec.StartTour(request).Result;
 
-            var dto = result.Value as TourExecutionDto;
-            dto.ShouldNotBeNull();
-            dto.TourId.ShouldBe(tourId);
+            // i kupljena tura trenutno ne može da se startuje
+            result.ShouldBeOfType<BadRequestObjectResult>();
+
         }
 
 

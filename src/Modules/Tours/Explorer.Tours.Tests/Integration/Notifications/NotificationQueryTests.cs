@@ -1,4 +1,5 @@
-﻿using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -56,14 +57,26 @@ public class NotificationQueryTests : BaseToursIntegrationTest
     {
         using var scope = Factory.Services.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        var notification = repository.GetById(-1);
+        var created = new Notification(
+            recipientId: -11,
+            type: NotificationType.NewMessage,
+            relatedEntityId: 123,
+            message: "Test notification"
+        );
+
+        dbContext.Notifications.Add(created);
+        dbContext.SaveChanges();
+
+        var notification = repository.GetById(created.Id);
 
         notification.ShouldNotBeNull();
         notification.RecipientId.ShouldBe(-11);
-        notification.Type.ShouldBe(Explorer.Tours.Core.Domain.NotificationType.NewMessage);
+        notification.Type.ShouldBe(NotificationType.NewMessage);
         notification.IsRead.ShouldBeFalse();
     }
+
 
     [Fact]
     public void Returns_null_for_non_existent_notification()
@@ -83,12 +96,24 @@ public class NotificationQueryTests : BaseToursIntegrationTest
         var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-        var expectedTotalCount = dbContext.Notifications.Count(n => n.RecipientId == -11);
+        // 🔹 očisti stare
+        var existing = dbContext.Notifications.Where(n => n.RecipientId == -11);
+        dbContext.Notifications.RemoveRange(existing);
+        dbContext.SaveChanges();
+
+        // 🔹 dodaj 3 notifikacije
+        dbContext.Notifications.AddRange(
+            new Notification(-11, NotificationType.NewMessage, 1, "n1"),
+            new Notification(-11, NotificationType.NewMessage, 2, "n2"),
+            new Notification(-11, NotificationType.NewMessage, 3, "n3")
+        );
+        dbContext.SaveChanges();
 
         var notifications = repository.GetByRecipientIdPaginated(-11, 1, 2, out int totalCount);
 
         notifications.ShouldNotBeNull();
-        notifications.Count.ShouldBe(2);
-        totalCount.ShouldBe(expectedTotalCount);
+        notifications.Count.ShouldBe(2);   // page size
+        totalCount.ShouldBe(3);             // ukupno
     }
+
 }

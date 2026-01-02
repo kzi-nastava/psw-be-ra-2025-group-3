@@ -15,7 +15,7 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourReviewService>();
 
-        var result = service.CheckEligibility(-2, -25); 
+        var result = service.CheckEligibility(-2, -25);
 
         result.CanReview.ShouldBeTrue();
         result.ReasonIfNot.ShouldBeNull();
@@ -28,7 +28,7 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourReviewService>();
 
-        var result = service.CheckEligibility(-2, -26); 
+        var result = service.CheckEligibility(-2, -26);
 
         result.CanReview.ShouldBeFalse();
         result.ReasonIfNot.ShouldContain("35%");
@@ -41,7 +41,7 @@ public class TourReviewEligibilityTests : BaseToursIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<ITourReviewService>();
 
-        var result = service.CheckEligibility(-2, -27); 
+        var result = service.CheckEligibility(-2, -27);
 
         result.CanReview.ShouldBeFalse();
         result.ReasonIfNot.ShouldContain("7 days");

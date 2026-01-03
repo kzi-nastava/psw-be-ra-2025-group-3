@@ -23,6 +23,9 @@ public class StakeholdersContext : DbContext
     public DbSet<Preference> Preferences { get; set; }
 
     public DbSet<Tourist> Tourists { get; set; }
+
+    public DbSet<Wallet> Wallets { get; set; }
+
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -116,6 +119,14 @@ public class StakeholdersContext : DbContext
                     )
                 );
         });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(w => w.Id);
+            entity.HasIndex(w => w.PersonId).IsUnique();
+            entity.Property(w => w.BalanceAc).IsRequired();
+        });
+
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

@@ -8,6 +8,7 @@ public interface INotificationService
     void CreateNewMessageNotification(long recipientId, long problemId, string senderType);
     void CreateProblemResolvedNotification(long recipientId, long problemId);
     void CreateProblemUnresolvedNotification(long recipientId, long problemId);
+    void CreateWalletTopUpNotification(long recipientId, int amountAc);
 
     // API metode za frontend
     List<NotificationDto> GetMyNotifications(long userId);

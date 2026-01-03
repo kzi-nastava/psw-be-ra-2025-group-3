@@ -11,12 +11,14 @@ public class AuthenticationService : IAuthenticationService
     private readonly ITokenGenerator _tokenGenerator;
     private readonly IUserRepository _userRepository;
     private readonly IPersonRepository _personRepository;
+    private readonly IWalletRepository _walletRepository;
 
-    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator)
+    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IWalletRepository walletRepository)
     {
         _tokenGenerator = tokenGenerator;
         _userRepository = userRepository;
         _personRepository = personRepository;
+        _walletRepository = walletRepository;
     }
 
     public AuthenticationTokensDto Login(CredentialsDto credentials)
@@ -46,6 +48,7 @@ public class AuthenticationService : IAuthenticationService
 
         var user = _userRepository.Create(new User(account.Username, account.Password, UserRole.Tourist, true));
         var person = _personRepository.Create(new Person(user.Id, account.Name, account.Surname, account.Email));
+        var wallet = _walletRepository.Create(new Wallet(person.Id));
 
         return _tokenGenerator.GenerateAccessToken(user, person.Id);
     }

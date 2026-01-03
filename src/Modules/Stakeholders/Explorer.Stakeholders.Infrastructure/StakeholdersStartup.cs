@@ -36,6 +36,8 @@ public static class StakeholdersStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IPreferenceService, PreferenceService>(); //preference
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();  //oprema
+        services.AddScoped<IWalletService, WalletService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -50,6 +52,8 @@ public static class StakeholdersStartup
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
         services.AddScoped<IPreferenceRepository, PreferenceDbRepository>(); //preference
         services.AddScoped<ITouristRepository, TouristDbRepository>();  //oprema
+
+        services.AddScoped<IWalletRepository, WalletDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

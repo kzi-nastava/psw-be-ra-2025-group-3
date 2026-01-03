@@ -133,4 +133,19 @@ public class NotificationService : INotificationService
 
         return description.Substring(0, 50) + "...";
     }
+
+    public void CreateWalletTopUpNotification(long recipientId, int amountAc)
+    {
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.WalletTopUp,
+            relatedEntityId: recipientId, 
+            message: $"Administrator added {amountAc} AC to your wallet."
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+
 }

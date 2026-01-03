@@ -39,11 +39,11 @@ namespace Explorer.API.Controllers.Administrator
         }
 
         [HttpPost]
-        public ActionResult<EncounterDto> Create([FromBody] EncounterDto encounterDto)
+        public ActionResult<EncounterDto> Create([FromBody] EncounterDto dto)
         {
             try
             {
-                var result = _encounterService.Create(encounterDto);
+                var result = _encounterService.Create(dto);
                 return Ok(result);
             }
             catch (ArgumentException e)

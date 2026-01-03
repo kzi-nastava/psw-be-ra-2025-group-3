@@ -31,6 +31,8 @@ namespace Explorer.Encounters.Infrastructure.Database
                 .Property(e => e.Type)
                 .HasConversion<string>();
 
+            
+
             modelBuilder.Entity<EncounterActivation>().HasKey(ea => ea.Id);
 
             modelBuilder.Entity<EncounterActivation>()

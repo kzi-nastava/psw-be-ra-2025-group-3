@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Explorer.Activity.Core\Explorer.Activity.Core.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -4,5 +4,7 @@ public enum EncounterStatus
 {
     Draft,
     Active,
-    Archived
+    Archived,
+    PendingApproval,
+    Rejected
 }

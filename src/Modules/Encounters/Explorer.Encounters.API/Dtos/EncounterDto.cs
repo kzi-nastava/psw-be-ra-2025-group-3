@@ -10,4 +10,5 @@ public class EncounterDto
     public int XP { get; set; }
     public string Status { get; set; }
     public string Type { get; set; }
+    public string ActionDescription { get; set; } = "";
 }

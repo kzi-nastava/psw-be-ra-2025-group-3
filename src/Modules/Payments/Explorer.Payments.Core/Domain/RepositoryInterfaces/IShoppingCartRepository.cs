@@ -12,5 +12,6 @@ namespace Explorer.Payments.Core.Domain.RepositoryInterfaces
         ShoppingCart Create(ShoppingCart cart);
         ShoppingCart Update(ShoppingCart cart);
         bool HasPurchasedTour(long touristId, long tourId); //tour-execution kartica
+        bool HasPurchasedBundle(long touristId, long bundleId);
     }
 }

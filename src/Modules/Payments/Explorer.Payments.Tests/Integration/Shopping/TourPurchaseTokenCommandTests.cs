@@ -1,10 +1,14 @@
-﻿using Explorer.API.Controllers.Shopping;
+﻿
+using Explorer.API.Controllers.Shopping;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
 using Explorer.Payments.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System;
+using System.Linq;
+using Xunit;
 
 namespace Explorer.Payments.Tests.Integration.Tourist;
 
@@ -13,11 +17,7 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
 {
     public TourPurchaseTokenCommandTests(PaymentsTestFactory factory) : base(factory) { }
 
-    // Helper – generiše novog unikatnog turistu
-    private static string NewPersonId()
-    {
-        return (-10000 - Guid.NewGuid().GetHashCode()).ToString();
-    }
+    private static string NewPersonId() => (-10000 - Guid.NewGuid().GetHashCode()).ToString();
 
     [Fact]
     public void Checkout_creates_single_token()
@@ -31,14 +31,16 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
 
         cart.Add(new ShoppingCartRequestDto { TourId = tourId });
 
-        var result = ((ObjectResult)purchase.Checkout().Result)?.Value
-                     as List<TourPurchaseTokenDto>;
+        var actionResult = purchase.Checkout();
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
+        var result = okResult.Value as CheckoutResultDto;
 
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(1);
-        result[0].TourId.ShouldBe(tourId);
+        result.Success.ShouldBeTrue();
+        result.Tokens.Count.ShouldBe(1);
+        result.Tokens[0].TourId.ShouldBe(tourId);
     }
-
 
     [Fact]
     public void Checkout_empties_cart()
@@ -53,13 +55,17 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
 
         cartController.Add(new ShoppingCartRequestDto { TourId = tourId });
 
-        purchaseController.Checkout();
+        var actionResult = purchaseController.Checkout();
+        var okResult = actionResult.Result as OkObjectResult;
+        okResult.ShouldNotBeNull();
+        var checkoutResult = okResult.Value as CheckoutResultDto;
+        checkoutResult.ShouldNotBeNull();
+        checkoutResult.Success.ShouldBeTrue();
 
         var storedCart = db.ShoppingCarts.First(c => c.TouristId == long.Parse(personId));
         storedCart.Items.Count.ShouldBe(0);
         storedCart.TotalPrice.ShouldBe(0);
     }
-
 
     [Fact]
     public void Checkout_fails_if_empty()
@@ -69,22 +75,16 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
         using var scope = Factory.Services.CreateScope();
         var purchaseController = CreatePurchaseController(scope, personId);
 
-        Should.Throw<InvalidOperationException>(() => purchaseController.Checkout());
+        // Prazna korpa ne baca exception više, vraća BadRequest
+        var actionResult = purchaseController.Checkout();
+        actionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
     }
 
-    private static ShoppingCartController CreateCartController(IServiceScope scope, string personId)
-    {
-        return new ShoppingCartController(scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
-        {
-            ControllerContext = BuildContext(personId)
-        };
-    }
+    private static ShoppingCartController CreateCartController(IServiceScope scope, string personId) =>
+        new ShoppingCartController(scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
+        { ControllerContext = BuildContext(personId) };
 
-    private static TourPurchaseController CreatePurchaseController(IServiceScope scope, string personId)
-    {
-        return new TourPurchaseController(scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>())
-        {
-            ControllerContext = BuildContext(personId)
-        };
-    }
+    private static TourPurchaseController CreatePurchaseController(IServiceScope scope, string personId) =>
+        new TourPurchaseController(scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>())
+        { ControllerContext = BuildContext(personId) };
 }

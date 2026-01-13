@@ -26,5 +26,12 @@ namespace Explorer.Stakeholders.Core.Domain
             if (amount <= 0) throw new ArgumentException("Amount must be > 0.");
             BalanceAc += amount;
         }
+
+        public void DeductAc(int amount)
+        {
+            if (amount <= 0) throw new ArgumentException("Amount must be > 0.");
+            if (BalanceAc < amount) throw new InvalidOperationException("Insufficient balance.");
+            BalanceAc -= amount;
+        }
     }
 }

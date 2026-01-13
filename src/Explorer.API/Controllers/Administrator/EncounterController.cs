@@ -1,5 +1,6 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,11 +40,14 @@ namespace Explorer.API.Controllers.Administrator
         }
 
         [HttpPost]
-        public ActionResult<EncounterDto> Create([FromBody] EncounterDto encounterDto)
+        public ActionResult<EncounterDto> Create([FromBody] EncounterDto dto)
         {
             try
             {
-                var result = _encounterService.Create(encounterDto);
+                // Kada administrator kreira encounter, on je uvek u draft stanju
+                dto.Status = EncounterStatus.Draft.ToString();
+                var result = _encounterService.Create(dto);
+
                 return Ok(result);
             }
             catch (ArgumentException e)
@@ -82,6 +86,42 @@ namespace Explorer.API.Controllers.Administrator
             catch (KeyNotFoundException e)
             {
                 return NotFound(e.Message);
+            }
+        }
+
+        [HttpPut("{id}/approve")]
+        public ActionResult<EncounterDto> Approve(long id)
+        {
+            try
+            {
+                var result = _encounterService.Approve(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{id}/reject")]
+        public ActionResult<EncounterDto> Reject(long id)
+        {
+            try
+            {
+                var result = _encounterService.Reject(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }

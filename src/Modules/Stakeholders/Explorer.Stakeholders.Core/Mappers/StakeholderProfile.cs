@@ -38,5 +38,8 @@ public class StakeholderProfile : Profile
         CreateMap<PreferenceDto, Preference>().ReverseMap(); //preference
         CreateMap<PreferenceCreateDto, Preference>();
         CreateMap<PreferenceUpdateDto, Preference>();
+
+        //luka s
+        CreateMap<ClubJoinRequestDto, ClubJoinRequest>().ReverseMap();
     }
 }

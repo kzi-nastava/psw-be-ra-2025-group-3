@@ -3,36 +3,43 @@ using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Encounters.Core.UseCases;
 
 public class EncounterService : IEncounterService
 {
     private readonly IEncounterRepository _encounterRepository;
+    private readonly IInternalTouristXPAndLevelSerive _internalTouristXPAndLevelSerive;
     private readonly IMapper _mapper;
 
-    public EncounterService(IEncounterRepository encounterRepository, IMapper mapper)
+    public EncounterService(IEncounterRepository encounterRepository, IInternalTouristXPAndLevelSerive internalTouristXPAndLevelSerive, IMapper mapper)
     {
         _encounterRepository = encounterRepository;
+        _internalTouristXPAndLevelSerive = internalTouristXPAndLevelSerive;
         _mapper = mapper;
     }
 
-    public EncounterDto Create(EncounterDto encounterDto)
+    public EncounterDto Create(EncounterDto dto)
     {
-        var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
-        var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
+        var geoPoint = new GeoPoint(dto.Latitude, dto.Longitude);
+        var encounterType = Enum.Parse<EncounterType>(dto.Type);
+        var status = Enum.Parse<EncounterStatus>(dto.Status);
 
         var encounter = new Encounter(
-            encounterDto.Name,
-            encounterDto.Description,
+            dto.Name,
+            dto.Description,
             geoPoint,
-            encounterDto.XP,
-            encounterType
+            dto.XP,
+            encounterType,
+            status,
+            dto.ActionDescription
         );
 
         var result = _encounterRepository.Create(encounter);
         return _mapper.Map<EncounterDto>(result);
     }
+
 
     public EncounterDto Update(EncounterDto encounterDto)
     {
@@ -41,8 +48,11 @@ public class EncounterService : IEncounterService
             throw new KeyNotFoundException($"Encounter with id {encounterDto.Id} not found.");
 
         var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
-        var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
+        var encounterType = Enum.TryParse(encounterDto.Type, true, out EncounterType t) ? t : EncounterType.Misc;
         var encounterStatus = Enum.Parse<EncounterStatus>(encounterDto.Status);
+
+
+        var actionDescription = encounterDto.ActionDescription ?? "";
 
         encounter.Update(
             encounterDto.Name,
@@ -50,7 +60,8 @@ public class EncounterService : IEncounterService
             geoPoint,
             encounterDto.XP,
             encounterType,
-            encounterStatus
+            encounterStatus,
+            actionDescription
         );
 
         var result = _encounterRepository.Update(encounter);
@@ -82,4 +93,36 @@ public class EncounterService : IEncounterService
         var encounters = _encounterRepository.GetActiveEncounters();
         return _mapper.Map<List<EncounterDto>>(encounters);
     }
+    public bool CanTouristCreateEncounter(long touristId)
+    {
+        var level = _internalTouristXPAndLevelSerive.GetLevel(touristId);  
+        return level >= 10;
+    }
+
+    public EncounterDto Approve(long id)
+    {
+        var encounter = _encounterRepository.GetById(id);
+        if (encounter == null) throw new KeyNotFoundException($"Encounter {id} not found.");
+
+        if (encounter.Status != EncounterStatus.PendingApproval)
+            throw new ArgumentException("Only PendingApproval encounters can be approved.");
+
+        encounter.SetStatus(EncounterStatus.Active);
+        var result = _encounterRepository.Update(encounter);
+        return _mapper.Map<EncounterDto>(result);
+    }
+
+    public EncounterDto Reject(long id)
+    {
+        var encounter = _encounterRepository.GetById(id);
+        if (encounter == null) throw new KeyNotFoundException($"Encounter {id} not found.");
+
+        if (encounter.Status != EncounterStatus.PendingApproval)
+            throw new ArgumentException("Only PendingApproval encounters can be rejected.");
+
+        encounter.SetStatus(EncounterStatus.Rejected);
+        var result = _encounterRepository.Update(encounter);
+        return _mapper.Map<EncounterDto>(result);
+    }
 }
+

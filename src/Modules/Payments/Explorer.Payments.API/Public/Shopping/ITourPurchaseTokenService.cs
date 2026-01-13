@@ -9,7 +9,7 @@ namespace Explorer.Payments.API.Public.Shopping
 {
     public interface ITourPurchaseTokenService
     {
-        List<TourPurchaseTokenDto> Checkout(long touristId);
+        CheckoutResultDto Checkout(long touristId);
         List<TourPurchaseTokenDto> GetTokens(long touristId);
     }
 }

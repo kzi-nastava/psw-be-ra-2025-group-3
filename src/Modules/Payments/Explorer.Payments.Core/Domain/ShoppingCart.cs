@@ -11,6 +11,7 @@ namespace Explorer.Payments.Core.Domain
     {
         public long TouristId { get; private set; }
         public List<OrderItem> Items { get; private set; }
+        public List<BundleOrderItem> BundleItems { get; private set; }
         public decimal TotalPrice { get; private set; }
 
         private ShoppingCart() { }
@@ -22,6 +23,7 @@ namespace Explorer.Payments.Core.Domain
 
             TouristId = touristId;
             Items = new();
+            BundleItems = new();
             TotalPrice = 0;
         }
         /*
@@ -46,10 +48,18 @@ namespace Explorer.Payments.Core.Domain
             if (Items.Any(i => i.TourId == orderItem.TourId))
                 throw new InvalidOperationException("Tour is already in the shopping cart.");
             
-            Items.Add(orderItem);
+            Items.Add(orderItem); 
             RecalculateTotal(); 
         }
-        
+        public void AddBundleItem(BundleOrderItem bundleItem)
+        {
+            if (BundleItems.Any(i => i.BundleId == bundleItem.BundleId))
+                throw new InvalidOperationException("Bundle is already in the shopping cart.");
+
+            BundleItems.Add(bundleItem);
+            RecalculateTotal();
+        }
+
         public void RemoveItem(long tourId)
         {
             var existing = Items.SingleOrDefault(i => i.TourId == tourId);
@@ -58,14 +68,29 @@ namespace Explorer.Payments.Core.Domain
             Items.Remove(existing);
             RecalculateTotal();
         }
-        public void Clear()
+        public void ClearItems()
         {
             Items.Clear();
+            BundleItems.Clear();
+            TotalPrice = 0;
+        }
+        // za dugme
+        public void Clear()
+        {
+            Items = new List<OrderItem>();
+            BundleItems = new List<BundleOrderItem>();
             TotalPrice = 0;
         }
         private void RecalculateTotal()
         {
-            TotalPrice = Items.Sum(i => i.Price);
+            TotalPrice = Items.Sum(i => i.Price) + BundleItems.Sum(b => b.Price);
+        }
+        public void RemoveBundleItem(long bundleId)
+        {
+            var existing = BundleItems.SingleOrDefault(i => i.BundleId == bundleId);
+            if (existing == null) return;
+            BundleItems.Remove(existing);
+            RecalculateTotal();
         }
     }
 }

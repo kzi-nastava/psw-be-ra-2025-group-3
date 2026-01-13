@@ -20,6 +20,7 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
 {
     public TourExecutionCommandTests(ToursTestFactory factory) : base(factory) { }
 
+    //
     [Fact]
     public void Starts_published_tour_successfully_when_purchased()
     {
@@ -35,7 +36,8 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
         var tourId = CreateAndPublishTour(scope, -11);
 
         shoppingCartService.AddToCart(-21, tourId);
-        tokenService.Checkout(-21);
+        var checkoutResult = tokenService.Checkout(-21);
+        checkoutResult.Success.ShouldBeTrue();
 
         var dto = new TourExecutionCreateDto
         {
@@ -46,10 +48,9 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
 
         var result = controller.StartTour(dto);
 
-        // ✅ NOVO OČEKIVANJE – USKLAĐENO SA LOGIKOM SERVISA
-        result.Result.ShouldBeOfType<BadRequestObjectResult>();
+        // Sa mock-om će biti OK
+        result.Result.ShouldBeOfType<OkObjectResult>();
     }
-
 
 
 

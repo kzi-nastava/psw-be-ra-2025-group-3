@@ -26,3 +26,7 @@ INSERT INTO stakeholders."People"(
     "Id", "UserId", "Name", "Surname", "Email", "ProfilePictureUrl", "Biography", "Quote")
 VALUES (-1, -1, 'Admin', 'Adminić', 'admin@gmail.com', null, 'Administrator', 'Adminov moto.');
 
+INSERT INTO stakeholders."People"(
+    "Id", "UserId", "Name", "Surname", "Email", "ProfilePictureUrl", "Biography", "Quote")
+VALUES (-24, -24, 'Jovan', 'Jovanović', 'turista4@gmail.com', null, 'Jovan Jovanović, novi turista.', 'Jovanov moto.');
+

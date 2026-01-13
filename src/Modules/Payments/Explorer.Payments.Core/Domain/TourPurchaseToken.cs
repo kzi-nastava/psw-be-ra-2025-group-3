@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// src/Modules/Payments/Explorer.Payments.Core/Domain/TourPurchaseToken.cs
 using Explorer.BuildingBlocks.Core.Domain;
+using System;
 
 namespace Explorer.Payments.Core.Domain
 {
@@ -14,17 +11,18 @@ namespace Explorer.Payments.Core.Domain
         public string Token { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
+        // EF Core private constructor
         private TourPurchaseToken() { }
 
-        public TourPurchaseToken(long touristId, long tourId, string token)
+        // GLAVNI konstruktor - koristi se u production kodu
+        public TourPurchaseToken(long touristId, long tourId)
         {
-           // if (touristId <= 0) throw new ArgumentException("Invalid tourist id.");
-           // if (tourId <= 0) throw new ArgumentException("Invalid tour id.");
-            if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("Token cannot be empty.");
+            if (touristId == 0) throw new ArgumentException("Invalid tourist id.");
+            if (tourId == 0) throw new ArgumentException("Invalid tour id.");
 
             TouristId = touristId;
             TourId = tourId;
-            Token = token;
+            Token = Guid.NewGuid().ToString();
             CreatedAt = DateTime.UtcNow;
         }
     }

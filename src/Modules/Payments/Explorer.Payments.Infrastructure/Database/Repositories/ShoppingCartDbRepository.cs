@@ -48,5 +48,10 @@ namespace Explorer.Payments.Infrastructure.Database.Repositories
 
             return cart.Items.Any(item => item.TourId == tourId);
         }
+        public bool HasPurchasedBundle(long touristId, long bundleId)
+        {
+            return _context.BundlePurchaseRecords
+                .Any(r => r.TouristId == touristId && r.BundleId == bundleId);
+        }
     }
 }

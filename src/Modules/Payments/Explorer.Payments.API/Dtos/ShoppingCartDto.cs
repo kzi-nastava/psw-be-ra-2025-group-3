@@ -18,5 +18,13 @@ namespace Explorer.Payments.API.Dtos
         public long TouristId { get; set; }
         public decimal TotalPrice { get; set; }
         public List<ShoppingCartItemDto> Items { get; set; } = new();
+        public List<BundleOrderItemDto> BundleItems { get; set; } = new();
+    }
+    public class BundleOrderItemDto
+    {
+        public long BundleId { get; set; }
+        public string BundleName { get; set; }
+        public decimal Price { get; set; }
+        public int TourCount { get; set; }
     }
 }

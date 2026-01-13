@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Explorer.API.Controllers.Shopping;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
@@ -10,6 +8,7 @@ using Explorer.Payments.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using Xunit;
 
 namespace Explorer.Payments.Tests.Integration.Shopping
 {
@@ -27,13 +26,11 @@ namespace Explorer.Payments.Tests.Integration.Shopping
         [Fact]
         public void Checkout_creates_tokens_and_empties_cart()
         {
-            // Arrange
             var personId = NewPersonId();
             var touristId = long.Parse(personId);
             var tourId = -2;
 
             using var scope = Factory.Services.CreateScope();
-
             var cartController = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
             {
@@ -48,27 +45,26 @@ namespace Explorer.Payments.Tests.Integration.Shopping
 
             var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
 
-            // Add item to cart
             cartController.Add(new ShoppingCartRequestDto { TourId = tourId });
 
-            // Act – perform checkout
-            var result = ((ObjectResult)purchaseController.Checkout().Result)?.Value
-                         as List<TourPurchaseTokenDto>;
+            var actionResult = purchaseController.Checkout();
+            actionResult.ShouldNotBeNull();
 
-            // Assert – returned tokens
+            var okResult = actionResult.Result as OkObjectResult;
+            okResult.ShouldNotBeNull();
+
+            var result = okResult.Value as CheckoutResultDto;
             result.ShouldNotBeNull();
-            result.Count.ShouldBe(1);
-            result[0].TourId.ShouldBe(tourId);
-            result[0].TouristId.ShouldBe(touristId);
+            result.Success.ShouldBeTrue();
+            result.Tokens.Count.ShouldBe(1);
+            result.Tokens[0].TourId.ShouldBe(tourId);
+            result.Tokens[0].TouristId.ShouldBe(touristId);
 
-            // Assert – token exists in DB
             var stored = db.TourPurchaseTokens
                             .FirstOrDefault(t => t.TouristId == touristId && t.TourId == tourId);
-
             stored.ShouldNotBeNull();
-            stored.Token.ShouldBe(result[0].Token);
+            stored.Token.ShouldBe(result.Tokens[0].Token);
 
-            // Assert – cart is emptied
             var storedCart = db.ShoppingCarts.First(c => c.TouristId == touristId);
             storedCart.Items.Count.ShouldBe(0);
             storedCart.TotalPrice.ShouldBe(0);
@@ -77,14 +73,11 @@ namespace Explorer.Payments.Tests.Integration.Shopping
         [Fact]
         public void GetTokens_returns_all_tokens_for_tourist()
         {
-            // Arrange
             var personId = NewPersonId();
-            var touristId = long.Parse(personId);
             var tour1 = -2;
             var tour2 = -4;
 
             using var scope = Factory.Services.CreateScope();
-
             var cart = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
             { ControllerContext = BuildContext(personId) };
@@ -93,18 +86,21 @@ namespace Explorer.Payments.Tests.Integration.Shopping
                 scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>())
             { ControllerContext = BuildContext(personId) };
 
-            // Add two tours
             cart.Add(new ShoppingCartRequestDto { TourId = tour1 });
             cart.Add(new ShoppingCartRequestDto { TourId = tour2 });
 
-            // Checkout
-            purchase.Checkout();
+            var checkoutActionResult = purchase.Checkout();
+            var checkoutOk = checkoutActionResult.Result as OkObjectResult;
+            checkoutOk.ShouldNotBeNull();
+            var checkoutResult = checkoutOk.Value as CheckoutResultDto;
+            checkoutResult.ShouldNotBeNull();
+            checkoutResult.Success.ShouldBeTrue();
 
-            // Act – get tokens
-            var result = ((ObjectResult)purchase.GetTokens().Result)?.Value
-                         as List<TourPurchaseTokenDto>;
+            var tokensActionResult = purchase.GetTokens();
+            var tokensOk = tokensActionResult.Result as OkObjectResult;
+            tokensOk.ShouldNotBeNull();
+            var result = tokensOk.Value as System.Collections.Generic.List<TourPurchaseTokenDto>;
 
-            // Assert
             result.ShouldNotBeNull();
             result.Count.ShouldBe(2);
             result.Select(t => t.TourId).ShouldContain(tour1);

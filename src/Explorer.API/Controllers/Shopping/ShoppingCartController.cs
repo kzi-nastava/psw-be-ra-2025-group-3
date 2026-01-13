@@ -36,5 +36,23 @@ namespace Explorer.API.Controllers.Shopping
         {
             return Ok(_shoppingCartService.RemoveFromCart(User.PersonId(), tourId));
         }
+
+
+        [HttpPost("add-bundle/{bundleId}")]
+        public IActionResult AddBundleToCart(long bundleId)
+        {
+            var result = _shoppingCartService.AddBundleToCart(User.PersonId(), bundleId);
+            return Ok(result);
+        }
+        [HttpDelete("bundles/{bundleId:long}")]
+        public ActionResult<ShoppingCartDto> RemoveBundle(long bundleId)
+        {
+            return Ok(_shoppingCartService.RemoveBundleFromCart(User.PersonId(), bundleId));
+        }
+        [HttpGet("has-purchased-bundle/{bundleId}")]
+        public ActionResult<bool> HasPurchasedBundle(long bundleId)
+        {
+            return Ok(_shoppingCartService.HasPurchasedBundle(User.PersonId(), bundleId));
+        }
     }
 }

@@ -52,7 +52,11 @@ public class ToursProfile : Profile
         CreateMap<ReviewImage, ReviewImageDto>();
         CreateMap<KeyPointPublicDto, KeyPoint>().ReverseMap();
 
-       
+        CreateMap<Bundle, BundleDto>().ReverseMap();
+        CreateMap<BundleCreateDto, Bundle>();
+        CreateMap<BundleUpdateDto, Bundle>();
+
+
         CreateMap<Tour, TourPreviewDto>()
             // 1. Difficulty kao int 
             .ForMember(dest => dest.Difficulty, 

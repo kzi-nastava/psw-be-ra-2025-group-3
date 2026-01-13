@@ -1,4 +1,5 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
-    public class WalletService : IWalletService
+    public class WalletService : IWalletService, IInternalWalletService
     {
         private readonly IWalletRepository _walletRepo;
         private readonly IPersonRepository _personRepo;
@@ -47,6 +48,29 @@ namespace Explorer.Stakeholders.Core.UseCases
             _walletRepo.Update(wallet);
 
             return new WalletDto { PersonId = touristPerson.Id, BalanceAc = wallet.BalanceAc };
+        }
+
+        // Interni servisi za Payments modul
+        public WalletDto GetWallet(long personId)
+        {
+            var wallet = _walletRepo.GetByPersonId(personId) ?? _walletRepo.Create(new Wallet(personId));
+            return new WalletDto { PersonId = personId, BalanceAc = wallet.BalanceAc };
+        }
+
+        public WalletDto DeductAc(long personId, decimal amountAc)
+        {
+            if (amountAc <= 0) throw new ArgumentException("Amount must be > 0.");
+
+            var wallet = _walletRepo.GetByPersonId(personId);
+            if (wallet == null) throw new KeyNotFoundException("Wallet not found.");
+
+            if (wallet.BalanceAc < amountAc)
+                throw new InvalidOperationException("Insufficient balance.");
+
+            wallet.DeductAc((int)amountAc);
+            _walletRepo.Update(wallet);
+
+            return new WalletDto { PersonId = personId, BalanceAc = wallet.BalanceAc };
         }
 
         private void EnsureRoleByPersonId(long personId, UserRole role)

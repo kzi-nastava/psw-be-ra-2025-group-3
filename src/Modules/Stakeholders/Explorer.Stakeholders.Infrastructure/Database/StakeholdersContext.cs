@@ -16,6 +16,7 @@ public class StakeholdersContext : DbContext
 
     
     public DbSet<Club> Clubs { get; set; }
+    public DbSet<ClubJoinRequest> ClubJoinRequests { get; set; }
     public DbSet<ClubImage> ClubImages { get; set; }
 
     public DbSet<Meetup> Meetups { get; set; }
@@ -47,6 +48,13 @@ public class StakeholdersContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.FeaturedImageId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ClubJoinRequest>()
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ClubJoinRequest>()
+            .HasIndex(r => new { r.TouristId, r.ClubId })
+            .IsUnique();
 
         modelBuilder.Entity<Club>()
             .Property(c => c.Status)

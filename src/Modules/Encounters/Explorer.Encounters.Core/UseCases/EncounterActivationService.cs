@@ -5,6 +5,7 @@ using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Encounters.Core.UseCases;
 
@@ -13,17 +14,20 @@ public class EncounterActivationService : IEncounterActivationService
     private readonly IEncounterActivationRepository _activationRepository;
     private readonly IEncounterRepository _encounterRepository;
     private readonly IInternalPositionService _positionService;
+    private readonly IInternalTouristXPAndLevelSerive _touristXPService;
     private readonly IMapper _mapper;
 
     public EncounterActivationService(
         IEncounterActivationRepository activationRepository,
         IEncounterRepository encounterRepository,
         IInternalPositionService positionService,
+        IInternalTouristXPAndLevelSerive touristXPService,
         IMapper mapper)
     {
         _activationRepository = activationRepository;
         _encounterRepository = encounterRepository;
         _positionService = positionService;
+        _touristXPService = touristXPService;
         _mapper = mapper;
     }
 
@@ -118,6 +122,11 @@ public class EncounterActivationService : IEncounterActivationService
 
         activation.Complete();
         var result = _activationRepository.Update(activation);
+
+        var encounter = _encounterRepository.GetById(encounterId)
+              ?? throw new KeyNotFoundException($"Encounter with id {encounterId} not found.");
+
+        _touristXPService.AddExperience(touristId, encounter.XP);
 
         return _mapper.Map<EncounterActivationDto>(result);
     }

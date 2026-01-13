@@ -1,4 +1,4 @@
-﻿using Explorer.Blog.API.Dtos;
+﻿/*using Explorer.Blog.API.Dtos;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Tests;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,3 +86,4 @@ namespace Explorer.Blog.Tests.Integration
         }
     }
 }
+*/

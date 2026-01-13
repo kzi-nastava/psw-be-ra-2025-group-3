@@ -149,5 +149,22 @@ namespace Explorer.API.Controllers.Author_Tourist
             var result = _blogService.GetUserVoteState(id, userId);
             return Ok(result);
         }
+
+        [HttpPost("recommended")]
+        public ActionResult<List<BlogDto>> GetRecommendedBlogs(
+    [FromBody] List<long> blogIds)
+        {
+            if (blogIds == null || !blogIds.Any())
+                return Ok(new List<BlogDto>());
+
+            var blogs = _blogService.GetAllBlogs()
+                .Where(b => blogIds.Contains(b.Id))
+                .OrderByDescending(b => b.IsFamous)
+                .ThenByDescending(b => b.IsActive)
+                .ThenByDescending(b => b.CommentsCount)
+                .ToList();
+
+            return Ok(blogs);
+        }
     }
 }

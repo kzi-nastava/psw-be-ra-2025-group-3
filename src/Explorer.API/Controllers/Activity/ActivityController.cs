@@ -98,5 +98,21 @@ namespace Explorer.API.Controllers.Activity
 
             return int.Parse(userIdClaim.Value);
         }
+
+        // =========================================================
+        // ⭐ NOVO – SAMO ID-EVI (za frontend)
+        // =========================================================
+        [HttpGet("blogs/recommended-ids")]
+        public ActionResult<List<long>> GetRecommendedBlogIds(
+            [FromQuery] int take = 6)
+        {
+            var userId = GetUserId();
+
+            var ids = _activityRepository
+                .GetMostViewedBlogIdsForUser(userId, take);
+
+            return Ok(ids);
+        }
+
     }
 }

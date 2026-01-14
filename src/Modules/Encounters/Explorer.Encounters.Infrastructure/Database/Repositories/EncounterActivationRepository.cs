@@ -61,4 +61,38 @@ public class EncounterActivationRepository : IEncounterActivationRepository
                     && ea.EncounterId == encounterId
                     && ea.Status == EncounterActivationStatus.Completed);
     }
+
+    public List<EncounterActivation> GetActiveActivationsForEncounter(long encounterId)
+    {
+        return _dbContext.EncounterActivations
+            .Where(ea => ea.EncounterId == encounterId && ea.Status == EncounterActivationStatus.InProgress)
+            .ToList();
+    }
+
+    public List<long> GetActiveTouristIdsInRange(long encounterId, double centerLat, double centerLon, double rangeInMeters)
+    {
+        var activeActivations = _dbContext.EncounterActivations
+            .Where(ea => ea.EncounterId == encounterId && ea.Status == EncounterActivationStatus.InProgress)
+            .ToList();
+
+        var touristIdsInRange = new List<long>();
+
+        foreach (var activation in activeActivations)
+        {
+            if (activation.CurrentLatitude.HasValue && activation.CurrentLongitude.HasValue)
+            {
+                var distance = DistanceCalculator.CalculateDistance(
+                    centerLat, centerLon,
+                    activation.CurrentLatitude.Value, activation.CurrentLongitude.Value
+                );
+
+                if (distance <= rangeInMeters)
+                {
+                    touristIdsInRange.Add(activation.TouristId);
+                }
+            }
+        }
+
+        return touristIdsInRange;
+    }
 }

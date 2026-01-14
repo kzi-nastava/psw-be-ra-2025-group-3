@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.Domain;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Explorer.Tours.Infrastructure.Database.Repositories
 {
@@ -36,6 +37,11 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
         public bool Exists(long touristId)
         {
             return _context.Positions.Any(p => p.TouristId == touristId);
+        }
+
+        public List<Position> GetAll()
+        {
+            return _context.Positions.ToList();
         }
     }
 }

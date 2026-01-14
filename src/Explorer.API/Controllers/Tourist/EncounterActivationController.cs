@@ -1,13 +1,7 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
-using Explorer.Encounters.Core.Domain;
-using Explorer.Encounters.Core.UseCases;
-using Explorer.Stakeholders.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Numerics;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -68,7 +62,7 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(result);
         }
 
-        /// Kompletira aktivni encounter i dodeljuje XP (TODO) <===============================================================
+        /// Kompletira aktivni Misc encounter (ručno)
         [HttpPost("{encounterId}/complete")]
         public ActionResult<EncounterActivationDto> CompleteEncounter(long encounterId)
         {
@@ -84,7 +78,7 @@ namespace Explorer.API.Controllers.Tourist
             }
         }
 
-        // Napusta (abandon) aktivni encounter
+        /// Napusta (abandon) aktivni encounter
         [HttpPost("{encounterId}/abandon")]
         public ActionResult<EncounterActivationDto> AbandonEncounter(long encounterId)
         {
@@ -99,5 +93,7 @@ namespace Explorer.API.Controllers.Tourist
                 return BadRequest(ex.Message);
             }
         }
+
+    
     }
 }

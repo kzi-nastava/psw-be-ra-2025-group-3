@@ -1,4 +1,7 @@
-﻿/*using Explorer.Blog.API.Dtos;
+
+﻿/* Zakomentarisao sam dok se ne ispravi
+
+using Explorer.Blog.API.Dtos;
 using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Tests;
 using Microsoft.Extensions.DependencyInjection;

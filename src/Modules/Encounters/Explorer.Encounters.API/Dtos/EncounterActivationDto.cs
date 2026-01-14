@@ -8,4 +8,9 @@ public class EncounterActivationDto
     public string Status { get; set; }
     public DateTime ActivatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    // Za Hidden Location tracking
+    public DateTime? LastLocationUpdateAt { get; set; }
+    public double? CurrentLatitude { get; set; }
+    public double? CurrentLongitude { get; set; }
 }

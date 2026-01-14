@@ -1,16 +1,16 @@
 ﻿
-using System;
-using System.Linq;
 using Explorer.BuildingBlocks.Tests;
 using Explorer.Payments.Infrastructure.Database;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
+using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
 using Moq;
+using System;
+using System.Linq;
 
 namespace Explorer.Payments.Tests
 {
@@ -21,6 +21,10 @@ namespace Explorer.Payments.Tests
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
             services.Remove(descriptor!);
             services.AddDbContext<PaymentsContext>(SetupTestContext());
+
+            var toursDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ToursContext>));
+            services.Remove(toursDescriptor!);
+            services.AddDbContext<ToursContext>(SetupTestContext());
 
             // ==================== MOCK: IInternalTourService ====================
             var existingInternalTour = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalTourService));

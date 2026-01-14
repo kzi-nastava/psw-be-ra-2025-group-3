@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Explorer.BuildingBlocks.Tests;
+﻿using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Stakeholders.Infrastructure.Database;
+using Explorer.Tours.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Explorer.Encounters.Tests
 {
@@ -17,7 +19,14 @@ namespace Explorer.Encounters.Tests
             services.Remove(descriptor!);
             services.AddDbContext<EncountersContext>(SetupTestContext());
 
-            
+            var toursDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ToursContext>));
+            services.Remove(toursDescriptor!);
+            services.AddDbContext<ToursContext>(SetupTestContext());
+
+            var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+            services.Remove(stakeholdersDescriptor!);
+            services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
             //descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<OTHER_MODULE_NAMEContext>));
             //services.Remove(descriptor!);
             //services.AddDbContext<OTHER_MODULE_NAMEContext>(SetupTestContext());

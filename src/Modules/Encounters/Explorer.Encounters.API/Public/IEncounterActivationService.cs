@@ -9,4 +9,5 @@ public interface IEncounterActivationService
     List<EncounterActivationDto> GetActiveEncounters(long touristId);
     EncounterActivationDto CompleteEncounter(long touristId, long encounterId);
     EncounterActivationDto AbandonEncounter(long touristId, long encounterId);
+
 }

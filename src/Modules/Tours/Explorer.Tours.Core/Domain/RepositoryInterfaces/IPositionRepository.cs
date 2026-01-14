@@ -12,5 +12,6 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         Position Update(Position position);
         Position? GetByTouristId(long touristId);
         bool Exists(long touristId);
+        List<Position> GetAll();
     }
 }

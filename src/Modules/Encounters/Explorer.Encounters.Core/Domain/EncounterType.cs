@@ -2,7 +2,7 @@
 
 public enum EncounterType
 {
-    Social,
-    Location,
-    Misc
+    Misc = 0,
+    Social = 1,
+    HiddenLocation = 2
 }

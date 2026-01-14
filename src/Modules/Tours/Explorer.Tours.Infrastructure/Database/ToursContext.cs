@@ -28,6 +28,10 @@ public class ToursContext : DbContext
 
     public DbSet<Bundle> Bundles { get; set; }
 
+    public DbSet<Coupon> Coupons { get; set; }
+
+    public DbSet<Sale> Sales { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -277,6 +281,45 @@ public class ToursContext : DbContext
                 ));
 
             entity.HasIndex(b => b.AuthorId);
+        });
+
+        // Coupon configuration
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Code).IsRequired().HasMaxLength(8);
+            entity.Property(c => c.DiscountPercentage).IsRequired().HasColumnType("decimal(5,2)");
+            entity.Property(c => c.AuthorId).IsRequired();
+            entity.Property(c => c.CreatedAt).IsRequired();
+            
+            entity.HasIndex(c => c.Code).IsUnique();
+            entity.HasIndex(c => c.AuthorId);
+            entity.HasIndex(c => c.TourId);
+        });
+
+        // Sale configuration
+        modelBuilder.Entity<Sale>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.StartDate).IsRequired();
+            entity.Property(s => s.EndDate).IsRequired();
+            entity.Property(s => s.DiscountPercentage).IsRequired().HasColumnType("decimal(5,2)");
+            entity.Property(s => s.AuthorId).IsRequired();
+            entity.Property(s => s.CreatedAt).IsRequired();
+
+            entity.Property(s => s.TourIds)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<long>>(v, (JsonSerializerOptions?)null) ?? new List<long>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<long>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                ));
+
+            entity.HasIndex(s => s.AuthorId);
         });
     }
 }

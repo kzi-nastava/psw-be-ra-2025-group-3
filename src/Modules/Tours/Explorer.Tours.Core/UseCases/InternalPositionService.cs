@@ -16,12 +16,15 @@ public class InternalPositionService : IInternalPositionService
         _mapper = mapper;
     }
 
-    public PositionDto? GetByTouristId(long touristId)
+    public PositionDto GetByTouristId(long touristId)
     {
         var position = _positionRepository.GetByTouristId(touristId);
-        if (position == null)
-            return null;
-
         return _mapper.Map<PositionDto>(position);
+    }
+
+    public List<PositionDto> GetAll()
+    {
+        var positions = _positionRepository.GetAll();
+        return _mapper.Map<List<PositionDto>>(positions);
     }
 }

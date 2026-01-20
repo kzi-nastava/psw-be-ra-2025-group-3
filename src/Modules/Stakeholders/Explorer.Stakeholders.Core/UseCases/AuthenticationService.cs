@@ -1,4 +1,4 @@
-﻿using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -12,13 +12,15 @@ public class AuthenticationService : IAuthenticationService
     private readonly IUserRepository _userRepository;
     private readonly IPersonRepository _personRepository;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWelcomeBonusService _welcomeBonusService;
 
-    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IWalletRepository walletRepository)
+    public AuthenticationService(IUserRepository userRepository, IPersonRepository personRepository, ITokenGenerator tokenGenerator, IWalletRepository walletRepository, IWelcomeBonusService welcomeBonusService)
     {
         _tokenGenerator = tokenGenerator;
         _userRepository = userRepository;
         _personRepository = personRepository;
         _walletRepository = walletRepository;
+        _welcomeBonusService = welcomeBonusService;
     }
 
     public AuthenticationTokensDto Login(CredentialsDto credentials)
@@ -49,6 +51,9 @@ public class AuthenticationService : IAuthenticationService
         var user = _userRepository.Create(new User(account.Username, account.Password, UserRole.Tourist, true));
         var person = _personRepository.Create(new Person(user.Id, account.Name, account.Surname, account.Email));
         var wallet = _walletRepository.Create(new Wallet(person.Id));
+
+        // Kreiraj welcome bonus pri registraciji
+        _welcomeBonusService.CreateWelcomeBonus(person.Id);
 
         return _tokenGenerator.GenerateAccessToken(user, person.Id);
     }

@@ -1,4 +1,4 @@
-﻿using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -26,6 +26,8 @@ public class StakeholdersContext : DbContext
     public DbSet<Tourist> Tourists { get; set; }
 
     public DbSet<Wallet> Wallets { get; set; }
+
+    public DbSet<WelcomeBonus> WelcomeBonuses { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -133,6 +135,17 @@ public class StakeholdersContext : DbContext
             entity.HasKey(w => w.Id);
             entity.HasIndex(w => w.PersonId).IsUnique();
             entity.Property(w => w.BalanceAc).IsRequired();
+        });
+
+        modelBuilder.Entity<WelcomeBonus>(entity =>
+        {
+            entity.HasKey(wb => wb.Id);
+            entity.HasIndex(wb => wb.PersonId).IsUnique();
+            entity.Property(wb => wb.BonusType).HasConversion<int>();
+            entity.Property(wb => wb.Value).IsRequired();
+            entity.Property(wb => wb.IsUsed).IsRequired();
+            entity.Property(wb => wb.CreatedAt).IsRequired();
+            entity.Property(wb => wb.ExpiresAt).IsRequired();
         });
 
     }

@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
@@ -156,9 +156,18 @@ public class ToursContext : DbContext
             .Property(tp => tp.Status)
             .HasConversion<int>();
 
-        modelBuilder.Entity<Message>()
-            .Property(m => m.AuthorType)
-            .HasConversion<int>();
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.ToTable("Messages", "tours");
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.Id).ValueGeneratedOnAdd();
+            entity.Property(m => m.AuthorId).IsRequired();
+            entity.Property(m => m.Content).IsRequired();
+            entity.Property(m => m.Timestamp).IsRequired();
+            entity.Property(m => m.AuthorType)
+                .HasConversion<int>()
+                .IsRequired();
+        });
 
         modelBuilder.Entity<Notification>()
             .Property(n => n.Type)

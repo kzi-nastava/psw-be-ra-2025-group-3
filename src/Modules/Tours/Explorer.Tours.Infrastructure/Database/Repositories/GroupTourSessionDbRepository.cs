@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -87,8 +87,10 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
                 .Where(s => s.Status == GroupTourSessionStatus.Active && s.Participants.Any(p => p.TouristId == touristId && p.LeftAt == null))
                 .FirstOrDefault();
             
+            // Ako nema aktivne group session, vrati null umesto da baca exception
+            // Turista možda ima solo tour execution, što je validno
             if (session == null)
-                throw new Exception(message: $"No active session found for Tourist ID {touristId}.");
+                return null;
 
             return session.Participants.Where(p => p.TouristId != touristId && p.LeftAt == null).ToList();
         }

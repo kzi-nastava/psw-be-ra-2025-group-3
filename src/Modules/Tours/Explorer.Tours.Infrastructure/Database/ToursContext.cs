@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
@@ -349,6 +349,16 @@ public class ToursContext : DbContext
             .HasForeignKey(p => p.SessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Position configuration
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.ToTable("Positions", "tours");
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Id).ValueGeneratedOnAdd();
+            entity.Property(p => p.TouristId).IsRequired();
+            entity.Property(p => p.Latitude).IsRequired();
+            entity.Property(p => p.Longitude).IsRequired();
+        });
 
     }
 }

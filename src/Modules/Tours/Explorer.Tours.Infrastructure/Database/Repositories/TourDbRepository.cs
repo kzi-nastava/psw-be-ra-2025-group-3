@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -79,16 +79,18 @@ public class TourDbRepository : ITourRepository
 
     public Tour? GetByIdWithKeyPoints(long id)
     {
-        return _context.Tours
+        var tour = _context.Tours
             .Include(t => t.Equipment)
-            .Include(t => t.KeyPoints)
+            .Include(t => t.KeyPoints.OrderBy(kp => kp.Id))  // OSIGURAVAMO REDOSLED - sortiraj po Id
             .FirstOrDefault(t => t.Id == id);  //za tour-execution
+        
+        return tour;
     }
 
     public List<Tour> GetPublishedWithKeyPoints()
     {
         return _context.Tours
-            .Include(t => t.KeyPoints)
+            .Include(t => t.KeyPoints.OrderBy(kp => kp.Id))  // OSIGURAVAMO REDOSLED
             .Where(t => t.Status == TourStatus.Published)
             .ToList();
     }
@@ -96,7 +98,7 @@ public class TourDbRepository : ITourRepository
     public Tour? GetTourWithKeyPoints(long id)
     {
         return _context.Tours
-            .Include(t => t.KeyPoints)
+            .Include(t => t.KeyPoints.OrderBy(kp => kp.Id))  // OSIGURAVAMO REDOSLED
             .Include(t => t.Equipment)
             .FirstOrDefault(t => t.Id == id);
     }

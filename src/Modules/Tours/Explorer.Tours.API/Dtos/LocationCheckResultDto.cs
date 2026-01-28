@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,4 +13,9 @@ public class LocationCheckResultDto
     public DateTime LastActivity { get; set; }
     public int TotalCompletedKeyPoints { get; set; }
     public double ProgressPercentage { get; set; }
+    
+    // Informacije o sledećoj key point koja se mora otključati (po redosledu)
+    public long? NextRequiredKeyPointId { get; set; }
+    public string? NextRequiredKeyPointName { get; set; }
+    public string? Message { get; set; } // Poruka koja objašnjava koja key point se mora otključati prvo
 }

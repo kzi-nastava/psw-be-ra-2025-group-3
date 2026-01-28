@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -90,13 +90,16 @@ public class TourExecutionService : ITourExecutionService
     {
         
         // Proveri da li turista već ima bilo kakvu aktivnu turu
+        // Ako ima, automatski je napusti pre pokretanja nove
         var existingActiveExecution = _executionRepository.GetActiveByTouristId(touristId);
         if (existingActiveExecution != null)
         {
-            throw new InvalidOperationException(
-                $"Cannot start: You already have an active tour. " +
-                "Please complete or abandon it first."
-            );
+            // Automatski napusti staru aktivnu turu
+            if (existingActiveExecution.GroupSessionId != null)
+                _groupTourSessionCleanup.HandleAbandon(existingActiveExecution.Id);
+            
+            existingActiveExecution.Abandon();
+            _executionRepository.Update(existingActiveExecution);
         }
 
         // Provera postojanja ture
@@ -179,7 +182,9 @@ public class TourExecutionService : ITourExecutionService
         if (tour == null || tour.KeyPoints == null || !tour.KeyPoints.Any())
             throw new InvalidOperationException("Tour or KeyPoints not found.");
 
-        // Pozovi agregat metodu
+        // Pozovi agregat metodu - proverava distancu do SVIH nekompletiranih key points
+        // Turista može da otključi bilo koju key point koja je blizu (200 metara)
+        // Nema obaveznog redosleda - može prvo obići key point 4 ako je blizu, pa onda key point 1
         bool keyPointCompleted = execution.CheckLocationProgress(
             dto.CurrentLatitude,
             dto.CurrentLongitude,
@@ -188,6 +193,25 @@ public class TourExecutionService : ITourExecutionService
 
        
         _executionRepository.Update(execution);
+
+        // Pronađi sledeću nekompletiranu key point (za prikaz korisniku)
+        var finalNextRequiredKeyPoint = execution.GetNextRequiredKeyPoint(tour.KeyPoints.ToList());
+
+        // Formiraj poruku o otključavanju
+        string? message = null;
+        if (!keyPointCompleted && finalNextRequiredKeyPoint != null)
+        {
+            message = $"Pronađite i obiđite ključne tačke. Najbliža nekompletirana tačka je: {finalNextRequiredKeyPoint.Name}.";
+        }
+        else if (keyPointCompleted && finalNextRequiredKeyPoint != null)
+        {
+            message = $"Ključna tačka je otključana! " +
+                     $"Preostalo je još {tour.KeyPoints.Count - execution.CompletedKeyPoints.Count} ključnih tačaka.";
+        }
+        else if (keyPointCompleted && finalNextRequiredKeyPoint == null)
+        {
+            message = "Sve ključne tačke su otključene!";
+        }
 
         // Vrati rezultat
         return new LocationCheckResultDto
@@ -198,7 +222,10 @@ public class TourExecutionService : ITourExecutionService
                 : null,
             LastActivity = execution.LastActivity,
             TotalCompletedKeyPoints = execution.CompletedKeyPoints.Count,
-            ProgressPercentage = execution.ProgressPercentage // za procenat
+            ProgressPercentage = execution.ProgressPercentage, // za procenat
+            NextRequiredKeyPointId = finalNextRequiredKeyPoint?.Id,
+            NextRequiredKeyPointName = finalNextRequiredKeyPoint?.Name,
+            Message = message
         };
     }
 
@@ -269,36 +296,61 @@ public class TourExecutionService : ITourExecutionService
 
     public TourExecutionWithNextKeyPointDto? GetActiveWithNextKeyPoint(long touristId)
     {
-        var activeExecution = _executionRepository.GetActiveByTouristId(touristId);
-        if (activeExecution == null)
-            return null;
-
-        var tour = _tourRepository.GetByIdWithKeyPoints(activeExecution.TourId);
-        if (tour == null || tour.KeyPoints == null || !tour.KeyPoints.Any())
-            return null;
-
-        var firstKeyPoint = tour.KeyPoints.OrderBy(kp => kp.Id).First();
-
-        var result = new TourExecutionWithNextKeyPointDto
+        try
         {
-            Id = activeExecution.Id,
-            TouristId = activeExecution.TouristId,
-            TourId = activeExecution.TourId,
-            StartTime = activeExecution.StartTime,
-            Status = (int)activeExecution.Status,
-            StartLatitude = activeExecution.StartLatitude,
-            StartLongitude = activeExecution.StartLongitude,
-            CompletionTime = activeExecution.CompletionTime,
-            AbandonTime = activeExecution.AbandonTime,
-            NextKeyPoint = _mapper.Map<KeyPointDto>(firstKeyPoint),
-            DistanceToNextKeyPoint = CalculateDistance(
-                activeExecution.StartLatitude,
-                activeExecution.StartLongitude,
-                firstKeyPoint.Latitude,
-                firstKeyPoint.Longitude)
-        };
+            var activeExecution = _executionRepository.GetActiveByTouristId(touristId);
+            if (activeExecution == null)
+                return null;
 
-        return result;
+            var tour = _tourRepository.GetByIdWithKeyPoints(activeExecution.TourId);
+            if (tour == null || tour.KeyPoints == null || !tour.KeyPoints.Any())
+                return null;
+
+            // Pronađi sledeću nekompletiranu key point (prva po redosledu Id za konzistentnost prikaza)
+            var completedKeyPointIds = activeExecution.CompletedKeyPoints?.Select(c => c.KeyPointId).ToList() ?? new List<long>();
+            var orderedKeyPoints = tour.KeyPoints.OrderBy(kp => kp.Id).ToList();
+            var nextKeyPoint = orderedKeyPoints.FirstOrDefault(kp => !completedKeyPointIds.Contains(kp.Id));
+
+            if (nextKeyPoint == null)
+                return null; // Sve tačke su kompletirane
+
+            // Uzmi trenutnu poziciju turiste iz Position servisa (ako postoji)
+            double currentLat = activeExecution.StartLatitude;
+            double currentLng = activeExecution.StartLongitude;
+
+            // Kreiraj KeyPointDto i sakrij secret ako nije kompletirana
+            var keyPointDto = _mapper.Map<KeyPointDto>(nextKeyPoint);
+            if (!completedKeyPointIds.Contains(nextKeyPoint.Id))
+            {
+                keyPointDto.Secret = string.Empty; // Sakrij secret dok nije kompletirana
+            }
+
+            var result = new TourExecutionWithNextKeyPointDto
+            {
+                Id = activeExecution.Id,
+                TouristId = activeExecution.TouristId,
+                TourId = activeExecution.TourId,
+                StartTime = activeExecution.StartTime,
+                Status = (int)activeExecution.Status,
+                StartLatitude = activeExecution.StartLatitude,
+                StartLongitude = activeExecution.StartLongitude,
+                CompletionTime = activeExecution.CompletionTime,
+                AbandonTime = activeExecution.AbandonTime,
+                NextKeyPoint = keyPointDto,
+                DistanceToNextKeyPoint = CalculateDistance(
+                    currentLat,
+                    currentLng,
+                    nextKeyPoint.Latitude,
+                    nextKeyPoint.Longitude)
+            };
+
+            return result;
+        }
+        catch (Exception)
+        {
+            // Ako se desi bilo kakva greška, vrati null umesto da baca exception
+            return null;
+        }
     }
 
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)

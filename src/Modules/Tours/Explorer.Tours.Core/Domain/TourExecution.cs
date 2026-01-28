@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -97,25 +97,50 @@ public class TourExecution : AggregateRoot
     {
         LastActivity = DateTime.UtcNow; // Ažuriraj LastActivity
 
-        foreach (var keyPoint in tourKeyPoints)
+        // Pronađi sve nekompletirane key points
+        var completedKeyPointIds = CompletedKeyPoints.Select(c => c.KeyPointId).ToList();
+        var uncompletedKeyPoints = tourKeyPoints.Where(kp => !completedKeyPointIds.Contains(kp.Id)).ToList();
+
+        // Ako nema nekompletiranih key points, sve su kompletirane
+        if (!uncompletedKeyPoints.Any())
+            return false;
+
+        // STRIKTNO SEKVENCIONALNO OTKLJUČAVANJE - mora redom po Id
+        // Pronađi prvu nekompletiranu key point po Id redosledu
+        var nextKeyPoint = uncompletedKeyPoints.OrderBy(kp => kp.Id).FirstOrDefault();
+        
+        if (nextKeyPoint == null)
+            return false;
+
+        // Proveri distancu samo do SLEDEĆE key point (po Id redosledu)
+        double distance = CalculateDistance(currentLatitude, currentLongitude, nextKeyPoint.Latitude, nextKeyPoint.Longitude);
+
+        if (distance <= 200) // 200 metara
         {
-            // Proveri da li je već kompletirana
-            if (CompletedKeyPoints.Any(c => c.KeyPointId == keyPoint.Id))
-                continue;
-
-            // Proveri distancu (200 metaraRadius)
-            double distance = CalculateDistance(currentLatitude, currentLongitude, keyPoint.Latitude, keyPoint.Longitude);
-
-            if (distance <= 200) // 200 metara
+            // Proveri da li već nije kompletirana (za slučaj duplog poziva)
+            if (!completedKeyPointIds.Contains(nextKeyPoint.Id))
             {
-                var completion = new KeyPointCompletion(keyPoint.Id, DateTime.UtcNow);
+                var completion = new KeyPointCompletion(nextKeyPoint.Id, DateTime.UtcNow);
                 CompletedKeyPoints.Add(completion);
                 ProgressPercentage = (CompletedKeyPoints.Count / (double)tourKeyPoints.Count) * 100; //task3
                 return true; // Kompletirana nova tačka
             }
         }
 
-        return false; // Nije kompletirana nijedna nova tačka
+        return false; // Nije kompletirana nijedna tačka
+    }
+
+    // Metoda koja vraća sledeću key point koja se mora otključati (po Id redosledu)
+    public KeyPoint? GetNextRequiredKeyPoint(List<KeyPoint> tourKeyPoints)
+    {
+        var completedKeyPointIds = CompletedKeyPoints.Select(c => c.KeyPointId).ToList();
+        var uncompletedKeyPoints = tourKeyPoints.Where(kp => !completedKeyPointIds.Contains(kp.Id)).ToList();
+
+        if (!uncompletedKeyPoints.Any())
+            return null;
+
+        // Vrati prvu nekompletiranu key point po Id redosledu (striktno sekvencijalno)
+        return uncompletedKeyPoints.OrderBy(kp => kp.Id).FirstOrDefault();
     }
 
     // Haversine formula za računanje distance između dve GPS koordinate (u metrima)

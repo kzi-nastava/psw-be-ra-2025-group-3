@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -108,8 +108,12 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
         public List<GroupTourSessionParticipantDto> GetOtherGroupParticipantsByTouristId(long touristId)
         {
-            var parList = _groupTourSessionRepository.FindOtherGroupParticipantsByTouristId(touristId)
-                ?? throw new Exception($"Active group tour session with tourist id {touristId} not found");
+            var parList = _groupTourSessionRepository.FindOtherGroupParticipantsByTouristId(touristId);
+            
+            // Ako nema aktivne group session, vrati praznu listu
+            // Turista možda ima solo tour execution, što je validno
+            if (parList == null || !parList.Any())
+                return new List<GroupTourSessionParticipantDto>();
 
             var resultList = parList.Select(p =>
             {

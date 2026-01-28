@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Execution;
 using Microsoft.AspNetCore.Authorization;
@@ -36,14 +36,21 @@ public class TourExecutionController : ControllerBase
     [HttpGet("active")]
     public ActionResult<TourExecutionDto> GetActiveTourExecution()
     {
-        long touristId = long.Parse(User.FindFirst("id")!.Value);
+        try
+        {
+            long touristId = long.Parse(User.FindFirst("id")!.Value);
 
-        var activeTourExecution = _tourExecutionService.GetActiveTourExecution(touristId);
+            var activeTourExecution = _tourExecutionService.GetActiveTourExecution(touristId);
 
-        if (activeTourExecution == null)
-            return Ok(null);
+            if (activeTourExecution == null)
+                return Ok(null);
 
-        return Ok(activeTourExecution);
+            return Ok(activeTourExecution);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to load active tour execution.", error = ex.Message });
+        }
     }
 
     [HttpGet("active/{touristId:long}")]
@@ -59,13 +66,20 @@ public class TourExecutionController : ControllerBase
     [HttpGet("active-with-next-keypoint")]
     public ActionResult<TourExecutionWithNextKeyPointDto> GetActiveWithNextKeyPoint()
     {
-        long touristId = long.Parse(User.FindFirst("id")!.Value);
-        var result = _tourExecutionService.GetActiveWithNextKeyPoint(touristId);
+        try
+        {
+            long touristId = long.Parse(User.FindFirst("id")!.Value);
+            var result = _tourExecutionService.GetActiveWithNextKeyPoint(touristId);
 
-        if (result == null)
-            return Ok(null);
+            if (result == null)
+                return Ok(null);
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to load active tour with next key point.", error = ex.Message });
+        }
     }
 
     [HttpPost("complete")]

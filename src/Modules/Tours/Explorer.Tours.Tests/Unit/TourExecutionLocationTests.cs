@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Shouldly;
 
 namespace Explorer.Tours.Tests.Unit;
@@ -133,5 +133,70 @@ public class TourExecutionLocationTests
         result2.ShouldBeTrue();
         result3.ShouldBeTrue();
         execution.CompletedKeyPoints.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public void Cannot_complete_key_point_2_without_completing_key_point_1_first()
+    {
+        // Arrange - Turista je blizu key point 2, ali nije kompletirao key point 1
+        var execution = new TourExecution(21, 2, 45.2500, 19.8300);
+
+        var keyPoint1 = new KeyPoint(2, "KP1", "First point", "img1.jpg", "Secret1", 45.2600, 19.8400); // Daleko
+        typeof(KeyPoint).GetProperty("Id").SetValue(keyPoint1, 101L);
+
+        var keyPoint2 = new KeyPoint(2, "KP2", "Second point", "img2.jpg", "Secret2", 45.2510, 19.8310); // Blizu
+        typeof(KeyPoint).GetProperty("Id").SetValue(keyPoint2, 102L);
+
+        var keyPoints = new List<KeyPoint> { keyPoint1, keyPoint2 };
+
+        // Act - Turista je blizu key point 2, ali nije kompletirao key point 1
+        var result = execution.CheckLocationProgress(45.2510, 19.8310, keyPoints);
+
+        // Assert - Ne može se otključati key point 2 bez key point 1
+        result.ShouldBeFalse();
+        execution.CompletedKeyPoints.Count.ShouldBe(0);
+        
+        // Proveri da je sledeća key point koja se mora otključati key point 1
+        var nextRequired = execution.GetNextRequiredKeyPoint(keyPoints);
+        nextRequired.ShouldNotBeNull();
+        nextRequired.Id.ShouldBe(101L); // Key point 1 se mora otključati prvo
+    }
+
+    [Fact]
+    public void Must_complete_key_points_in_order_regardless_of_proximity()
+    {
+        // Arrange - Key point 2 je bliže turisti nego key point 1
+        var execution = new TourExecution(21, 2, 45.2500, 19.8300);
+
+        var keyPoint1 = new KeyPoint(2, "KP1", "First point", "img1.jpg", "Secret1", 45.2600, 19.8500); // Dalje
+        typeof(KeyPoint).GetProperty("Id").SetValue(keyPoint1, 101L);
+
+        var keyPoint2 = new KeyPoint(2, "KP2", "Second point", "img2.jpg", "Secret2", 45.2510, 19.8310); // Blize
+        typeof(KeyPoint).GetProperty("Id").SetValue(keyPoint2, 102L);
+
+        var keyPoints = new List<KeyPoint> { keyPoint1, keyPoint2 };
+
+        // Act 1 - Turista ide blizu key point 2 (ali nije kompletirao key point 1)
+        var result1 = execution.CheckLocationProgress(45.2510, 19.8310, keyPoints);
+
+        // Assert 1 - Ne može se otključati key point 2
+        result1.ShouldBeFalse();
+        execution.CompletedKeyPoints.Count.ShouldBe(0);
+
+        // Act 2 - Turista ide blizu key point 1
+        var result2 = execution.CheckLocationProgress(45.2600, 19.8500, keyPoints);
+
+        // Assert 2 - Sada može da otključi key point 1
+        result2.ShouldBeTrue();
+        execution.CompletedKeyPoints.Count.ShouldBe(1);
+        execution.CompletedKeyPoints[0].KeyPointId.ShouldBe(101L);
+
+        // Act 3 - Sada može da otključi key point 2
+        var result3 = execution.CheckLocationProgress(45.2510, 19.8310, keyPoints);
+
+        // Assert 3 - Sada može da otključi key point 2 jer je otključio key point 1
+        result3.ShouldBeTrue();
+        execution.CompletedKeyPoints.Count.ShouldBe(2);
+        execution.CompletedKeyPoints[1].KeyPointId.ShouldBe(102L);
     }
 }

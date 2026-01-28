@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
 using Explorer.Tours.Core.Domain;
@@ -31,17 +31,19 @@ public class PositionService : IPositionService
 
     public void Update(long touristId, PositionDto dto)
     {
+        // Uvek koristi GetByTouristId koji vraća prvu poziciju (ako postoji)
         var existing = _positionRepository.GetByTouristId(touristId);
 
         if (existing == null)
         {
-            // CREATE
+            // CREATE - samo ako ne postoji pozicija za ovog turistu
+            // Create metoda u repository-ju već osigurava da se obrišu duplikati
             var pos = new Position(touristId, dto.Latitude, dto.Longitude);
             _positionRepository.Create(pos);
             return;
         }
 
-        // UPDATE
+        // UPDATE postojeće pozicije - OSIGURAVAMO DA POSTOJI SAMO JEDNA POZICIJA
         existing.Update(dto.Latitude, dto.Longitude);
         _positionRepository.Update(existing);
     }

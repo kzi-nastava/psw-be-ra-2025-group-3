@@ -1,4 +1,7 @@
-﻿using Explorer.Tours.API.Dtos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.API.Public.Tourist;
@@ -29,8 +32,15 @@ namespace Explorer.API.Controllers.Tourist
         [HttpGet]
         public ActionResult<List<TourDto>> GetPublishedTours()
         {
-            var tours = _tourService.GetPublished();
-            return Ok(tours);
+            try
+            {
+                var tours = _tourService.GetPublished();
+                return Ok(tours);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to load published tours.", error = ex.Message });
+            }
         }
 
         //Istaknute ture za neprijavljene korisnike
@@ -38,13 +48,20 @@ namespace Explorer.API.Controllers.Tourist
         [AllowAnonymous]
         public ActionResult<List<TourPreviewDto>> GetHighlightedTours([FromQuery] int count = 6)
         {
-            var result = _touristTourService.GetPublishedTours()
-                .OrderByDescending(t => t.AverageRating)
-                .ThenByDescending(t => t.Reviews.Count)
-                .Take(count)
-                .ToList();
-            
-            return Ok(result);
+            try
+            {
+                var result = _touristTourService.GetPublishedTours()
+                    .OrderByDescending(t => t.AverageRating)
+                    .ThenByDescending(t => t.Reviews.Count)
+                    .Take(count)
+                    .ToList();
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to load highlighted tours.", error = ex.Message });
+            }
         }
 
         [HttpGet("{id}/preview")]
@@ -98,9 +115,16 @@ namespace Explorer.API.Controllers.Tourist
             [FromQuery] bool? onSale,
             [FromQuery] bool? sortByDiscount)
         {
-            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating, OnSale = onSale, SortByDiscount = sortByDiscount };
-            var result = _touristTourService.SearchAndFilterTours(filters);
-            return Ok(result);
+            try
+            {
+                var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating, OnSale = onSale, SortByDiscount = sortByDiscount };
+                var result = _touristTourService.SearchAndFilterTours(filters);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to search tours.", error = ex.Message });
+            }
         }
 
         private long GetTouristId()

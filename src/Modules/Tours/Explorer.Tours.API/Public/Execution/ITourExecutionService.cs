@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,4 +20,9 @@ public interface ITourExecutionService
     TourExecutionWithNextKeyPointDto? GetActiveWithNextKeyPoint(long touristId);
 
     TourDto GetActiveTourByTouristId(long touristId);
+
+    /// <summary>
+    /// Unlock detailed info (Secret) for a key point by paying AC. Tourist must have purchased the tour.
+    /// </summary>
+    KeyPointDetailUnlockResultDto UnlockKeyPointDetails(long touristId, long keyPointId);
 }

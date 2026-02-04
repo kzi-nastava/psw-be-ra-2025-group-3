@@ -34,6 +34,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly IInternalNotificationService _notificationService;
     private readonly IInternalAchievementService _achievementService;
     private readonly AcRewardsService _acRewardsService;
+    private readonly IInternalWalletService _walletService;
 
     private readonly IGroupTourSessionCleanup _groupTourSessionCleanup;
     private readonly ITourService _tourService;
@@ -59,6 +60,7 @@ public class TourExecutionService : ITourExecutionService
         IInternalNotificationService notificationService,
         IInternalAchievementService achievementService,
         AcRewardsService acRewardsService,
+        IInternalWalletService walletService,
 
         IGroupTourSessionCleanup groupTourSessionCleanup,
         ITourService tourService,
@@ -80,6 +82,7 @@ public class TourExecutionService : ITourExecutionService
         _notificationService = notificationService;
         _achievementService = achievementService;
         _acRewardsService = acRewardsService;
+        _walletService = walletService;
 
         _xpEventService = xpEventService;
 
@@ -186,7 +189,7 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Tour or KeyPoints not found.");
 
         // Pozovi agregat metodu - proverava distancu do SVIH nekompletiranih key points
-        // Turista može da otključi bilo koju key point koja je blizu (200 metara)
+        // Turista može da otključi key point kada je unutar TourExecution.KeyPointUnlockRadiusMeters (200 m)
         // Nema obaveznog redosleda - može prvo obići key point 4 ako je blizu, pa onda key point 1
         bool keyPointCompleted = execution.CheckLocationProgress(
             dto.CurrentLatitude,
@@ -398,5 +401,40 @@ public class TourExecutionService : ITourExecutionService
 
         return earthRadiusMeters * c;
 
+    }
+
+    private const int KeyPointDetailUnlockCostAc = 5;
+
+    public KeyPointDetailUnlockResultDto UnlockKeyPointDetails(long touristId, long keyPointId)
+    {
+        var keyPoint = _keyPointRepository.Get(keyPointId);
+        if (keyPoint == null)
+            throw new KeyNotFoundException("Key point not found.");
+
+        var hasPurchased = _tokenService.GetTokens(touristId).Any(t => t.TourId == keyPoint.TourId);
+        if (!hasPurchased)
+            throw new InvalidOperationException("You must have purchased this tour to unlock key point details.");
+
+        var wallet = _walletService.GetWallet(touristId);
+        if (wallet.BalanceAc < KeyPointDetailUnlockCostAc)
+            throw new InvalidOperationException($"Insufficient AC balance. Need {KeyPointDetailUnlockCostAc} AC to unlock detailed info.");
+
+        // WalletTransactionType.KeyPointDetailUnlock = 6 (defined in Stakeholders module)
+        var updated = _walletService.Debit(
+            personId: touristId,
+            amountAc: KeyPointDetailUnlockCostAc,
+            type: 6,
+            description: $"Unlock detailed info for key point: {keyPoint.Name}",
+            referenceType: "KeyPointDetailUnlock",
+            referenceId: keyPointId
+        );
+
+        return new KeyPointDetailUnlockResultDto
+        {
+            KeyPointId = keyPointId,
+            Secret = keyPoint.Secret ?? string.Empty,
+            CostAc = KeyPointDetailUnlockCostAc,
+            NewBalanceAc = updated.BalanceAc
+        };
     }
 }

@@ -77,6 +77,12 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
                 PersonId = personId,
                 BalanceAc = 100000 - (int)amount
             });
+        walletMock.Setup(s => s.Debit(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long?>(), It.IsAny<long?>()))
+            .Returns((long personId, int amountAc, int _, string _, string _, long? _, long? _) => new WalletDto
+            {
+                PersonId = personId,
+                BalanceAc = Math.Max(0, 100000 - amountAc)
+            });
 
         services.AddScoped<IInternalWalletService>(_ => walletMock.Object);
 

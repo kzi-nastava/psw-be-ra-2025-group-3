@@ -135,4 +135,26 @@ public class TourExecutionController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Unlock detailed info (secret) for a key point by paying 5 AC. Tourist must have purchased the tour.
+    /// </summary>
+    [HttpPost("keypoint/{keyPointId:long}/unlock-details")]
+    public ActionResult<KeyPointDetailUnlockResultDto> UnlockKeyPointDetails(long keyPointId)
+    {
+        try
+        {
+            long touristId = long.Parse(User.FindFirst("id")!.Value);
+            var result = _tourExecutionService.UnlockKeyPointDetails(touristId, keyPointId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

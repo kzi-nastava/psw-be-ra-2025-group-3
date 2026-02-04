@@ -12,6 +12,7 @@ namespace Explorer.Stakeholders.Core.Domain
         CheckoutPurchase = 2,
         WelcomeBonusAc = 3,
         RankRewardAc = 4,
-        TourRewardAc = 5
+        TourRewardAc = 5,
+        KeyPointDetailUnlock = 6
     }
 }

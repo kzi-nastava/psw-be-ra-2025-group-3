@@ -9,6 +9,9 @@ namespace Explorer.Tours.Core.Domain;
 
 public class TourExecution : AggregateRoot
 {
+    /// <summary>Prag u metrima: kada je turista unutar ovog rastojanja od sledeće key point, tačka se otključava.</summary>
+    public const double KeyPointUnlockRadiusMeters = 200;
+
     public long TouristId { get; private set; }
     public long TourId { get; private set; }
     public DateTime StartTime { get; private set; }
@@ -115,7 +118,7 @@ public class TourExecution : AggregateRoot
         // Proveri distancu samo do SLEDEĆE key point (po Id redosledu)
         double distance = CalculateDistance(currentLatitude, currentLongitude, nextKeyPoint.Latitude, nextKeyPoint.Longitude);
 
-        if (distance <= 200) // 200 metara
+        if (distance <= KeyPointUnlockRadiusMeters)
         {
             // Proveri da li već nije kompletirana (za slučaj duplog poziva)
             if (!completedKeyPointIds.Contains(nextKeyPoint.Id))

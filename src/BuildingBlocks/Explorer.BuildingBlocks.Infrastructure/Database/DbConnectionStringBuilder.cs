@@ -11,8 +11,13 @@ public static class DbConnectionStringBuilder
         var user = Environment.GetEnvironmentVariable("DATABASE_USERNAME") ?? "postgres";
         var password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD") ?? "root";
         var pooling = Environment.GetEnvironmentVariable("DATABASE_POOLING") ?? "true";
+        var sslMode = Environment.GetEnvironmentVariable("DATABASE_SSL_MODE") ?? "";
 
-        return
-            $"Server={server};Port={port};Database={database};SearchPath={schema};User ID={user};Password={password};Pooling={pooling};";
+        var connectionString = $"Server={server};Port={port};Database={database};SearchPath={schema};User ID={user};Password={password};Pooling={pooling};";
+
+        if (!string.IsNullOrEmpty(sslMode))
+            connectionString += $"SSL Mode={sslMode};Trust Server Certificate=true;";
+
+        return connectionString;
     }
 }

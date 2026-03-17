@@ -22,15 +22,18 @@ builder.Services.AddControllers();
 builder.Services.ConfigureSwagger(builder.Configuration);
 builder.Services.AddSignalR();
 // 🔥 DODATO: EKSPLICITNI CORS ZA SIGNALR
+var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',')
+    ?? new[] { "http://localhost:4200" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("_corsPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); 
+            .AllowCredentials();
     });
 });
 
@@ -54,15 +57,8 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseHsts();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseRouting();
 
@@ -83,7 +79,6 @@ app.UseStaticFiles(new StaticFileOptions
 // 🔥 CORS MORA BITI IZMEĐU UseRouting i Auth
 app.UseCors("_corsPolicy");
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
